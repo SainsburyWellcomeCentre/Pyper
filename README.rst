@@ -52,9 +52,5 @@ Example
 Documentation
 =============
 
-.. toctree::
-   :maxdepth: 2
-   
-   installation
-   usage
-   api
+For further documentation, you can compile the documentation using sphinx
+or alternatively, head to http://www.margrie-lab.com/motionTracking
