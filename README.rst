@@ -36,7 +36,7 @@ Please see the instructions below for installation and usage.
 =======
 Example
 =======
-.. figure:: exampleCapture.gif
+.. figure:: https://github.com/SainsburyWellcomeCentre/motionTracking/raw/master/doc/source/exampleCapture.gif
     :align: center
     :alt: A usage example of the software
     :figwidth: 500
@@ -58,12 +58,3 @@ Documentation
    installation
    usage
    api
-
-==================
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
