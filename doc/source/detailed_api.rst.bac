@@ -1,0 +1,34 @@
+============
+Detailed API
+============
+All the methods are documented (public, private and special, e.g. _add_)
+
+.. automodule:: tracking
+    :members:
+    :private-members:
+    :special-members:
+    :exclude-members: __dict__,__weakref__
+
+.. automodule:: video_stream
+    :members:
+    :private-members:
+    :special-members:
+    :exclude-members: __dict__,__weakref__
+    
+.. automodule:: video_frame
+    :members:
+    :private-members:
+    :special-members:
+    :exclude-members: __dict__,__weakref__
+    
+.. automodule:: object_contour
+    :members:
+    :private-members:
+    :special-members:
+    :exclude-members: __dict__,__weakref__
+    
+.. automodule:: roi
+    :members:
+    :private-members:
+    :special-members:
+    :exclude-members: __dict__,__weakref__

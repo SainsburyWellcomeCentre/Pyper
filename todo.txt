@@ -1,0 +1,5 @@
+Tests
+Autothreshold
+Put frame size as option in video-stream.UsbVideoStream and PiVideoStream
+Compare findContours methods for efficiency
+

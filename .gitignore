@@ -1,0 +1,11 @@
+*.py[co]
+*~
+*.dat
+*.tab
+.eric*
+.ropeproject
+*.e4p
+*.tif
+doc/build/*
+testTrack.mpg
+resources/teleporter/*
