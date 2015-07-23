@@ -21,14 +21,14 @@ from matplotlib import pyplot as plt
 
 from OpenGL import GL # Hack necessary to get qtQuick working
 
-from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtQml import QQmlApplicationEngine
-
-from PyQt5.QtCore import QUrl, QTimer, QSize
-from PyQt5.QtCore import QObject, pyqtSlot, QVariant
-
-from PyQt5.QtQuick import QQuickImageProvider
 from PyQt5.QtWidgets import QApplication, QFileDialog
+
+from PyQt5.QtCore import QObject, pyqtSlot, QVariant
+from PyQt5.QtCore import QUrl, QTimer, QSize
+
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtQuick import QQuickImageProvider
 
 from video_stream import QuickRecordedVideoStream as VStream
 from video_stream import VideoStreamFrameException
