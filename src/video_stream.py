@@ -298,14 +298,14 @@ class UsbVideoStream(VideoStream):
         capture.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 100)
 
         # Try custom resolution
-        widthSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[1]) # flip dimensions for openCV
-        heightSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[0])
+        widthSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[0])
+        heightSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[1])
         
         if not widthSet: # We now have to check because camera can silently refuse size setting (returns False)
             # In this case, we take the camera default
-            actualWidth = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)) # openCV dimensions flipped
+            actualWidth = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
         if not heightSet:
-            actualHeight = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)) # but should be consistent with openCV acquisition
+            actualHeight = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
 
         actualSize = (actualWidth, actualHeight) # All in openCV nomenclature
         self.size = actualSize
