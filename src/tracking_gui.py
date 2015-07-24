@@ -471,10 +471,19 @@ class TrackerIface(QObject):
     def getFrameIdx(self):
         return str(self.tracker._stream.currentFrameIdx)
         
-    @pyqtSlot(QVariant, QVariant, QVariant)
-    def setRoi(self, x, y, diameter):
+    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
+    def setRoi(self, width, height, x, y, diameter):
+        
+        streamWidth, streamHeight = self.tracker._stream.size # flipped for openCV
+        horizontalScalingFactor = streamWidth / width
+        verticalScalingFactor = streamHeight / height
+        
         radius = diameter / 2.0
-        self.roi = Circle((x+radius, y+radius), radius)
+        scaledX = (x + radius) * horizontalScalingFactor
+        scaledY = (y + radius) * verticalScalingFactor
+        scaledRadius = radius * horizontalScalingFactor
+        
+        self.roi = Circle((scaledX, scaledY), scaledRadius)
 
     def read(self):
         try:
@@ -512,7 +521,6 @@ class RecorderIface(TrackerIface):
         
         bgStart = self.main.bgFrameIdx
         nBackgroundFrames = self.main.nBgFrames
-        #bgEndFrame = self.main.bgFrameIdx + nBackgroundFrames - 1
         trackFrom = self.main.startFrameIdx
         trackTo = self.main.endFrameIdx if (self.main.endFrameIdx > 0) else None
         

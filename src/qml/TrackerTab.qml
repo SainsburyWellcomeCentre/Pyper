@@ -106,7 +106,7 @@ Rectangle {
         Roi{
             anchors.fill: parent
             onReleased: {
-                py_tracker.setRoi(roiX, roiY, roiWidth)
+                py_tracker.setRoi(width, height, roiX, roiY, roiWidth)
             }
         }
     }

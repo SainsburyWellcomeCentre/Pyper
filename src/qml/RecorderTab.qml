@@ -112,7 +112,7 @@ Rectangle {
         Roi{
             anchors.fill: parent
             onReleased: {
-                py_recorder.setRoi(roiX, roiY, roiWidth)
+                py_recorder.setRoi(width, height, roiX, roiY, roiWidth)
             }
         }
     }

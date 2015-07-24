@@ -281,7 +281,6 @@ class UsbVideoStream(VideoStream):
         :param int nBackgroundFrames: The number of frames to use for the background
         """
         VideoStream.__init__(self, savePath, bgStart, nBackgroundFrames)
-        self.size = UsbVideoStream.FRAME_SIZE
         
     def _startVideoCaptureSession(self, savePath):
         """
@@ -297,13 +296,19 @@ class UsbVideoStream(VideoStream):
         capture = cv2.VideoCapture(DEFAULT_CAM)
         capture.set(cv2.cv.CV_CAP_PROP_FPS, FPS)
         capture.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 100)
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[1]) # flip dimensions for openCV
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[0])
-        # We now have to check because camera can silently refuse size setting (returns False)
-        # In this case, we take the camera default
-        actualWidth = int(capture.get(cv.CV_CAP_PROP_FRAME_WIDTH)) # openCV dimensions flipped
-        actualHeight = int(capture.get(cv.CV_CAP_PROP_FRAME_HEIGHT)) # but should be consistent with openCV acquisition
+
+        # Try custom resolution
+        widthSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[1]) # flip dimensions for openCV
+        heightSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[0])
+        
+        if not widthSet: # We now have to check because camera can silently refuse size setting (returns False)
+            # In this case, we take the camera default
+            actualWidth = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)) # openCV dimensions flipped
+        if not heightSet:
+            actualHeight = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)) # but should be consistent with openCV acquisition
+
         actualSize = (actualWidth, actualHeight) # All in openCV nomenclature
+        self.size = actualSize
         videoWriter = cv2.VideoWriter(savePath, CODEC, FPS, actualSize)
         return capture, videoWriter
         
@@ -498,4 +503,3 @@ class QuickRecordedVideoStream(RecordedVideoStream):
             raise EOFError("End of recording reached")
         frame = self.frames[self.currentFrameIdx]
         return Frame(frame)
-
