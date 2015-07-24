@@ -320,7 +320,7 @@ class GuiTracker(Tracker):
                 sil = self._trackFrame(frame, 'b',  requestedOutput=requestedOutput)
                 if sil is None:
                     if record: self._stream._save(frame)
-                    return (None, None)# Skip if no contour found
+                    return (None, None, None)# Skip if no contour found
                 else:
                     self.silhouette = sil.copy()
                 if self.roi is not None: self._checkMouseInRoi()
@@ -532,6 +532,8 @@ class RecorderIface(TrackerIface):
         
     @pyqtSlot()
     def start(self):
+        self.positions = [] # reset between runs
+        self.distancesFromArena = []
         
         bgStart = self.main.bgFrameIdx
         nBackgroundFrames = self.main.nBgFrames
