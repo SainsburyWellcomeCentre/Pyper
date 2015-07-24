@@ -308,13 +308,13 @@ class GuiTracker(Tracker):
                 raise KeyboardInterrupt # stop recording
                 
             if fid < self._stream.bgStartFrame:
-                return frame.color(), (-1, -1) # Skip junk frames
+                return frame.color(), (-1, -1), (-1, -1) # Skip junk frames
             elif self._stream.isBgFrame():
                 self._buildBg(frame)
                 if record: self._stream._save(frame)
             elif self._stream.bgEndFrame < fid < self.trackFrom:
                 if record: self._stream._save(frame)
-                return frame.color(), (-1, -1) # Skip junk frames
+                return frame.color(), (-1, -1), (-1, -1) # Skip junk frames
             else: # Tracked frame
                 if self._stream.isFirstDataFrame(): self._finaliseBg()
                 sil = self._trackFrame(frame, 'b',  requestedOutput=requestedOutput)
@@ -327,7 +327,14 @@ class GuiTracker(Tracker):
                 self.paint(self.silhouette, 'c')
                 self.silhouette.paint(curve=self.positions)
                 if record: self._stream._save(self.silhouette)
-                return self.silhouette, self.positions[-1]
+                result = [self.silhouette, self.positions[-1]]
+                if self.extractArena:
+                    distances = (self._getDistanceFromArenaCenter(), self._getDistanceFromArenaBorder())
+                    self.distancesFromArena.append(distances)
+                    result.append(self.distancesFromArena[-1])
+                else:
+                    result.append((-1, -1))
+                return result
         except VideoStreamFrameException: pass
         except (KeyboardInterrupt, EOFError) as e:
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
@@ -354,7 +361,11 @@ class TrackerIface(QObject):
     def getRow(self, idx):
         idx = int(idx)
         if 0 <= idx < len(self.positions):
-            return [str(idx)] + [str(var) for var in self.positions[idx]]
+            result = [str(idx)]
+            result += [str(var) for var in self.positions[idx]]
+            result += [str(var) for var in self.distancesFromArena[idx]]
+            print(result)
+            return  result
         else:
             return -1
         
@@ -388,6 +399,7 @@ class TrackerIface(QObject):
     @pyqtSlot()
     def start(self):
         self.positions = [] # reset between runs
+        self.distancesFromArena = []
         
         self.tracker._stream.bgStartFrame = self.main.bgFrameIdx
         nBackgroundFrames = self.main.nBgFrames
@@ -494,11 +506,13 @@ class TrackerIface(QObject):
             self.tracker._stream.stopRecording('Detection issue, check your parameters')
             return None
         if result is not None:
-            img, position = result
+            img, position, distances = result
             self.positions.append(position)
+            self.distancesFromArena.append(distances)
             return img
         else:
             self.positions.append((-1, -1))
+            self.distancesFromArena.append((-1, -1))
 
     def getImg(self):
         if self.tracker._stream.currentFrameIdx < self.nFrames:
@@ -581,11 +595,13 @@ class RecorderIface(TrackerIface):
             print('Detection issue, check your parameters')
             return None
         if result is not None:
-            img, position = result
+            img, position, distances = result
             self.positions.append(position)
+            self.distancesFromArena.append(distances)
             return img
         else:
             self.positions.append((-1, -1))
+            self.distancesFromArena.append((-1, -1))
 
 class CvImageProvider(QQuickImageProvider):
     

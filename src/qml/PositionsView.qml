@@ -25,7 +25,9 @@ TableView{
             } else {
                 mod.append({"frameId": parseInt(result[0]),
                            "x": parseFloat(result[1]),
-                           "y": parseFloat(result[2])});
+                           "y": parseFloat(result[2]),
+                           "centerDist": parseFloat(result[3]),
+                           "borderDist": parseFloat(result[4])});
                 idx += 1;
             }
         }
@@ -37,6 +39,8 @@ TableView{
             frameId: 0
             x: 0.0
             y: 0.0
+            centerDist: -1.0
+            boderDist: -1.0
         }
     }
     Component.onCompleted: {
@@ -56,6 +60,16 @@ TableView{
     TableViewColumn{
         role: "y"
         title: "Y"
+        width: 60
+    }
+    TableViewColumn{
+        role: "centerDist"
+        title: "to center"
+        width: 60
+    }
+    TableViewColumn{
+        role: "borderDist"
+        title: "to border"
         width: 60
     }
 }

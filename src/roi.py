@@ -12,6 +12,7 @@ This module is used to check the position of the mouse relative to an roi
 import numpy as np
 from math import radians, cos, sin
 import cv2
+from cv2 import norm
 
 class Roi(object):
     """
@@ -36,6 +37,15 @@ class Roi(object):
         :param tuple point: The (x, y) point to check
         """
         return cv2.pointPolygonTest(self.points, point, True)
+        
+    def distFromCenter(self, point):
+        """
+        Returns the distance from the point to the center of mass of the roi
+        
+        :param tuple point: The (x, y) point to check
+        """
+        return norm(self.center, point)
+        
 
 class Circle(Roi):
     """

@@ -192,6 +192,7 @@ class Tracker(object):
         mask = bg.threshold(self.threshold)
         cnt = self._getBiggestContour(mask)
         arena = Circle(*cv2.minEnclosingCircle(cnt))
+        self.distancesFromArena = []
         return arena
         
     def _makeBottomSquare(self):
@@ -273,6 +274,20 @@ class Tracker(object):
         if self.roi.pointInRoi(self.positions[-1]):
             self.callback()
             self.silhouette = self.silhouette.copy()
+            
+    def _getDistanceFromArenaBorder(self):
+        positions = tuple(self.positions[-1])
+        if positions == (-1,-1):
+            return
+        if self.extractArena:
+            return self.arena.distFromBorder(positions)
+            
+    def _getDistanceFromArenaCenter(self):
+        positions = tuple(self.positions[-1])
+        if positions == (-1,-1):
+            return
+        if self.extractArena:
+            return self.arena.distFromCenter(positions)
             
     def paint(self, frame, roiColor='y', arenaColor='m'):
         if self.roi is not None:
