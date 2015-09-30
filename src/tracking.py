@@ -200,7 +200,7 @@ class Tracker(object):
         Creates a set of diagonaly opposed points to use as the corners
         of the square displayed by the default callback method.
         """
-        bottomRightPt = self._stream.size[::-1]
+        bottomRightPt = self._stream.size
         topLeftPt = tuple([p-50 for p in bottomRightPt])
         self.bottomSquare = (topLeftPt, bottomRightPt)
         

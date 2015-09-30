@@ -159,9 +159,7 @@ class RecordedVideoStream(VideoStream):
         dirname, filename = os.path.split(filePath)
         basename, ext = os.path.splitext(filename)
         savePath = os.path.join(dirname, 'recording.avi') # Fixme: should use argument
-        if __debug__:
-            print('Writer size: {}'.format(self.size))
-        videoWriter = cv2.VideoWriter(savePath, cv.CV_FOURCC(*'mp4v'), 15, (self.size[1], self.size[0]), True)
+        videoWriter = cv2.VideoWriter(savePath, cv.CV_FOURCC(*'mp4v'), 15, self.size, True)
         if not(videoWriter.isOpened()):
             raise VideoStreamIOException("Can't start video writer codec {} probably unsupported".format(CODEC))
         return capture, videoWriter
@@ -179,12 +177,12 @@ class RecordedVideoStream(VideoStream):
         
         :param stream: The stream to use as source
         :type stream: cv2.VideoCapture
-        :return: height, width
+        :return: width, height
         :rtype: (int, int)
         """
-        self.height = int(stream.get(cv.CV_CAP_PROP_FRAME_HEIGHT))
         self.width = int(stream.get(cv.CV_CAP_PROP_FRAME_WIDTH))
-        return (self.height, self.width)
+        self.height = int(stream.get(cv.CV_CAP_PROP_FRAME_HEIGHT))
+        return (self.width, self.height)
         
     def _getNFrames(self, stream):
         """

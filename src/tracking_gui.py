@@ -38,6 +38,8 @@ import video_analysis
 
 import cv2
 
+DEBUG = True
+
 class Logger(QObject):
     
     def __init__(self, context, parent=None, logObjectName="log"):
@@ -61,8 +63,9 @@ class MainIface(QObject):
         self.win = parent
         self.ctx = context
         
-        self.logger = Logger(self.ctx, self.win, "log")
-        sys.stdout = self.logger
+        if not DEBUG:
+            self.logger = Logger(self.ctx, self.win, "log")
+            sys.stdout = self.logger
         
         self.bgFrameIdx = 5
         self.nBgFrames = 1
@@ -484,8 +487,7 @@ class TrackerIface(QObject):
         return str(self.tracker._stream.currentFrameIdx)
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
-    def setRoi(self, width, height, x, y, diameter):
-        
+    def setRoi(self, width, height, x, y, diameter):        
         streamWidth, streamHeight = self.tracker._stream.size # flipped for openCV
         horizontalScalingFactor = streamWidth / width
         verticalScalingFactor = streamHeight / height
