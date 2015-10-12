@@ -12,12 +12,10 @@ and from Antonio Gonzalez for the RecordedVideoStream class
 :author: crousse
 """
 
-import os, platform
+import os, platform, sys
 
 import numpy as np
 import scipy
-
-from progressbar import RotatingMarker, ProgressBar
 
 from video_frame import Frame
 import cv2
@@ -31,6 +29,18 @@ DEFAULT_CAM = 0
 CODEC = cv.CV_FOURCC(*'mp4v') # TODO: check which codecs are available
 FPS = 30
 FRAME_SIZE = (256, 256)
+
+def pBar(val):
+    modulo = val % 4
+    if modulo == 0:
+        sys.stdout.write('\b/')
+    elif modulo == 1:
+        sys.stdout.write('\b-')
+    elif modulo == 2:
+        sys.stdout.write('\b\\')
+    elif modulo == 3:
+        sys.stdout.write('\b|')
+    sys.stdout.flush()
     
 class VideoStream(object):
     """
@@ -190,19 +200,15 @@ class RecordedVideoStream(VideoStream):
         :raises: VideoStreamIOException if video cannot be read
         """
         nFrames = 0
-        msg = "Computing number of frames, this may take some time.  "
-        widgets=[msg, RotatingMarker()]
-        #widgets=[msg, RotatingMarker(markers='◐◓◑◒')]
-        pbar = ProgressBar(widgets=widgets, maxval=10000).start()
+        print("Computing number of frames, this may take some time.  ")
         while True:
-            pbar.update(nFrames)
             gotFrame, _ = stream.read()
             if gotFrame:
+                pBar(nFrames)
                 nFrames +=1
             else:
                 break
-        pbar.finish()
-        print("Done")
+        print("\nDone")
         if nFrames == 0:
             raise VideoStreamIOException("Could not read video")
         else:
