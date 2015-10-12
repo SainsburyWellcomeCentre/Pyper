@@ -247,7 +247,7 @@ class Tracker(object):
                 elif self._stream.bgEndFrame < fid < self.trackFrom:
                     continue # Skip junk frames
                 else: # Tracked frame
-                    if self._stream.isFirstDataFrame(): self._finaliseBg()
+                    if fid == self.trackFrom: self._finaliseBg()
                     sil = self._trackFrame(frame)
                     if sil is None:
                         continue # Skip if no contour found
@@ -335,11 +335,11 @@ class Tracker(object):
         """
         Finalise the background (average stack and compute SD if more than one image)
         """
-        if self.normalise:
-            self.bg = self.bg.normalise()
         if self.bg.ndim > 2:
             self.bgStd = np.std(self.bg, axis=2)
             self.bg = np.average(self.bg, axis=2)
+        if self.normalise:
+            self.bgAvgAvg = self.bg.mean()# TODO: rename
     
     def _trackFrame(self, frame, requestedColor='r', requestedOutput='raw'):
         """
@@ -467,10 +467,11 @@ class Tracker(object):
         :rtype: video_frame.Frame
         """
         if self.normalise:
-            frame = frame.normalise()
+            frame = frame.normalise(self.bgAvgAvg)
         diff = Frame(cv2.absdiff(frame, self.bg))
         if self.bgStd is not None:
-            silhouette = diff > (self.bgStd * self.nSds)
+            threshold = self.bgStd * self.nSds
+            silhouette = diff > threshold
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)

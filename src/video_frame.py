@@ -72,9 +72,9 @@ class Frame(np.ndarray):
         :return: the grayscale frame
         :rtype: `Frame`
         """
-        if len(self.shape) == 2: # Single channel images:
+        if self.ndim == 2: # Single channel images:
             return Frame(np.dstack([self]*3))
-        elif len(self.shape) == 3 and self.shape[2] == 1:
+        elif self.ndim == 3 and self.shape[2] == 1:
             raise NotImplementedError("Image is color but has only one channel.\
                                         This type is not supported yet")            
         return Frame(cv2.cvtColor(self, cv2.COLOR_BGR2GRAY))
@@ -86,7 +86,7 @@ class Frame(np.ndarray):
         :return: the color frame
         :rtype: `Frame`
         """
-        if len(self.shape) == 3 and self.shape[2] == 3: # Already color
+        if self.ndim == 3 and self.shape[2] == 3: # Already color
             return Frame(self.astype(np.uint8))
 #        return Frame(np.dstack([self.gray().astype(np.uint8)]*3))
         return Frame(self.gray())
@@ -107,19 +107,20 @@ class Frame(np.ndarray):
         code, silhouette = cv2.threshold(self, threshold, 255, cv2.THRESH_BINARY)
         return Frame(silhouette)
         
-    def normalise(self):
+    def normalise(self, refAvg=75):
         """
-        Normalises the frame (divides by median and keeps 8 bits)
+        Normalises the frame (divides by average and keeps 8 bits)
+        
+        :param int refAvg: The reference average to use to keep the 8 bits range
         
         :return: the normalised frame
         :rtype: `Frame`
         """
-#        avg = np.mean(self)
-        median = np.median(self)
+        avg = self.mean()
         originalDType = self.dtype
         frame = self.astype(np.float32)
-        frame /= median
-        frame *= 255 # TODO: use original range
+        frame /= avg
+        frame *= refAvg
         if originalDType != np.float32:
             frame = frame.astype(originalDType)
         return Frame(frame)

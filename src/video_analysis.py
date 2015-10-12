@@ -60,7 +60,10 @@ def posToDistances(positions):
     for i in range(1, len(positions)):
         p1 = positions[i-1]
         p2 = positions[i]
-        distance = math.sqrt((p2[1] - p1[1])**2 * (p2[0] - p1[0])**2)
+        for v in p1+p2:
+            if type(v) not in [float, np.float64, np.float32]:
+                raise TypeError("Index {}, expected type float, got {}".format(i, type(v)))
+        distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
         distances.append(distance)
     return distances
 

@@ -103,15 +103,6 @@ class VideoStream(object):
         :rtype: bool
         """
         return (self.bgStartFrame <= self.currentFrameIdx <= self.bgEndFrame)
-        
-    def isFirstDataFrame(self):
-        """
-        Checks if the current Frame is in the data frames range
-        
-        :return: Whether the current frame is in the data range
-        :rtype: bool
-        """
-        return (self.currentFrameIdx == self.bgEndFrame)
     
     def recordCurrentFrameToDisk(self):
         """ Saves current frame to video file (self.dest) """

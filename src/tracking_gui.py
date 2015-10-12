@@ -319,7 +319,7 @@ class GuiTracker(Tracker):
                 if record: self._stream._save(frame)
                 return frame.color(), (-1, -1), (-1, -1) # Skip junk frames
             else: # Tracked frame
-                if self._stream.isFirstDataFrame(): self._finaliseBg()
+                if fid == self.trackFrom: self._finaliseBg()
                 sil = self._trackFrame(frame, 'b',  requestedOutput=requestedOutput)
                 if sil is None:
                     if record: self._stream._save(frame)
