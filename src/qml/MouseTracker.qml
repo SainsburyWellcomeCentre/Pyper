@@ -19,6 +19,19 @@ ApplicationWindow {
                 onTriggered: {
                     py_iface.openVideo();
                     infoScreen.flash(2000);
+                    if (tabs){
+                        if (previewTab) {
+                            if (previewTab.wasLoaded) {
+                                previewTab.children[0].reload(); // Using children[0] because direct call doesn't work
+                                previewTab.children[0].disableControls();
+                            }
+                        }
+                        if (trackTab) {
+                            if (trackTab.wasLoaded) {
+                                trackTab.children[0].reload(); // Using children[0] because direct call doesn't work
+                            }
+                        }
+                    }
                 }
             }
             MenuItem {
@@ -176,6 +189,8 @@ ApplicationWindow {
                     id: previewWindow
                     objectName: "previewWindow"
                 }
+                property bool wasLoaded
+                onLoaded: {wasLoaded = true}
             }
             Tab {
                 id: trackTab
@@ -184,6 +199,8 @@ ApplicationWindow {
                     id: trackerWindow
                     objectName: "Tracker"
                 }
+                property bool wasLoaded
+                onLoaded: {wasLoaded = true}
             }
             Tab {
                 id: recordTab

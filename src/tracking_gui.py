@@ -66,7 +66,9 @@ class MainIface(QObject):
         if not DEBUG:
             self.logger = Logger(self.ctx, self.win, "log")
             sys.stdout = self.logger
+        self._setDefaults()
         
+    def _setDefaults(self):
         self.bgFrameIdx = 5
         self.nBgFrames = 1
         self.startFrameIdx = self.bgFrameIdx + self.nBgFrames
@@ -197,6 +199,7 @@ class MainIface(QObject):
         srcPath = path[0]
         if srcPath:
             self.srcPath = srcPath
+            self._setDefaults()
             return srcPath
         
     @pyqtSlot(result=QVariant)   

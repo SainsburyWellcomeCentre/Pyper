@@ -6,10 +6,11 @@ Rectangle {
     anchors.fill: parent
 
     function reload(){
-        frameSetterContainer.reload()
-        referenceTreatmentSettings.reload()
-        detectionParamsSetterContainer.reload()
-        boolSetterContainer.reload()
+        frameSetterContainer.reload();
+        referenceTreatmentSettings.reload();
+        detectionParamsSetterContainer.reload();
+        boolSetterContainer.reload();
+        vidTitle.reload();
     }
 
     onVisibleChanged: { if (visible){ reload() } }
@@ -80,12 +81,17 @@ Rectangle {
     }
 
     Text {
+        id: vidTitle
         anchors.bottom: trackerDisplay.top
         anchors.bottomMargin: 20
         anchors.horizontalCenter: trackerDisplay.horizontalCenter
 
         color: "#ffffff"
         text: py_iface.getFileName()
+        function reload(){
+            text = py_iface.getFileName();
+        }
+
         style: Text.Raised
         font.bold: true
         verticalAlignment: Text.AlignVCenter

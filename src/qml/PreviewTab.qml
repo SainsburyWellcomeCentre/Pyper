@@ -9,18 +9,18 @@ Rectangle {
 
     function reload(){
         frameControls.reload()
+        vidTitle.reload()
     }
 
-//    onVisibleChanged: {
-//        if (visible){
-//            reload()
-//            if (!loaded){
-//                splash.flash(600000);
-//                py_viewer.load();
-//                splash.visible = false;
-//            }
-//        }
-//    }
+    function disableControls() {
+        vidControl.enabled = false;
+    }
+
+    onVisibleChanged: {
+        if (visible){
+            reload()
+        }
+    }
 
     CustomLabeledButton {
         id: loadBtn
@@ -40,12 +40,17 @@ Rectangle {
     }
 
     Text {
+        id: vidTitle
         anchors.bottom: previewImage.top
         anchors.bottomMargin: 20
         anchors.horizontalCenter: previewImage.horizontalCenter
 
         color: "#ffffff"
         text: py_iface.getFileName()
+        function reload() {
+            text = py_iface.getFileName();
+        }
+
         style: Text.Raised
         font.bold: true
         verticalAlignment: Text.AlignVCenter
