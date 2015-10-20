@@ -7,6 +7,8 @@ The tracking module
 IT is the main module after the interface.
 This module used inspiration from code developed by Antonio Gonzalez for the trackFrame function
 
+If running on an ARM processor, it assumes the platform is a Raspberry Pi and thus uses the pi camera
+instead of a usb camera by default. It also slightly optimises for speed.
 :author: crousse
 """
 from __future__ import division
@@ -177,6 +179,7 @@ class Tracker(object):
         self.bg = None
         self.bgStd = None
         
+        self.defaultPos = (-1, -1)
         self.positions = []
         
     def _extractArena(self):
@@ -263,28 +266,33 @@ class Tracker(object):
                 msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
                 self._stream.stopRecording(msg)
                 return self.positions
+                
+    def _lastPosIsDefault(self):
+        lastPos = tuple(self.positions[-1])
+        if lastPos == self.defaultPos:
+            return True
+        else:
+            return False
 
     def _checkMouseInRoi(self):
         """
         Checks whether the mouse is within the specified ROI and
         calls the specified callback method if so.
         """
-        if self.positions[-1] == (-1,-1):
+        if self._lastPosIsDefault():
             return
         if self.roi.pointInRoi(self.positions[-1]):
             self.callback()
             self.silhouette = self.silhouette.copy()
             
     def _getDistanceFromArenaBorder(self):
-        positions = tuple(self.positions[-1])
-        if positions == (-1,-1):
+        if self._lastPosIsDefault():
             return
         if self.extractArena:
             return self.arena.distFromBorder(positions)
             
     def _getDistanceFromArenaCenter(self):
-        positions = tuple(self.positions[-1])
-        if positions == (-1,-1):
+        if self._lastPosIsDefault():
             return
         if self.extractArena:
             return self.arena.distFromCenter(positions)
@@ -364,7 +372,7 @@ class Tracker(object):
         plotSilhouette = None
         if fast:
             requestedOutput = 'mask'
-        self.positions.append((-1,-1)) # default to out of image
+        self.positions.append(self.defaultPos)
         if biggestContour is not None:
             area = cv2.contourArea(biggestContour)
             if self.minArea < area < self.maxArea:
@@ -479,3 +487,53 @@ class Tracker(object):
         if self.clearBorders:
             silhouette.clearBorders()
         return silhouette, diff
+
+class GuiTracker(Tracker):
+    """
+    A subclass of Tracker that reimplements trackFrame for use with the GUI
+    """
+    
+    def setRoi(self, roi):
+        self.roi = roi
+        self._makeBottomSquare()
+    
+    def trackFrame(self, record=False, requestedOutput='raw'):
+        try:
+            frame = self._stream.read()
+            fid = self._stream.currentFrameIdx
+            if self.trackTo and (fid > self.trackTo):
+                raise KeyboardInterrupt # stop recording
+                
+            if fid < self._stream.bgStartFrame:
+                return frame.color(), self.defaultPos, self.defaultPos # Skip junk frames
+            elif self._stream.isBgFrame():
+                self._buildBg(frame)
+                if record: self._stream._save(frame)
+                return frame.color(), self.defaultPos, self.defaultPos
+            elif self._stream.bgEndFrame < fid < self.trackFrom:
+                if record: self._stream._save(frame)
+                return frame.color(), self.defaultPos, self.defaultPos # Skip junk frames
+            else: # Tracked frame
+                if fid == self.trackFrom: self._finaliseBg()
+                sil = self._trackFrame(frame, 'b',  requestedOutput=requestedOutput)
+                if sil is None:
+                    if record: self._stream._save(frame)
+                    return (None, None, None)# Skip if no contour found
+                else:
+                    self.silhouette = sil.copy()
+                if self.roi is not None: self._checkMouseInRoi()
+                self.paint(self.silhouette, 'c')
+                self.silhouette.paint(curve=self.positions)
+                if record: self._stream._save(self.silhouette)
+                result = [self.silhouette, self.positions[-1]]
+                if self.extractArena:
+                    distances = (self._getDistanceFromArenaCenter(), self._getDistanceFromArenaBorder())
+                    self.distancesFromArena.append(distances)
+                    result.append(self.distancesFromArena[-1])
+                else:
+                    result.append(self.defaultPos)
+                return result
+        except VideoStreamFrameException: pass
+        except (KeyboardInterrupt, EOFError) as e:
+            msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
+            self._stream.stopRecording(msg)

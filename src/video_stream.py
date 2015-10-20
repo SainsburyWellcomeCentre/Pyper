@@ -30,6 +30,8 @@ CODEC = cv.CV_FOURCC(*'mp4v') # TODO: check which codecs are available
 FPS = 30
 FRAME_SIZE = (256, 256)
 
+isGraphical = 'PyQt5' in sys.modules.keys()
+
 def pBar(val):
     modulo = val % 4
     if modulo == 0:
@@ -209,7 +211,8 @@ class RecordedVideoStream(VideoStream):
         while True:
             gotFrame, _ = stream.read()
             if gotFrame:
-                pBar(nFrames)
+                if not isGraphical:
+                    pBar(nFrames)
                 nFrames +=1
             else:
                 break
@@ -503,3 +506,30 @@ class QuickRecordedVideoStream(RecordedVideoStream):
             raise EOFError("End of recording reached")
         frame = self.frames[self.currentFrameIdx]
         return Frame(frame)
+
+class ImageListVideoStream(object):
+    """
+    A minimalist VideoStream it just implements the read() method to return images from a list
+    """
+    def __init__(self, imgsList):
+        """
+        :param list imgsList: The list of images constituting the stream
+        """
+        self.imgs = imgsList
+        self.currentFrameIdx = 0
+
+    def read(self):
+        """
+        Returns the next frame after updating the count
+        
+        :return: frame
+        :rtype: video_frame.Frame
+        
+        :raises: EOFError when end of stream is reached
+        """
+        if self.currentFrameIdx > (len(self.imgs) - 2):
+            raise EOFError("End of recording reached")
+        img = self.imgs[self.currentFrameIdx]
+        frame = Frame(img)
+        self.currentFrameIdx += 1
+        return frame
