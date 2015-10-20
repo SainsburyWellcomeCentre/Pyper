@@ -86,7 +86,7 @@ class Frame(np.ndarray):
         :return: the color frame
         :rtype: `Frame`
         """
-        if self.ndim == 3 and self.shape[2] == 3: # Already color
+        if self.ndim == 3 and self.shape[2] in (3, 4): # Already color
             return Frame(self.astype(np.uint8))
 #        return Frame(np.dstack([self.gray().astype(np.uint8)]*3))
         return Frame(self.gray())

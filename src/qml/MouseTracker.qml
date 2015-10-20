@@ -125,8 +125,24 @@ ApplicationWindow {
             onClicked: { tabs.currentIndex = 3 }
         }
         CustomToolButton{
-            id: analysisBtn
+            id: calibrationBtn
             anchors.top: recordTabBtn.bottom
+            anchors.topMargin: 15
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            height: width * 1.25
+
+            active: calibrationTab.visible
+
+            text: "Calibration"
+            tooltip: "Switch to camera calibration mode"
+            iconSource: "../../resources/icons/calibration.png"
+
+            onClicked: { tabs.currentIndex = 4 }
+        }
+        CustomToolButton{
+            id: analysisBtn
+            anchors.top: calibrationBtn.bottom
             anchors.topMargin: 15
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
@@ -138,7 +154,7 @@ ApplicationWindow {
             tooltip: "Switch to analysis mode"
             iconSource: "../../resources/icons/analyse.png"
 
-            onClicked: { tabs.currentIndex = 4 }
+            onClicked: { tabs.currentIndex = 5 }
         }
     }
     Rectangle{
@@ -207,6 +223,13 @@ ApplicationWindow {
                 title: "Record"
                 RecorderTab{
                     id: recorderWindow
+                }
+            }
+            Tab {
+                id: calibrationTab
+                title: "Calibrate"
+                CalibrationTab{
+                    id: calibrationWindow
                 }
             }
             Tab {

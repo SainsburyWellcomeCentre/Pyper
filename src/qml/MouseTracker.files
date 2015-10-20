@@ -22,3 +22,5 @@ Video.qml
 VideoControls.qml
 WelcomeTab.qml
 PositionsView.qml
+CalibrationTab.qml
+CustomRow.qml

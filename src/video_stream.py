@@ -199,6 +199,11 @@ class RecordedVideoStream(VideoStream):
         
         :raises: VideoStreamIOException if video cannot be read
         """
+#        nFrames = stream.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT) # TODO: test
+#        if nFrames >= 1:
+#            return nFrames
+#        else
+#            nFrames = 0
         nFrames = 0
         print("Computing number of frames, this may take some time.  ")
         while True:

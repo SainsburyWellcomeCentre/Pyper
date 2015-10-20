@@ -57,7 +57,7 @@ Rectangle {
                 width: recordBtn.width
                 height: width
 
-                tooltip: "Starts video recording"
+                tooltip: "Stops video recording"
                 iconSource: "../../resources/icons/stop.png"
 
                 enabled: false

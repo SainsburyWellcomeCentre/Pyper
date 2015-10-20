@@ -18,7 +18,10 @@ Column {
     nChildren: children.length
 
     function calculateHeight(){
-        var childHeight = children[0].height;
-        return (childHeight * nChildren + spacing * (nChildren -1));
+        var childrenHeight = 0;
+        for (var i=0; i < nChildren; i+=1) {
+            childrenHeight += children[i].height;
+        }
+        return (childrenHeight + spacing * (nChildren -1));
     }
 }
