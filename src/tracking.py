@@ -523,7 +523,7 @@ class GuiTracker(Tracker):
                         callback=callback)
         self.uiIface = uiIface
         self.currentFrameIdx = 0
-        self.record = self.destFilePath is not None
+        self.record = destFilePath is not None
     
     def setRoi(self, roi):
         """
