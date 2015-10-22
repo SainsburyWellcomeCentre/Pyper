@@ -120,7 +120,8 @@ class Tracker(object):
                 bgStart=0, trackFrom=1, trackTo=None,
                 nBackgroundFrames=1, nSds=5.0,
                 clearBorders=False, normalise=False,
-                plot=False, fast=False, extractArena=False, 
+                plot=False, fast=False, extractArena=False,
+                cameraCalibration=None,
                 callback=None):
         """
         :param str srcFilePath: The source file path to read from (camera if None)
@@ -178,6 +179,8 @@ class Tracker(object):
         self.nSds = nSds
         self.bg = None
         self.bgStd = None
+        
+        self.cameraCalibration = cameraCalibration
         
         self.defaultPos = (-1, -1)
         self.positions = []
@@ -239,6 +242,8 @@ class Tracker(object):
             try:
                 if checkFps: prevTime = self._checkFps(prevTime)
                 frame = self._stream.read()
+                if self.cameraCalibration is not None:
+                    frame = self.cameraCalibration.remap(frame)
                 fid = self._stream.currentFrameIdx
                 if self.trackTo and (fid > self.trackTo):
                     raise KeyboardInterrupt # stop recording
@@ -491,15 +496,73 @@ class Tracker(object):
 class GuiTracker(Tracker):
     """
     A subclass of Tracker that reimplements trackFrame for use with the GUI
+    This class implements read() to behave as a stream
     """
+    def __init__(self, uiIface, srcFilePath=None, destFilePath=None, 
+                threshold=20, minArea=100, maxArea=5000,
+                teleportationThreshold=10,
+                bgStart=0, trackFrom=1, trackTo=None,
+                nBackgroundFrames=1, nSds=5.0,
+                clearBorders=False, normalise=False,
+                plot=False, fast=False, extractArena=False,
+                cameraCalibration=None,
+                callback=None):
+        """
+        :param TrackerInterface uiIface: the interface this tracker is called from
+        
+        For the other parameters, see Tracker
+        """
+        Tracker.__init__(self, srcFilePath=srcFilePath, destFilePath=destFilePath, 
+                        threshold=threshold, minArea=minArea, maxArea=maxArea,
+                        teleportationThreshold=teleportationThreshold,
+                        bgStart=bgStart, trackFrom=trackFrom, trackTo=trackTo,
+                        nBackgroundFrames=nBackgroundFrames, nSds=nSds,
+                        clearBorders=clearBorders, normalise=normalise,
+                        plot=plot, fast=fast, extractArena=extractArena,
+                        cameraCalibration=cameraCalibration,
+                        callback=callback)
+        self.uiIface = uiIface
+        self.currentFrameIdx = 0
+        self.record = self.destFilePath is not None
     
     def setRoi(self, roi):
-        self.roi = roi
-        self._makeBottomSquare()
+        """
+        Set the region of interest and enable it
+        """
+        if roi is not None:
+            self.roi = roi
+            self._makeBottomSquare()
+
+    def read(self):
+        """
+        The required method to behave as a video stream
+        It calls self.track() and increments the currentFrameIdx
+        It also updates the uiIface positions accordingly
+        """
+        try:
+            self.currentFrameIdx = self._stream.currentFrameIdx + 1
+            result = self.trackFrame(record=self.record, requestedOutput=self.uiIface.outputType)
+        except cv2.error as e:
+            self.uiIface.timer.stop()
+            self._stream.stopRecording('Error {} stopped recording'.format(e))
+            return
+        if result is not None:
+            img, position, distances = result
+            self.uiIface.positions.append(position)
+            self.uiIface.distancesFromArena.append(distances)
+            return img
+        else:
+            self.uiIface.positions.append(self.defaultPos)
+            self.uiIface.distancesFromArena.append(self.defaultPos)
     
     def trackFrame(self, record=False, requestedOutput='raw'):
+        """
+        Reimplementation of Tracker.trackFrame for the GUI
+        """
         try:
             frame = self._stream.read()
+            if self.cameraCalibration is not None:
+                frame = Frame(self.cameraCalibration.remap(frame))
             fid = self._stream.currentFrameIdx
             if self.trackTo and (fid > self.trackTo):
                 raise KeyboardInterrupt # stop recording
@@ -515,7 +578,7 @@ class GuiTracker(Tracker):
                 return frame.color(), self.defaultPos, self.defaultPos # Skip junk frames
             else: # Tracked frame
                 if fid == self.trackFrom: self._finaliseBg()
-                sil = self._trackFrame(frame, 'b',  requestedOutput=requestedOutput)
+                sil = self._trackFrame(frame, 'b', requestedOutput=requestedOutput)
                 if sil is None:
                     if record: self._stream._save(frame)
                     return (None, None, None)# Skip if no contour found

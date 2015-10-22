@@ -101,7 +101,7 @@ Rectangle {
 
         enabled: false
 
-        onPlayClicked: { py_viewer.start() }
+        onPlayClicked: { py_viewer.play() }
         onPauseClicked: { py_viewer.pause() }
         onForwardClicked: { py_viewer.move(sliderValue) }
         onBackwardClicked: { py_viewer.move(-sliderValue) }
