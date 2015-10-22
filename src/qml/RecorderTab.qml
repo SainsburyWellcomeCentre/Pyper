@@ -47,6 +47,9 @@ Rectangle {
 
                 enabled: false
                 onClicked:{
+                    if (roi.isDrawn){
+                        py_recorder.setRoi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
+                    }
                     py_recorder.start();
                     enabled = false;
                     stopBtn.enabled = true;
@@ -110,9 +113,13 @@ Rectangle {
         source: "image://recorderprovider/img"
 
         Roi{
+            id: roi
             anchors.fill: parent
+            isActive: roiButton.isDown
             onReleased: {
-                py_recorder.setRoi(width, height, roiX, roiY, roiWidth)
+                if (isDrawn) {
+                    py_recorder.setRoi(width, height, roiX, roiY, roiWidth)
+                }
             }
         }
     }
@@ -261,6 +268,41 @@ Rectangle {
         model: ["Raw", "Diff"]
         onCurrentTextChanged:{
             py_recorder.setFrameType(currentText)
+        }
+    }
+    CustomButton {
+        id: roiButton
+
+        property bool isDown
+        isDown: false
+        property string oldSource
+        oldSource: iconSource
+
+        anchors.top: comboBox1.bottom
+        anchors.topMargin: 10
+        anchors.horizontalCenter: comboBox1.horizontalCenter
+
+        width: recordBtn.width
+        height: width
+
+        iconSource: "../../resources/icons/roi.png"
+        pressedSource: "../../resources/icons/roi_pressed.png"
+        tooltip: "Draw ROI"
+
+        onPressed: {}
+        onReleased: {}
+
+        onClicked: {
+            if (isDown){
+                py_iface.restoreCursor();
+                iconSource = oldSource;
+                isDown = false;
+            } else {
+                py_iface.chgCursor();
+                oldSource = iconSource;
+                iconSource = pressedSource;
+                isDown = true;
+            }
         }
     }
 }

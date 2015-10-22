@@ -24,6 +24,8 @@ from PyQt5.QtWidgets import QFileDialog
 
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
+from PyQt5.QtCore import Qt
+
 from tracking import GuiTracker
 from video_stream import QuickRecordedVideoStream as VStream
 from video_stream import ImageListVideoStream
@@ -419,16 +421,17 @@ class TrackerIface(BaseInterface):
         :param y: The center of the roi in the second dimension
         :param diameter: The diameter of the ROI
         """
-        streamWidth, streamHeight = self.tracker._stream.size # flipped for openCV
-        horizontalScalingFactor = streamWidth / width
-        verticalScalingFactor = streamHeight / height
-        
-        radius = diameter / 2.0
-        scaledX = (x + radius) * horizontalScalingFactor
-        scaledY = (y + radius) * verticalScalingFactor
-        scaledRadius = radius * horizontalScalingFactor
-        
-        self.roi = Circle((scaledX, scaledY), scaledRadius)
+        if hasattr(self, 'tracker'):
+            streamWidth, streamHeight = self.tracker._stream.size # flipped for openCV
+            horizontalScalingFactor = streamWidth / width
+            verticalScalingFactor = streamHeight / height
+            
+            radius = diameter / 2.0
+            scaledX = (x + radius) * horizontalScalingFactor
+            scaledY = (y + radius) * verticalScalingFactor
+            scaledRadius = radius * horizontalScalingFactor
+            
+            self.roi = Circle((scaledX, scaledY), scaledRadius)
 
     @pyqtSlot()
     def save(self):
@@ -622,7 +625,15 @@ class ParamsIface(QObject):
         """
         Reset the standard out on destruction
         """
-        sys.stdout = sys.__stdout__   
+        sys.stdout = sys.__stdout__
+
+    @pyqtSlot()
+    def chgCursor(self):
+        self.app.setOverrideCursor(Qt.CursorShape(Qt.CrossCursor))
+
+    @pyqtSlot()
+    def restoreCursor(self):
+        self.app.restoreOverrideCursor()
     
     # BOOLEAN OPTIONS
     @pyqtSlot(bool)
