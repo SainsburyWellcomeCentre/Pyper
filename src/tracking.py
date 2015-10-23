@@ -294,13 +294,15 @@ class Tracker(object):
         if self._lastPosIsDefault():
             return
         if self.extractArena:
-            return self.arena.distFromBorder(positions)
+            lastPos = tuple(self.positions[-1])
+            return self.arena.distFromBorder(lastPos)
             
     def _getDistanceFromArenaCenter(self):
         if self._lastPosIsDefault():
             return
         if self.extractArena:
-            return self.arena.distFromCenter(positions)
+            lastPos = tuple(self.positions[-1])
+            return self.arena.distFromCenter(lastPos)
             
     def paint(self, frame, roiColor='y', arenaColor='m'):
         if self.roi is not None:
