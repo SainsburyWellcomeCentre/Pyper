@@ -58,6 +58,7 @@ Documentation
    installation
    usage
    api
+   troubleShooting
 
 ==================
 Indices and tables
