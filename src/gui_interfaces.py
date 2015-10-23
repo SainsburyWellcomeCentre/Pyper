@@ -329,7 +329,7 @@ class TrackerIface(BaseInterface):
         """
         idx = int(idx)
         if 0 <= idx < len(self.positions):
-            row = [idx] + self.positions[idx] + self.distancesFromArena[idx]
+            row = [idx] + list(self.positions[idx]) + list(self.distancesFromArena[idx])
             return [str(e) for e in row]
         else:
             return -1
