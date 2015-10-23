@@ -345,7 +345,7 @@ class TrackerIface(BaseInterface):
                                 fast=False, cameraCalibration=self.params.calib,
                                 callback=None)
         self.stream = self.tracker # To comply with BaseInterface
-        self.tracker.roi = None
+        self.tracker.roi = self.roi
 
         self.nFrames = self.tracker._stream.nFrames - 1
         self.currentFrameIdx = self.tracker._stream.currentFrameIdx
@@ -544,7 +544,7 @@ class RecorderIface(TrackerIface):
         normalise = self.params.normalise
         extractArena = self.params.extractArena
         
-        self.tracker = GuiTracker(self, record=True, srcFilePath=None, destFilePath=self.params.destPath,
+        self.tracker = GuiTracker(self, srcFilePath=None, destFilePath=self.params.destPath,
                                 threshold=threshold, minArea=minArea, maxArea=maxArea,
                                 teleportationThreshold=teleportationThreshold,
                                 bgStart=bgStart, trackFrom=trackFrom, trackTo=trackTo,
