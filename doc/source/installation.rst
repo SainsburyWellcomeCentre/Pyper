@@ -34,12 +34,38 @@ be necessary if you do not use these optional features (e.g. the GUI).
 Installation on linux (assuming a debian based distribution)
 ------------------------------------------------------------
 
+Please note for the raspberry pi, the GUI will not work. This is due to a limitation of the video driver supplied by Broadcom. This program uses QtQuick which uses hardware acceleration to minimise the load on the CPU. The current driver does not support this feature. This issue might be solved in the future using EGLFS. Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
+
+Please note, if you use an Ubuntu distribution, Ubuntu removed the PyQt5 bindings for python 2.7 in 14.04 but reintroduced them afterwards.
+
 .. code-block:: bash
 
     sudo apt-get update
-    sudo apt-get install python-opencv python-skimage python-progressbar python-configobj python-scipy python-pyqt5 python-opengl git
-    git clone https://serverurl/motionTracking motionTracking
+    sudo apt-get install python-opencv python-skimage python-progressbar python-configobj python-scipy git
+
+then:
     
+.. code-block:: bash
+    
+    git clone https://serverurl/motionTracking motionTracking
+
+
+for the gui:
+
+.. code-block:: bash
+
+     sudo apt-get install python-pyqt5 python-opengl python-pyqt5.qtopengl python-pyqt5.qtquick qml-module-qtquick-controls
+     
+     
+for the raspberry-pi camera:
+
+.. code-block:: bash
+
+     sudo apt-get install python-picamera
+
+Remember to activate the camera in raspi-config
+
+
     
 Installation on MacOSX (tested on Mavericks)
 --------------------------------------------
@@ -136,10 +162,26 @@ To install QT via homebrew first open a terminal, ensure proxies and $PATH are s
     brew install PyQt5 --with-python # Installs the bindings for python 2.7 which is necessary for openCV 2
     
 
+Installation on Windows
+-----------------------
+Instructions by Andrew Aerskin
 
+The core of the program works fine. You just have to install openCV and link it with your version of python:
 
+- Download OPENCV for Windows: http://opencv.org/downloads.html
 
+- Extract the file (automatic) (doesn't have to be Python folder)
 
+- Go to the folder where you extracted OpenCV and find opencv\\build\\python\\<yourversion (e.g. 2.7)>\\<yoursystem (e.g. 64-bit)>\\cv2.pyd
 
+- Copy the cv2.pyd file and put it in C:\\<PythonFolder (e.g. Python27)>\\Lib\\site-packages\\
 
+- Open a python console and check it worked:
 
+.. code-block:: python
+
+   >> import cv2
+   >> print cv2.__version__
+   
+The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This as not been tested here.
+    
