@@ -1,3 +1,14 @@
+"""
+*********************
+The transcoder module
+*********************
+
+This module is supplied as a utility to convert between openCV video formats to open videos with different players
+This may be required if your player doesn't support your format or to fix some videos if some metadata are missing in the file
+
+:author: crousse
+"""
+
 import numpy as np
 from scipy.misc import imresize
 import cv2
@@ -8,6 +19,12 @@ from video_stream import RecordedVideoStream
 from progressbar import Percentage, Bar,  ProgressBar
 
 class Transcoder(RecordedVideoStream):
+    """
+    The transcoder class.
+    
+    It will convert the video to mp4v (destFilePath should match this extension) but this can be changed easily.
+    You can also crop and scale the video at the same time.
+    """
     def __init__(self, srcFilePath, destFilePath, bgStart, nBackgroundFrames, cropParams, scaleParams):
         RecordedVideoStream.__init__(self, srcFilePath, bgStart, nBackgroundFrames)
         self.cropParams = np.array(cropParams)

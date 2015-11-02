@@ -1,3 +1,14 @@
+"""
+*************************
+The video_analysis module
+*************************
+
+This module is supplied for basic analysis of the position data. It should be used to give you a quick overview of the trajectory behaviour.
+However, please note that analysis is not the main goal of this software package so functionalities are limited in this module.
+
+:author: crousse
+"""
+
 from __future__ import division
 
 import math
@@ -70,6 +81,7 @@ def posToDistances(positions):
 def readPositions(srcFilePath):
     """
     Reads a positions dat file into a list of positions
+    
     .. warning:
         It assumes positions are 2nd and 3rd columns of the file
         and the file is tab separated
