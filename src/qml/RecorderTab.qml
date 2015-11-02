@@ -6,6 +6,15 @@ Rectangle {
     color: "#3B3B3B"
     anchors.fill: parent
 
+    onVisibleChanged: reload()
+
+    function reload(){
+        frameSetterContainer.reload();
+        referenceTreatmentSettings.reload();
+        detectionParamsSetterContainer.reload();
+        boolSetterContainer.reload();
+    }
+
     ErrorScreen{
         id: errorScreen
         width: 400
@@ -19,7 +28,7 @@ Rectangle {
     Rectangle {
         id: controls
         x: 5
-        anchors.top: recordImage.top
+        y: 10
         width: 120
         height: row1.height + 20
 
@@ -125,12 +134,61 @@ Rectangle {
     }
 
     Rectangle{
-        id: referenceTreatmentSettings
+        id: frameSetterContainer
         width: 120
-        height: col2.height + 20
+        height: col.height + 20
         anchors.top: controls.bottom
         anchors.topMargin: 10
         anchors.horizontalCenter: controls.horizontalCenter
+
+        color: "#4c4c4c"
+        radius: 9
+        border.width: 3
+        border.color: "#7d7d7d"
+
+        function reload(){
+            col.reload()
+        }
+
+        CustomColumn {
+            id: col
+
+            IntLabel {
+                width: parent.width
+                label: "Ref"
+                tooltip: "Select the reference frame"
+                readOnly: false
+                text: py_iface.getBgFrameIdx()
+                onTextChanged: py_iface.setBgFrameIdx(text)
+                function reload(){ text = py_iface.getBgFrameIdx() }
+            }
+            IntLabel {
+                width: parent.width
+                label: "Start"
+                tooltip: "Select the first data frame"
+                readOnly: false
+                text: py_iface.getStartFrameIdx()
+                onTextChanged: py_iface.setStartFrameIdx(text)
+                function reload(){ text = py_iface.getStartFrameIdx() }
+            }
+            IntLabel {
+                width: parent.width
+                label: "End"
+                tooltip: "Select the last data frame"
+                readOnly: false
+                text: py_iface.getEndFrameIdx()
+                onTextChanged: py_iface.setEndFrameIdx(text)
+                function reload(){ text = py_iface.getEndFrameIdx() }
+            }
+        }
+    }
+    Rectangle{
+        id: referenceTreatmentSettings
+        width: 120
+        height: col2.height + 20
+        anchors.top: frameSetterContainer.bottom
+        anchors.topMargin: 10
+        anchors.horizontalCenter: frameSetterContainer.horizontalCenter
 
         color: "#4c4c4c"
         radius: 9
