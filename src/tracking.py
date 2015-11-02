@@ -583,7 +583,7 @@ class GuiTracker(Tracker):
                 sil = self._trackFrame(frame, 'b', requestedOutput=requestedOutput)
                 if sil is None:
                     if record: self._stream._save(frame)
-                    return None, self.defaultPos, self.defaultPos# Skip if no contour found
+                    return None, self.defaultPos, self.defaultPos # Skip if no contour found
                 else:
                     self.silhouette = sil.copy()
                 if self.roi is not None: self._checkMouseInRoi()

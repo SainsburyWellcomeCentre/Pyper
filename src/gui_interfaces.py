@@ -319,6 +319,7 @@ class TrackerIface(BaseInterface):
         
         self.positions = []
         self.roi = None
+        self._setupAnalysisImageProviders()
 
     @pyqtSlot(QVariant, result=QVariant)
     def getRow(self, idx):
@@ -357,6 +358,10 @@ class TrackerIface(BaseInterface):
         self._setDisplayMax()
         self._updateImgProvider()
         
+    def _setupAnalysisImageProviders(self):
+        """
+        Register the analysis image providers (for pyplot graphs) wit the QT interface
+        """
         engine = self.ctx.engine()
         self.analysisImageProvider = PyplotImageProvider(fig=None)
         engine.addImageProvider("analysisprovider", self.analysisImageProvider)
