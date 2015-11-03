@@ -17,18 +17,19 @@ ApplicationWindow {
                 text: qsTr("&Open")
                 shortcut: "Ctrl+O"
                 onTriggered: {
-                    py_iface.openVideo();
-                    infoScreen.flash(2000);
-                    if (tabs){
-                        if (previewTab) {
-                            if (previewTab.wasLoaded) {
-                                previewTab.children[0].reload(); // Using children[0] because direct call doesn't work
-                                previewTab.children[0].disableControls();
+                    if (py_iface.openVideo()) {
+                        infoScreen.flash(2000);
+                        if (tabs){
+                            if (previewTab) {
+                                if (previewTab.wasLoaded) {
+                                    previewTab.children[0].reload(); // Using children[0] because direct call doesn't work
+                                    previewTab.children[0].disableControls();
+                                }
                             }
-                        }
-                        if (trackTab) {
-                            if (trackTab.wasLoaded) {
-                                trackTab.children[0].reload(); // Using children[0] because direct call doesn't work
+                            if (trackTab) {
+                                if (trackTab.wasLoaded) {
+                                    trackTab.children[0].reload(); // Using children[0] because direct call doesn't work
+                                }
                             }
                         }
                     }
@@ -248,14 +249,13 @@ ApplicationWindow {
     TextArea {
         id: log
         objectName: "log"
-//        text: ">>>"
         height: 50
         width: parent.width - mainMenuBar.width
         anchors.left:mainMenuBar.right
         anchors.top: mainUi.bottom
         style: TextAreaStyle{
             backgroundColor: "#666666"
-            textColor: "#ffffff"
+            textColor: "white"
             selectionColor: "steelblue"
             selectedTextColor: "cyan"
         }

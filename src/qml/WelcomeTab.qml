@@ -1,5 +1,6 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.3
+import QtQuick.Controls.Styles 1.3
 
 Rectangle {
     id: background
@@ -31,24 +32,23 @@ Rectangle {
         font.family: "Verdana"
     }
 
-    Button {
-        id: loadButton
-        x: 80
-        anchors.top: welcomeMsg.bottom
-        anchors.topMargin: 100
-        text: "Select video"
-        tooltip: "Select the video for 'preview' and 'track'"
+    TextArea {
+        id: text1
+        x: 196
+        y: 246
+        width: 397
+        height: 142
 
-        onClicked: {
-            py_iface.openVideo();
-            infoScreen.flash(2000);
+        text: qsTr("Please select an existing video using the file menu or proceed to record or calibration")
+        font.family: "Verdana"
+        readOnly: true
+        horizontalAlignment: Text.AlignHCenter
+        font.pixelSize: 18
+        style: TextAreaStyle{
+            backgroundColor: "#666666"
+            textColor: "white"
+            selectionColor: "steelblue"
+            selectedTextColor: "cyan"
         }
     }
 }
-//    Button {
-//        id: recordButton
-//        x: 220
-//        anchors.top: welcomeMsg.bottom
-//        anchors.topMargin: 100
-//        text: "Record"
-//    }
