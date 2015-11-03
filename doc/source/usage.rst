@@ -41,26 +41,26 @@ The default detection parameter should be appropriate for the example videos.
 
 The drop down menu allows you to select between the type of image (level of processing) you want to display.
 
-Finaly, you can define a region of interest using the yellow circle icon. When the mouse enters this roi, the program will trigger a callback method. The default method draws a square at the bottom right of the image but this behaviour can be altered by overwritting the callback method in a subclass of the GuiTraker class (see API).
+Finaly, you can define a region of interest using the yellow circle icon. When the mouse enters this ROI, the program will trigger a callback method. The default method draws a square at the bottom right of the image but this behaviour can be altered by overwritting the callback method in a subclass of the GuiTraker class (see API).
 
 If you cannot detect your sample successfuly, please refer to the troubleshooting section.
 
 The *Record* Tab
 ^^^^^^^^^^^^^^^^
 
-This tab essentialy reproduces the behaviour of the *Track* tab but for videos that are being recorded through a usb or FireWire camera for example. Before starting you must supply a destination path to save the video. The extension will determine the format. The available formats will dependend on the codecs available to ffmpeg in you installation. In tests, best restults were obtained with .avi and .mpg
+This tab essentialy reproduces the behaviour of the *Track* tab but for videos that are being recorded through a USB or FireWire camera for example. Before starting you must supply a destination path to save the video. The extension will determine the format. The available formats will dependend on the codecs available to ffmpeg in you installation. In tests, best restults were obtained with .avi and .mpg
 
 The *Calibration* tab
 ^^^^^^^^^^^^^^^^^^^^^
 
 This menu computes the parameters of the lens used to acquire the videos and once calculated, these parameters will be used automatically to undistort the images in the *Track* and the *Record* tabs.
 To use this functionnality, you must provide a folder containing a series (e.g. 10) of images acquired with the same lens and parameters as the video and containing a reference chessboard. A printable template can be found at http://docs.opencv.org/2.4/_downloads/pattern.png which will work with the default parameters.
-Once the folder is selected, press **Calibrate** and wait for the calibration to finish. Once done, the controls will become available and allow you to browse through the images used for calibration, the images with the features drwan and the undistorted images. You can also save the camera matrix for reference. In the future, it should become possible to load a calibration file from the *Track* and *Record* tabs.
+Once the folder is selected, press **Calibrate** and wait for the calibration to finish. Once done, the controls will become available and allow you to browse through the images used for calibration, the images with the features drawn and the undistorted images. You can also save the camera matrix for reference. In the future, it should become possible to load a calibration file from the *Track* and *Record* tabs.
 
-The Analyse tab
+The *Analyse* tab
 ^^^^^^^^^^^^^^^
 
-This tab provides simple analysis and graphig features as well as the ability to save the list of coordinates.
+This tab provides simple analysis and graphing features as well as the ability to save the list of coordinates.
 
 First select the checkbox that corresponds to the tab you want to analyse. Then, click **Update** and you can finaly save your coordinates and plot graphs of distance made by the specimen between frames and change of directions at each frame. To save the graphs, right click on them and a menu will promt you for a destination path.
 
