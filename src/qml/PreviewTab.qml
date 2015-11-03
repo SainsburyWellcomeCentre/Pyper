@@ -136,7 +136,10 @@ Rectangle {
                 label: "Ref"
                 tooltip: "Select the reference frame"
                 text: py_iface.getBgFrameIdx()
-                onTextChanged: py_iface.setBgFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setBgFrameIdx(text);
+                    reload();
+                }
                 onClicked: { text = py_viewer.getFrameIdx() }
                 onEnabledChanged: reload()
                 function reload(){ text = py_iface.getBgFrameIdx() }
@@ -147,7 +150,10 @@ Rectangle {
                 label: "Start"
                 tooltip: "Select the first data frame"
                 text: py_iface.getStartFrameIdx()
-                onTextChanged: py_iface.setStartFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setStartFrameIdx(text);
+                    reload();
+                }
                 onClicked: { text = py_viewer.getFrameIdx() }
                 onEnabledChanged: reload()
                 function reload(){ text = py_iface.getStartFrameIdx() }
@@ -158,7 +164,10 @@ Rectangle {
                 label: "End"
                 tooltip: "Select the last data frame"
                 text: py_iface.getEndFrameIdx()
-                onTextChanged: py_iface.setEndFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setEndFrameIdx(text);
+                    reload();
+                }
                 onClicked: { text = py_viewer.getFrameIdx() }
                 onEnabledChanged: reload()
                 function reload(){ text = py_iface.getEndFrameIdx() }

@@ -709,7 +709,9 @@ class ParamsIface(QObject):
     # FRAME OPTIONS
     @pyqtSlot(QVariant)
     def setBgFrameIdx(self, idx):
-        self.bgFrameIdx = int(idx)
+        idx = int(idx)
+        maxIdx = self.startFrameIdx - self.nBgFrames
+        self.bgFrameIdx = min(idx, maxIdx)
     
     @pyqtSlot(result=QVariant)
     def getBgFrameIdx(self):
@@ -725,10 +727,9 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setStartFrameIdx(self, idx):
-        if idx >= (self.bgFrameIdx + self.nBgFrames):
-            self.startFrameIdx = int(idx)
-        else:
-            self.startFrameIdx = self.bgFrameIdx + self.nBgFrames
+        idx = int(idx)
+        minIdx = (self.bgFrameIdx + self.nBgFrames)
+        self.startFrameIdx = max(minIdx, idx)
 
     @pyqtSlot(result=QVariant)
     def getStartFrameIdx(self):
@@ -736,7 +737,10 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setEndFrameIdx(self, idx):
-        self.endFrameIdx = int(idx)        
+        idx = int(idx)
+        if idx <= self.startFrameIdx and idx != -1:
+            idx = self.startFrameIdx + self.nBgFrames
+        self.endFrameIdx = idx
 
     @pyqtSlot(result=QVariant)
     def getEndFrameIdx(self):

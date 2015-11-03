@@ -163,7 +163,10 @@ Rectangle {
                 tooltip: "Select the reference frame"
                 readOnly: false
                 text: py_iface.getBgFrameIdx()
-                onTextChanged: py_iface.setBgFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setBgFrameIdx(text);
+                    reload();
+                }
                 function reload(){ text = py_iface.getBgFrameIdx() }
             }
             IntLabel {
@@ -172,7 +175,10 @@ Rectangle {
                 tooltip: "Select the first data frame"
                 readOnly: false
                 text: py_iface.getStartFrameIdx()
-                onTextChanged: py_iface.setStartFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setStartFrameIdx(text);
+                    reload();
+                }
                 function reload(){ text = py_iface.getStartFrameIdx() }
             }
             IntLabel {
@@ -181,7 +187,10 @@ Rectangle {
                 tooltip: "Select the last data frame"
                 readOnly: false
                 text: py_iface.getEndFrameIdx()
-                onTextChanged: py_iface.setEndFrameIdx(text)
+                onTextChanged: {
+                    py_iface.setEndFrameIdx(text);
+                    reload();
+                }
                 function reload(){ text = py_iface.getEndFrameIdx() }
             }
         }
