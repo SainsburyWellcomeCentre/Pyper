@@ -84,10 +84,14 @@ class VideoStream(object):
             else:
                 errMsg = 'Wrong number of color channels, expexted 1 or 3, got {}'.format(nColors)
                 raise VideoStreamTypeException(errMsg)
-            # TODO: assert shape
             if not tmpColorFrame.dtype == np.uint8:
                 tmpColorFrame = tmpColorFrame.astype(np.uint8)
-            self.videoWriter.write(tmpColorFrame.copy())
+            writerShape = tuple(list(self.size[::-1]) + [3])
+            if tmpColorFrame.shape != writerShape:
+                raise VideoStreamFrameException("Cannot write frame of shape {} onto writer of shape {}"
+                                                .format(tmpColorFrame.shape, writerShape))
+            else:
+                self.videoWriter.write(tmpColorFrame.copy())
         else:
             print("skipping save because {} is None".format("frame" if frame is None else "savepath"))
             
@@ -301,13 +305,17 @@ class UsbVideoStream(VideoStream):
         capture.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 100)
 
         # Try custom resolution
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[0])
-        capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[1])
+        widthSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, UsbVideoStream.FRAME_SIZE[0])
+        heightSet = capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, UsbVideoStream.FRAME_SIZE[1])
         
         # We now have to check because camera can silently refuse size setting (returns False)
         # We thus take whatever is now set (ours or the camera default)
         actualWidth = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
         actualHeight = int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
+        if not widthSet:
+            print('Width refused by camera, using default of: {}'.format(actualWidth))
+        if not heightSet:
+            print('Height refused by camera, using default of: {}'.format(actualHeight))
 
         actualSize = (actualWidth, actualHeight) # All in openCV nomenclature
         self.size = actualSize

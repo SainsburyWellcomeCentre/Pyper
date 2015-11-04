@@ -265,7 +265,8 @@ class Tracker(object):
                     if self.plot: self._plot()
                     if record: self._stream._save(self.silhouette)
                 if isRecording: pbar.update(self._stream.currentFrameIdx)
-            except VideoStreamFrameException: pass
+            except VideoStreamFrameException as e:
+                print('Error with video_stream at frame {}: \n{}'.format(fid, e))
             except (KeyboardInterrupt, EOFError) as e:
                 if isRecording: pbar.finish()
                 msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
@@ -395,6 +396,8 @@ class Tracker(object):
                         color = requestedColor
                     else:
                         raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] for requestedOutput, got: {}".format(requestedOutput))
+                else:
+                    color = 'w'
                 mouse = ObjectContour(biggestContour, plotSilhouette, contourType='raw', color=color)
                 if plotSilhouette is not None:
                     mouse.draw()
@@ -598,7 +601,8 @@ class GuiTracker(Tracker):
                 else:
                     result.append(self.defaultPos)
                 return result
-        except VideoStreamFrameException: pass
+        except VideoStreamFrameException as e:
+            print('Error with video_stream at frame {}: \n{}'.format(fid, e))
         except (KeyboardInterrupt, EOFError) as e:
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
             self._stream.stopRecording(msg)
