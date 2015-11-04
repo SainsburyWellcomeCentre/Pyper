@@ -64,9 +64,9 @@ Rectangle {
             label: "Save"
             onClicked: {
                 if (trackingLabel.checked){
-                    py_tracker.save()
+                    py_tracker.save(py_iface.getPath())
                 } else if (recordingLabel.checked){
-                    py_recorder.save()
+                    py_recorder.save(py_iface.getDestPath())
                 }
             }
         }
@@ -89,11 +89,10 @@ Rectangle {
             onClicked: {
                 if (trackingLabel.checked){
                     py_tracker.analyseAngles();
-                    analysisImage.reload();
                 } else if (recordingLabel.checked){
                     py_recorder.analyseAngles();
-                    analysisImage.reload();
                 }
+                analysisImage.reload();
             }
         }
         CustomLabeledButton{
@@ -103,11 +102,10 @@ Rectangle {
             onClicked: {
                 if (trackingLabel.checked){
                     py_tracker.analyseDistances();
-                    analysisImage2.reload();
                 } else if (recordingLabel.checked){
                     py_recorder.analyseDistances();
-                    analysisImage2.reload();
                 }
+                analysisImage2.reload();
             }
         }
     }

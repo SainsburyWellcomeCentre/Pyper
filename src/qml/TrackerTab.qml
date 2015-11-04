@@ -24,7 +24,18 @@ Rectangle {
         visible: false
         anchors.centerIn: trackerDisplay
     }
+    InfoScreen{
+        id: infoScreen
 
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        width: 100
+        height: 75
+
+        text: "Roi mode"
+        visible: false
+        z: 1
+    }
 
     Rectangle {
         id: controls
@@ -356,11 +367,13 @@ Rectangle {
                 py_iface.restoreCursor();
                 iconSource = oldSource;
                 isDown = false;
+                infoScreen.visible = false;
             } else {
                 py_iface.chgCursor();
                 oldSource = iconSource;
                 iconSource = pressedSource;
                 isDown = true;
+                infoScreen.visible = true;
             }
         }
     }

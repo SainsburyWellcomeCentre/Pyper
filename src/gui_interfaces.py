@@ -32,7 +32,7 @@ from video_stream import ImageListVideoStream
 from roi import Circle
 import video_analysis
 from camera_calibration import CameraCalibration
-from image_providers import CvImageProvider, PyplotImageProvider
+from image_providers import CvImageProvider
 
 VIDEO_FILTERS = "Videos (*.h264 *.avi *.mpg)"
 
@@ -314,12 +314,13 @@ class TrackerIface(BaseInterface):
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker object of the tracking module.
     """
-    def __init__(self, app, context, parent, params, displayName, providerName):
+    def __init__(self, app, context, parent, params, displayName, providerName, analysisProvider1, analysisProvider2):
         BaseInterface.__init__(self, app, context, parent, params, displayName, providerName)
         
         self.positions = []
         self.roi = None
-        self._setupAnalysisImageProviders()
+        self.analysisImageProvider = analysisProvider1
+        self.analysisImageProvider2 = analysisProvider2
 
     @pyqtSlot(QVariant, result=QVariant)
     def getRow(self, idx):
@@ -357,16 +358,6 @@ class TrackerIface(BaseInterface):
         self._setDisplay()
         self._setDisplayMax()
         self._updateImgProvider()
-        
-    def _setupAnalysisImageProviders(self):
-        """
-        Register the analysis image providers (for pyplot graphs) wit the QT interface
-        """
-        engine = self.ctx.engine()
-        self.analysisImageProvider = PyplotImageProvider(fig=None)
-        engine.addImageProvider("analysisprovider", self.analysisImageProvider)
-        self.analysisImageProvider2 = PyplotImageProvider(fig=None)
-        engine.addImageProvider("analysisprovider2", self.analysisImageProvider2)
 
     @pyqtSlot()
     def start(self):
@@ -438,16 +429,21 @@ class TrackerIface(BaseInterface):
             
             self.roi = Circle((scaledX, scaledY), scaledRadius)
 
-    @pyqtSlot()
-    def save(self):
+    @pyqtSlot(QVariant)
+    def save(self, defaultDest):
         """
         Save the data (positions and distancesFromArena) as a csv style file
         """
         diag = QFileDialog()
+        if defaultDest:
+            defaultDest = os.path.splitext(defaultDest)[0] + '.csv'
+        else:
+            defaultDest = os.getenv('HOME')
         destPath = diag.getSaveFileName(parent=diag,
                                     caption='Save file',
-                                    directory=os.getenv('HOME'), 
-                                    filter="Text (*.txt *.dat *.csv)")
+                                    directory=defaultDest,
+                                    filter="Text (*.txt *.dat *.csv)", 
+                                    initialFilter="Text (*.csv)")
         destPath = destPath[0]
         if destPath:
             self.write(destPath)
@@ -783,9 +779,13 @@ class ParamsIface(QObject):
 
     @pyqtSlot(result=QVariant)
     def getPath(self):
-        return self.srcPath if hasattr(self, "srcPath") else ""
+        return self.srcPath if self.isPathSelected() else ""
 
     @pyqtSlot(result=QVariant)
     def getFileName(self):
         path = self.getPath()
         return os.path.basename(path) if path else ""
+    
+    @pyqtSlot(result=QVariant)
+    def getDestPath(self):
+        return self.destPath if hasattr(self, "destPath") else ""

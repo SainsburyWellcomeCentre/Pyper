@@ -59,8 +59,11 @@ if __name__ == '__main__':
     appEngine.addImageProvider('trackerprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
     appEngine.addImageProvider('recorderprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
     appEngine.addImageProvider('calibrationprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('analysisprovider', PyplotImageProvider()) # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('analysisprovider2', PyplotImageProvider()) # Hack to make qml believe provider is valid before its creation
+    
+    analysisImageProvider = PyplotImageProvider(fig=None)
+    appEngine.addImageProvider("analysisprovider", analysisImageProvider)
+    analysisImageProvider2 = PyplotImageProvider(fig=None)
+    appEngine.addImageProvider("analysisprovider2", analysisImageProvider2)
     appEngine.load(QUrl('./qml/MouseTracker.qml'))
     
     win = appEngine.rootObjects()[0]
@@ -72,8 +75,8 @@ if __name__ == '__main__':
     # REGISTER PYTHON CLASSES WITH QML
     params = ParamsIface(app, context, win)
     viewer = ViewerIface(app, context, win, params, "preview", "viewerprovider")
-    tracker = TrackerIface(app, context, win, params, "trackerDisplay", "trackerprovider")
-    recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider")
+    tracker = TrackerIface(app, context, win, params, "trackerDisplay", "trackerprovider", analysisImageProvider, analysisImageProvider2)
+    recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider", analysisImageProvider, analysisImageProvider2)
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
     
     context.setContextProperty('py_iface', params)

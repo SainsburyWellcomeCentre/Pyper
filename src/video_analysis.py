@@ -74,7 +74,10 @@ def posToDistances(positions):
         for v in p1+p2:
             if (v != -1) and (type(v) not in [float, np.float64, np.float32]):
                 raise TypeError("Index {}, expected type float, got {}".format(i, type(v)))
-        distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
+        if p1 == (-1, -1) or p2 == (-1, -1):
+            distance = 0
+        else:
+            distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
         distances.append(distance)
     return distances
 
@@ -138,7 +141,7 @@ def plotAngles(angles, samplingFreq):
     
 def plotDistances(distances, samplingFreq):
     xVect = np.array(range(len(distances))) / samplingFreq
-    plt.ylim([0, 100])
+    plt.ylim([0, 10])
     plt.ylabel('distance (pixels)')
     plt.xlabel('time (s)')
     plt.plot(xVect, distances, label='Distance (AU)')
