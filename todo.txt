@@ -1,5 +1,12 @@
 Tests
 Autothreshold
-Put frame size as option in video-stream.UsbVideoStream and PiVideoStream
-Compare findContours methods for efficiency
 
+Put frame size as option in video-stream.UsbVideoStream and PiVideoStream
+Get boolean of whether specimen is in ROI for each frame
+Save pickle of calibration parameters
+Add manual arena ROI
+Add GUI for ROI callback function
+Compare findContours methods for efficiency
+Save source folder for future use
+Merge play and pause buttons ?
+Remove welcome page ?
