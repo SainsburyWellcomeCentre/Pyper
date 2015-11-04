@@ -62,21 +62,28 @@ if __name__ == '__main__':
             print('{} is not a valid answer'.format(answer))
             answer = promptDelete(folder)
         return True if answer == 'Y' else False
+        
+    def createDestFolder(srcFolder, prefix):
+        destFolder = os.path.join(srcFolder, prefix)
+        if os.path.isdir(destFolder):
+            if promptDelete(destFolder):
+                tmpDest = os.path.join(tempfile.gettempdir(), prefix)
+                if os.path.isdir(tmpDest): shutil.rmtree(tmpDest)
+                shutil.move(destFolder, tmpDest)
+                print('Your folder has been moved to {}, where you can retrive it before it is deleted by a reboot of your machine'\
+                .format(tmpDest))
+        os.mkdir(destFolder)
+        return destFolder
 
     # Folders and files
     srcFolder = os.path.dirname(args.videoFile)
     vidName = os.path.basename(args.videoFile)
-    if args.saveGraphs and not args.prefix:
-        prefix = os.path.splitext(vidName)[0]
-    destFolder = os.path.join(srcFolder, prefix)
-    if os.path.isdir(destFolder):
-        if promptDelete(destFolder):
-            tmpDest = os.path.join(tempfile.gettempdir(), prefix)
-            if os.path.isdir(tmpDest): shutil.rmtree(tmpDest)
-            shutil.move(destFolder, tmpDest)
-            print('Your folder has been moved to {}, where you can retrive it before it is deleted by a reboot of your machine'\
-            .format(tmpDest))
-    os.mkdir(destFolder)
+    prefix = None
+    if args.saveGraphs:
+        if not args.prefix:
+            prefix = os.path.splitext(vidName)[0]
+    prefix = prefix if prefix is not None else args.prefix
+    destFolder = createDestFolder(srcFolder, prefix)
     imgExt = '.'+args.imgFileFormat
 
     # Time information
@@ -102,7 +109,7 @@ if __name__ == '__main__':
                     nBackgroundFrames=args.nBackgroundFrames, nSds=args.nSds,
                     clearBorders=args.clearBorders, normalise=False,
                     plot=args.plot, fast=config['tracker']['fast'], 
-                    extractArena=True)
+                    extractArena=False)
     positions = tracker.track(roi=roi)
 
     ################################ ANALYSIS ########################################
