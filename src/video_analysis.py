@@ -69,8 +69,8 @@ def posToDistances(positions):
     """
     distances=[]
     for i in range(1, len(positions)):
-        p1 = positions[i-1]
-        p2 = positions[i]
+        p1 = tuple(positions[i-1])
+        p2 = tuple(positions[i])
         for v in p1+p2:
             if (v != -1) and (type(v) not in [float, np.float64, np.float32]):
                 raise TypeError("Index {}, expected type float, got {}".format(i, type(v)))
@@ -119,9 +119,9 @@ def getAngles(positions):
     """
     angles = []
     for i in range(2, len(positions)):
-        a = positions[i-2]
-        b = positions[i-1]
-        c = positions[i]
+        a = list(positions[i-2])
+        b = list(positions[i-1])
+        c = list(positions[i])
         if a == b == c:
            angles.append(0)
         else:
