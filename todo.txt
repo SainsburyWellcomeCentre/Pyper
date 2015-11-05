@@ -1,7 +1,9 @@
 Tests
 Autothreshold
 
-Put frame size as option in video-stream.UsbVideoStream and PiVideoStream
+Make -b,-f,-t in CLI frames if single number
+Add normalise option to CLI
+Put frame size as option in video_stream.UsbVideoStream and PiVideoStream
 Get boolean of whether specimen is in ROI for each frame
 Save pickle of calibration parameters
 Add manual arena ROI
