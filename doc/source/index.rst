@@ -11,11 +11,11 @@ Welcome to Motion_Tracking's documentation!
 Introduction
 ------------
 
-This program allows the tracking of mice in open field maze from pre-recorded 
-videos or from a live feed. The live stream of frames can be generated from
-a usb camera or from the camera (normal or NoIR) of the Raspberry Pi. On the
-Raspberry Pi, a subclass of the standard PiCamera object is used to speed-up
-video acquisition and online processing.
+This program allows the tracking of specimen (e.g. a mouse, a rat ...) in an 
+open field maze from pre-recorded videos or from a live feed. The live stream 
+of frames can be generated from a usb camera or from the camera (normal or NoIR)
+of the Raspberry Pi. On the Raspberry Pi, a subclass of the standard PiCamera 
+object is used to speed-up video acquisition and online processing.
 
 The combination of recording and online position tracking allows the definition
 of complex behavioural experiment as the program can send a TTL pulse to an
