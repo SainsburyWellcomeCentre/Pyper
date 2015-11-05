@@ -46,11 +46,9 @@ Rectangle {
         Image {
             id: toolButtonIcon
             source: parent.parent.iconSource
-            smooth: true
             width: parent.width
             height: parent.height * 0.8
             anchors.top: parent.top
-            antialiasing: true
         }
 
         Text {
