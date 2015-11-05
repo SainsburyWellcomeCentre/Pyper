@@ -110,7 +110,7 @@ Rectangle {
 
         tooltip: "Select video destination (before recording)"
         onClicked: {
-            pathTextField.text = py_iface.setSavePath();
+            pathTextField.text = py_iface.setSavePath("");
             if (py_recorder.camDetected()){
                 recordBtn.enabled = true;
             } else {
@@ -125,6 +125,15 @@ Rectangle {
         anchors.leftMargin: 5
         anchors.verticalCenter: pathBtn.verticalCenter
         text: "..."
+
+        onTextChanged: {
+            py_iface.setSavePath(text);
+            if (py_recorder.camDetected()){
+                recordBtn.enabled = true;
+            } else {
+                errorScreen.flash(3000);
+            }
+        }
     }
 
     Video {
