@@ -34,9 +34,11 @@ be necessary if you do not use these optional features (e.g. the GUI).
 Installation on linux (assuming a debian based distribution)
 ------------------------------------------------------------
 
-Please note that the GUI will currently not work on the raspberry pi. This is due to a limitation of the video driver supplied by Broadcom. This program uses QtQuick which in turn uses hardware acceleration to minimise the load on the CPU. The current driver does not support this feature. This issue might be solved in the future using EGLFS. Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
+.. note::
+    Please note that the GUI will currently not work on the raspberry pi. This is due to a limitation of the video driver supplied by Broadcom. This program uses QtQuick which in turn uses hardware acceleration to minimise the load on the CPU. The current driver does not support this feature. This issue might be solved in the future using EGLFS. Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
 
-Please note, if you use an Ubuntu distribution, Ubuntu removed the PyQt5 bindings for python 2.7 in 14.04 but reintroduced them afterwards. Please ensure that you use a version for which the *python-pyqt5* is available and not only *python3-pyqt5*. You can check this using:
+.. important::
+    If you use an Ubuntu distribution, Ubuntu removed the PyQt5 bindings for python 2.7 in 14.04 but reintroduced them afterwards. Please ensure that you use a version for which the *python-pyqt5* is available and not only *python3-pyqt5*. You can check this using:
 
 .. code-block:: bash
     
@@ -102,13 +104,13 @@ Then, you can install homebrew.
     
 the installer will run and probably tell you it will change some user rights. For example: *“The following directories will be made group writable: /user/local/lib”*. It will also probably ask you to confirm with enter and prompt for your admin password.
 
-Now we have to make sure homebrew software is visible to the system. Open a new terminal window, and in there, type:
+Now we have to make sure homebrew software is visible to the system. Open a new terminal **window**, and in there, type:
 
 .. code-block:: bash
 
     echo $PATH
     
-and check whether you can see the following in the output: “/usr/local/sbin” and “/usr/local/bin”
+and check whether you can see both of the following in the output: “/usr/local/sbin” and “/usr/local/bin”
 
 if “/usr/local/bin” is missing, run the following:
 
@@ -118,10 +120,14 @@ if “/usr/local/bin” is missing, run the following:
     
 if “/usr/local/sbin” is missing, do the same but replace /usr/local/bin by /usr/local/sbin
 
-Now open another new terminal window, close the other (old) terminals, run the command in the “important” box above and get ready to install openCV and python.
+Now open another new terminal window, close the other (old) terminals, run the command in the “important” box below and get ready to install openCV and python.
 
 .. important::
-    Homebrew will potentially install additional versions of software you might already have on your system. This software will be installed to /usr/local/. To prevent these versions from clashing, run the following command whenever you are working on the terminal and want to use homebrew or a software that has been installed using homebrew: export PATH="/usr/local/bin:$PATH". This will ensure that - during the currently open terminal session - the homebrew versions have precedence over any other potentially installed versions.
+    Homebrew will potentially install additional versions of software you might already have on your system. This software will be installed to /usr/local/. To prevent these versions from clashing, run the following command whenever you are working on the terminal and want to use homebrew or a software that has been installed using homebrew.This will ensure that - during the currently open terminal session - the homebrew versions have precedence over any other potentially installed versions.
+    
+.. code-block:: bash
+
+    export PATH="/usr/local/bin:$PATH"
 
 Installing openCV with python:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -147,7 +153,7 @@ The following will set up python for package downloads and create an alias calle
     echo 'alias brewPython="/usr/local/bin/python"' >> ~/.bash_profile
     
 
-If you want to use this oversion of python from your standard mac "Applications" folder, run:
+If you want to use this version of python from your standard mac "Applications" folder, run:
 
 .. code-block:: bash
 
@@ -160,7 +166,7 @@ The following will now install python dependencies for the motion tracking softw
 
     sudo  -E /usr/local/bin/pip install numpy scipy scikit-image python-dateutil
     sudo  -E /usr/local/bin/pip install pyparsing matplotlib image
-    sudo  -E /usr/local/bin/pip isntall PyOpenGL progressbar
+    sudo  -E /usr/local/bin/pip install PyOpenGL progressbar
     
     
 Installing the GUI:
@@ -220,5 +226,5 @@ Finaly download the motion tracking program using:
     
     git clone https://serverurl/motionTracking motionTracking
    
-The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This as not been tested here.
+The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
     

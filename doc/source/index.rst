@@ -56,6 +56,7 @@ Documentation
    :maxdepth: 2
    
    installation
+   gettingStarted
    usage
    api
    troubleShooting
