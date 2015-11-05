@@ -345,7 +345,7 @@ class UsbVideoStream(VideoStream):
         """
         self.stream.release()
         VideoStream.stopRecording(self, msg)
-        self.currentFrameIdx=-1
+        self.currentFrameIdx = -1
 
 class PiVideoStream(VideoStream):
     """
