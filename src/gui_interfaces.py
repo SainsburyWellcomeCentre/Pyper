@@ -34,7 +34,8 @@ import video_analysis
 from camera_calibration import CameraCalibration
 from image_providers import CvImageProvider
 
-VIDEO_FILTERS = "Videos (*.h264 *.avi *.mpg)"
+VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
+VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
 
 class BaseInterface(QObject):
     """
@@ -758,17 +759,21 @@ class ParamsIface(QObject):
             self._setDefaults()
             return srcPath
 
-    @pyqtSlot(result=QVariant)   
-    def setSavePath(self):
+    @pyqtSlot(QVariant, result=QVariant)   
+    def setSavePath(self, path):
         """
         The QT dialog to select the path to save the recorded video
         """
         diag = QFileDialog()
-        path = diag.getSaveFileName(parent=diag,
-                                    caption='Save file',
-                                    directory=os.getenv('HOME'), 
-                                    filter=VIDEO_FILTERS)
-        destPath = path[0]
+        if not path:
+            path = diag.getSaveFileName(parent=diag,
+                                        caption='Save file',
+                                        directory=os.getenv('HOME'), 
+                                        filter=VIDEO_FILTERS, 
+                                        initialFilter="Videos (*.avi)")
+            destPath = path[0]
+        else:
+            destPath = path if (os.path.splitext(path)[1] in VIDEO_FORMATS) else ""
         if destPath:
             self.destPath = destPath
             return destPath
