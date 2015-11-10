@@ -72,9 +72,10 @@ Rectangle {
                         if (roi.isDrawn){
                             py_recorder.setRoi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
                         }
-                        py_recorder.start();
-                        enabled = false;
-                        stopBtn.enabled = true;
+                        if (py_recorder.start()) {
+                            enabled = false;
+                            stopBtn.enabled = true;
+                        }
                     } else {
                         errorScreen.flash(3000);
                     }

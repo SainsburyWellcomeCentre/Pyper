@@ -527,11 +527,20 @@ class RecorderIface(TrackerIface):
     def load(self): # TODO: check if worth keeping
         pass
         
-    @pyqtSlot()
+    @pyqtSlot(result=QVariant)
     def start(self):
         """
         Start the recording and tracking.
+        
+        :returns: The recording was started status code
         """
+        if not hasattr(self.params, 'destPath'):
+            return False
+        vidExt = os.path.splitext(self.params.destPath)[1]
+        if vidExt not in VIDEO_FORMATS:
+            print('Unknow format: {}'.format(vidExt))
+            return False
+        
         self.positions = [] # reset between runs
         self.distancesFromArena = []
         
@@ -566,6 +575,7 @@ class RecorderIface(TrackerIface):
         self.tracker.setRoi(self.roi)
         
         self.timer.start(self.timerSpeed)
+        return True
         
     def getSamplingFreq(self):
         """
