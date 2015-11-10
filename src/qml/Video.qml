@@ -45,6 +45,8 @@ Item {
         height: 20
         minimumValue: 0
 
+        enabled: parent.enabled
+
         signal pressed(real xPosition, real yPosition)
         signal released(real xPosition, real yPosition)
         signal clicked(real xPosition, real yPosition)

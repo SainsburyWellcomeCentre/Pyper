@@ -33,6 +33,7 @@ Rectangle {
         }
         onReleased:{
             py_viewer.load();
+            previewImage.enabled = true;
             splash.visible = false;
             vidControl.enabled = true;
             frameControls.enabled = true;
@@ -65,6 +66,8 @@ Rectangle {
         objectName: "preview"
         width: 640
         height: 480
+
+        enabled: false
 
         source: "image://viewerprovider/img"
         onProgressClicked: py_viewer.seekTo(frameId)
