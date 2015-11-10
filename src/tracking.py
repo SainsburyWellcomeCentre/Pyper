@@ -547,6 +547,9 @@ class GuiTracker(Tracker):
         try:
             self.currentFrameIdx = self._stream.currentFrameIdx + 1
             result = self.trackFrame(record=self.record, requestedOutput=self.uiIface.outputType)
+        except EOFError:
+            self.uiIface._stop('End of recording reached')
+            return
         except cv2.error as e:
             self.uiIface.timer.stop()
             self._stream.stopRecording('Error {} stopped recording'.format(e))
@@ -606,3 +609,4 @@ class GuiTracker(Tracker):
         except (KeyboardInterrupt, EOFError) as e:
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
             self._stream.stopRecording(msg)
+            raise EOFError
