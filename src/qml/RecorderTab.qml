@@ -152,7 +152,12 @@ Rectangle {
             isActive: roiButton.isDown
             onReleased: {
                 if (isDrawn) {
-                    py_recorder.setRoi(width, height, roiX, roiY, roiWidth)
+                    if (isActive){
+                        py_recorder.setRoi(width, height, roiX, roiY, roiWidth);
+                    } else {
+                        py_recorder.removeRoi();
+                        eraseRoi();
+                    }
                 }
             }
         }

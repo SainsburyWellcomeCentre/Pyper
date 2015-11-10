@@ -430,6 +430,10 @@ class TrackerIface(BaseInterface):
             
             self.roi = Circle((scaledX, scaledY), scaledRadius)
 
+    @pyqtSlot()
+    def removeRoi(self):
+        self.roi = None
+
     @pyqtSlot(QVariant)
     def save(self, defaultDest):
         """

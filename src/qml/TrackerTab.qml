@@ -131,7 +131,12 @@ Rectangle {
             isActive: roiButton.isDown
             onReleased: {
                 if (isDrawn) {
-                    py_tracker.setRoi(width, height, roiX, roiY, roiWidth)
+                    if (isActive){
+                        py_tracker.setRoi(width, height, roiX, roiY, roiWidth);
+                    } else {
+                        py_tracker.removeRoi();
+                        eraseRoi();
+                    }
                 }
             }
         }
