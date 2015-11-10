@@ -66,7 +66,7 @@ The following will install the additional dependencies for the GUI:
      sudo apt-get install python-pyqt5 python-opengl python-pyqt5.qtopengl python-pyqt5.qtquick qml-module-qtquick-controls
      
      
-Finaly, for the raspberry-pi camera:
+Finally, for the raspberry-pi camera:
 
 .. code-block:: bash
 
@@ -82,7 +82,7 @@ Then select camera -> activate
     
 Installation on MacOSX (tested on Mavericks)
 --------------------------------------------
-The installation was tested with homebrew by Christian Niedworok.
+Installation instructions by Christian Niedworok.
 
 Installing Homebrew:
 ^^^^^^^^^^^^^^^^^^^^
@@ -166,8 +166,7 @@ The following will now install python dependencies for the motion tracking softw
 
     sudo  -E /usr/local/bin/pip install numpy scipy scikit-image python-dateutil
     sudo  -E /usr/local/bin/pip install pyparsing matplotlib image
-    sudo  -E /usr/local/bin/pip install PyOpenGL progressbar
-    
+    sudo  -E /usr/local/bin/pip install PyOpenGL progressbar    
     
 Installing the GUI:
 ^^^^^^^^^^^^^^^^^^^
@@ -184,13 +183,26 @@ To install QT via homebrew first open a terminal, ensure proxies and $PATH are s
     brew install qt5
     brew install PyQt5 --with-python # Installs the bindings for python 2.7 which is necessary for openCV 2
     
-    
-Finaly download the motion tracking program using:
+
+Getting the program
+^^^^^^^^^^^^^^^^^^^    
+Finally download the motion tracking program using:
     
 .. code-block:: bash
     
     git clone https://serverurl/motionTracking motionTracking
     
+At the end if the program doesn't start, try running:
+
+.. code-block:: bash
+
+    brew update
+    brew upgrade
+    brew doctor
+    
+This should let you know if there are any issues with your homebrew installation.
+It might be that homebrew is asking you to link some libraries. If so follow the instructions on screen.
+Ensure that /usr/loca/lib is writable.
 
 Installation on Windows
 -----------------------
@@ -220,7 +232,7 @@ The core of the program works fine. You just have to install openCV and link it 
    >> import cv2
    >> print cv2.__version__
    
-Finaly download the motion tracking program using:
+Finally download the motion tracking program using:
     
 .. code-block:: Batch
     

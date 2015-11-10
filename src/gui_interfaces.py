@@ -743,7 +743,7 @@ class ParamsIface(QObject):
     def getEndFrameIdx(self):
         return self.endFrameIdx
 
-    @pyqtSlot(result=QVariant)   
+    @pyqtSlot(result=QVariant)
     def openVideo(self):
         """
         The QT dialog to select the video to be used for preview or tracking
@@ -759,7 +759,7 @@ class ParamsIface(QObject):
             self._setDefaults()
             return srcPath
 
-    @pyqtSlot(QVariant, result=QVariant)   
+    @pyqtSlot(QVariant, result=QVariant)
     def setSavePath(self, path):
         """
         The QT dialog to select the path to save the recorded video

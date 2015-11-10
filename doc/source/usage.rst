@@ -7,11 +7,18 @@ This software can be used in different ways. You can use the graphical interface
 Using the Graphical interface:
 ------------------------------
 
-To use the Graphical interface, start the interface from a terminal by typing:
+To use the Graphical interface, start a terminal window and then:
+
+Change your working directory to that of the source of the program (subfolder src). This must fit your installation folder. For example if user rcajal downloaded on the desktop:
 
 .. code-block:: bash
     
-    cd /the/path/to/the/source/folder
+    cd ~/Desktop/motionTracking/src
+    
+Then actually launch the program:
+
+.. code-block:: bash
+
     python tracking_gui.py
     
 When using the graphical interface, hovering over buttons and other elements should display tooltips explaining what these do.

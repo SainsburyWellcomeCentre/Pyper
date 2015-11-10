@@ -5,11 +5,18 @@ Quick start
 Starting the program
 ^^^^^^^^^^^^^^^^^^^^
 To get a quick feel for the software, some example files have been included in the resources folder of the program.
-Start by opening the program:
+Start by opening the program, in a terminal:
+
+Change your working directory to that of the source of the program (subfolder src). This must fit your installation folder. For example if user rcajal downloaded on the desktop:
 
 .. code-block:: bash
     
-    cd path/to/the/program/src
+    cd ~/Desktop/motionTracking/src
+    
+Then actually launch the program:
+
+.. code-block:: bash
+
     python tracking_gui.py
     
 .. note::
@@ -19,22 +26,25 @@ The graphical interface should now be started.
 
 Preview
 ^^^^^^^
-Open a file using the file menu or your platform shortcut and select the *teleporter.h264* file in the resources folder.
+Open a file using the file menu or your platform shortcut and select the *teleporter.h264* file in the resources subfolder of the program (i.e. where you downloaded it with git).
 You can now go to the *Preview* tab and navigate through the file.
-* Select a reference frame (avoid the very first image)
+
+* Select a reference frame before the specimen enters the arena (also avoid the very first image).
 * Select a start frame (after the reference) where the mouse has entered the arena.
 * Select the end of the tracked portion or leave it as is to select the end of the recording by default.
     
 Tracking
 ^^^^^^^^
 You can now navigate to the *Track* tab.
-Press the track arrow and you should see the video begin to play. At the beginning, the video should play as the source. Note that the resolution is better than in the preview because the preview is downscaled. Once the video playback reaches the point that you selected for the beginning of the tracking, the mouse should become outlined in red and leave a green line as a trail delineating its trajectory. You can then select a different image type from the drop down menu at the bottom of the window to get a feel for the processing going on in the background.
+Press the *start tracking* arrow (*play* button) and you should see the video begin to play. At the beginning, the video should play as the source. Note that the resolution is better than in the preview because the preview is downscaled. Once the video playback reaches the point that you selected for the beginning of the tracking, the mouse should become outlined in red and leave a green line as a trail delineating its trajectory. You can then select a different image type from the drop down menu at the bottom of the window to get a feel for the processing going on in the background.
 
 Analysis
 ^^^^^^^^
 Once the end of the recording is reached, you can proceed to the *Analyse* tab and click **Update**. The list of coordinates will now appear in the table. Coordinates of (-1, -1) indicate default coordinates that are selected if:
+
 * The frame is before the beginning of the tracked segment of the recording.
 * The specimen could not be found in the arena with the specified parameters.
+
 If you now click angles and distances two graphs should appear indicating the change of direction at each frame and the distance made at each frame respecively. To save the coordinates, select **Save** and provide a destination path.
 
 Recording
