@@ -89,7 +89,11 @@ Rectangle {
                 tooltip: "Number of rows in pattern"
                 readOnly: false
                 text: py_calibration.getNRows()
-                onTextChanged: py_calibration.setNRows(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_calibration.setNRows(text);
+                    }
+                }
                 function reload() {text = py_calibration.getNRows() }
             }
             IntLabel{
@@ -98,7 +102,11 @@ Rectangle {
                 tooltip: "Number of columns in pattern"
                 readOnly: false
                 text: py_calibration.getNColumns()
-                onTextChanged: py_calibration.setNColumns(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_calibration.setNColumns(text);
+                    }
+                }
                 function reload() {text = py_calibration.getNColumns() }
             }
         }

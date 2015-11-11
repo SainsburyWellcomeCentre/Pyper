@@ -10,6 +10,18 @@ Item {
     property alias text: textField.text
     property alias readOnly: textField.readOnly
 
+    function validateInt() {
+        if (text === '-') {
+            return false
+        } else if (text === '0') {
+            return true
+        } else if (parseInt(text, 10)) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     Row {
         anchors.fill: parent
         spacing: 5
@@ -27,7 +39,6 @@ Item {
             height: parent.height
             color: "white"
             horizontalAlignment: Text.AlignHCenter
-//            validator: IntValidator{}
             readOnly: true
         }
     }

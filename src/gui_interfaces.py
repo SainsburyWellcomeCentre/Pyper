@@ -683,7 +683,9 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setDetectionThreshold(self, threshold):
-        self.detectionThreshold = int(threshold)
+        thrsh = int(threshold)
+        if 0 < thrsh < 256:
+            self.detectionThreshold = thrsh
 
     @pyqtSlot(result=QVariant)
     def getMinArea(self):
@@ -691,7 +693,9 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setMinArea(self, area):
-        self.objectsMinArea = int(area)
+        area = int(area)
+        if area > 0:
+            self.objectsMinArea = area
 
     @pyqtSlot(result=QVariant)
     def getMaxArea(self):
@@ -699,7 +703,9 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setMaxArea(self, area):
-        self.objectsMaxArea = int(area)
+        area = int(area)
+        if area > 0:
+            self.objectsMaxArea = area
 
     @pyqtSlot(result=QVariant)
     def getMaxMovement(self):
@@ -707,7 +713,9 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setMaxMovement(self, movement):
-        self.teleportationThreshold = int(movement)
+        mvmt = int(movement)
+        if mvmt > 0:
+            self.teleportationThreshold = mvmt
 
     @pyqtSlot(result=QVariant)
     def getNSds(self):
@@ -715,12 +723,15 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def setNSds(self, n):
-        self.nSds = int(n)    
+        nSds = int(n)
+        if nSds > 0:
+            self.nSds = nSds
 
     # FRAME OPTIONS
     @pyqtSlot(QVariant)
     def setBgFrameIdx(self, idx):
         idx = int(idx)
+        idx = idx if idx >= 0 else 0
         maxIdx = self.startFrameIdx - self.nBgFrames
         self.bgFrameIdx = min(idx, maxIdx)
     
@@ -749,8 +760,11 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def setEndFrameIdx(self, idx):
         idx = int(idx)
-        if idx <= self.startFrameIdx and idx != -1:
-            idx = self.startFrameIdx + self.nBgFrames
+        if idx > 0:
+            if idx <= self.startFrameIdx:
+                idx = self.startFrameIdx + self.nBgFrames
+        else:
+            idx = -1
         self.endFrameIdx = idx
 
     @pyqtSlot(result=QVariant)

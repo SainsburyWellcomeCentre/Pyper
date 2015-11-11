@@ -191,8 +191,10 @@ Rectangle {
                 readOnly: false
                 text: py_iface.getBgFrameIdx()
                 onTextChanged: {
-                    py_iface.setBgFrameIdx(text);
-                    reload();
+                    if (validateInt()) {
+                        py_iface.setBgFrameIdx(text);
+                        reload();
+                    }
                 }
                 function reload(){ text = py_iface.getBgFrameIdx() }
             }
@@ -203,8 +205,10 @@ Rectangle {
                 readOnly: false
                 text: py_iface.getStartFrameIdx()
                 onTextChanged: {
-                    py_iface.setStartFrameIdx(text);
-                    reload();
+                    if (validateInt()) {
+                        py_iface.setStartFrameIdx(text);
+                        reload();
+                    }
                 }
                 function reload(){ text = py_iface.getStartFrameIdx() }
             }
@@ -215,8 +219,10 @@ Rectangle {
                 readOnly: false
                 text: py_iface.getEndFrameIdx()
                 onTextChanged: {
-                    py_iface.setEndFrameIdx(text);
-                    reload();
+                    if (validateInt()) {
+                        py_iface.setEndFrameIdx(text);
+                        reload();
+                    }
                 }
                 function reload(){ text = py_iface.getEndFrameIdx() }
             }
@@ -246,7 +252,11 @@ Rectangle {
                 tooltip: "Number of frames for background"
                 readOnly: false
                 text: py_iface.getNBgFrames()
-                onTextChanged: py_iface.setNBgFrames(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setNBgFrames(text);
+                    }
+                }
                 function reload() {text = py_iface.getNBgFrames() }
             }
             IntLabel{
@@ -255,7 +265,11 @@ Rectangle {
                 tooltip: "Number of standard deviations above average"
                 readOnly: false
                 text: py_iface.getNSds()
-                onTextChanged: py_iface.setNSds(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setNSds(text);
+                    }
+                }
                 function reload() {text = py_iface.getNSds() }
             }
         }
@@ -284,7 +298,11 @@ Rectangle {
                 tooltip: "Detection threshold"
                 readOnly: false
                 text: py_iface.getDetectionThreshold()
-                onTextChanged: py_iface.setDetectionThreshold(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setDetectionThreshold(text);
+                    }
+                }
                 function reload() {text = py_iface.getDetectionThreshold() }
             }
             IntLabel {
@@ -293,7 +311,11 @@ Rectangle {
                 tooltip: "Minimum object area"
                 readOnly: false
                 text: py_iface.getMinArea()
-                onTextChanged: py_iface.setMinArea(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setMinArea(text);
+                    }
+                }
                 function reload() { py_iface.getMinArea() }
             }
             IntLabel {
@@ -302,7 +324,11 @@ Rectangle {
                 tooltip: "Maximum object area"
                 readOnly: false
                 text: py_iface.getMaxArea()
-                onTextChanged: py_iface.setMaxArea(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setMaxArea(text);
+                    }
+                }
                 function reload() { py_iface.getMaxArea() }
             }
             IntLabel{
@@ -311,7 +337,11 @@ Rectangle {
                 tooltip: "Maximum displacement (between frames) threshold"
                 readOnly: false
                 text: py_iface.getMaxMovement()
-                onTextChanged: py_iface.setMaxMovement(text)
+                onTextChanged: {
+                    if (validateInt()) {
+                        py_iface.setMaxMovement(text);
+                    }
+                }
                 function reload() { py_iface.getMaxMovement() }
             }
         }
