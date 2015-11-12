@@ -13,7 +13,7 @@ Change your working directory to that of the source of the program (subfolder sr
 
 .. code-block:: bash
     
-    cd ~/Desktop/motionTracking/src
+    cd ~/Desktop/pyperMotionTracking/src
     
 Then actually launch the program:
 

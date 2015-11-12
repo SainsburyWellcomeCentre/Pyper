@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Motion_Tracking documentation build configuration file, created by
+# Pyper documentation build configuration file, created by
 # sphinx-quickstart on Tue Jun  2 19:41:30 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -58,7 +58,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Motion_Tracking'
+project = u'Pyper'
 copyright = u'2015, Charly Rousseau'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -191,7 +191,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Motion_Trackingdoc'
+htmlhelp_basename = 'Pyperdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -211,7 +211,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Motion_Tracking.tex', u'Motion\\_Tracking Documentation',
+  ('index', 'Pyper.tex', u'Pyper Documentation',
    u'Charly Rousseau', 'manual'),
 ]
 
@@ -241,7 +241,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'motion_tracking', u'Motion_Tracking Documentation',
+    ('index', 'pyper', u'Pyper Documentation',
      [u'Charly Rousseau'], 1)
 ]
 
@@ -255,8 +255,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Motion_Tracking', u'Motion_Tracking Documentation',
-   u'Charly Rousseau', 'Motion_Tracking', 'One line description of project.',
+  ('index', 'Pyper', u'Pyper Documentation',
+   u'Charly Rousseau', 'Pyper', 'One line description of project.',
    'Miscellaneous'),
 ]
 

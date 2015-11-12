@@ -1,10 +1,10 @@
-.. Motion_Tracking documentation master file, created by
+.. Pyper documentation master file, created by
    sphinx-quickstart on Tue Jun  2 19:41:30 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 ===========================================
-Welcome to Motion_Tracking's documentation!
+Welcome to Pyper's documentation!
 ===========================================
 
 

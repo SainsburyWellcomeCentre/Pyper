@@ -22,7 +22,7 @@ from PyQt5.QtCore import QObject, QUrl
 from gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface
 from image_providers import CvImageProvider, PyplotImageProvider
 
-DEBUG = True
+DEBUG = False
 
 class Logger(QObject):
     """

@@ -1,5 +1,5 @@
 """
-Motion tracking, The command line interface
+Pyper, The command line interface
 
 :author: crousse
 """

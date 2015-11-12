@@ -14,7 +14,7 @@ You will need at least:
 
 Recommended modules
 -------------------
-These modules are required only for some of Motion_Tracking's modules and won't
+These modules are required only for some of Pyper's modules and won't
 be necessary if you do not use these optional features (e.g. the GUI).
 
 :Command line:
@@ -56,7 +56,7 @@ Then download the motion tracking program using:
     
 .. code-block:: bash
     
-    git clone https://serverurl/motionTracking motionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
 
 
 The following will install the additional dependencies for the GUI:
@@ -190,7 +190,7 @@ Finally download the motion tracking program using:
     
 .. code-block:: bash
     
-    git clone https://serverurl/motionTracking motionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
     
 At the end if the program doesn't start, try running:
 
@@ -236,7 +236,7 @@ Finally download the motion tracking program using:
     
 .. code-block:: Batch
     
-    git clone https://serverurl/motionTracking motionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
    
 The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
     
