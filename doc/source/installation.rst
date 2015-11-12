@@ -57,6 +57,14 @@ Then download the motion tracking program using:
 .. code-block:: bash
     
     git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
+    
+If you want to use the command line interface, copy the motionTracking.conf file from the src folder
+to your home folder preceded by a dot. Assuming pyperMotionTracking is in your home folder, type the following
+command:
+
+.. code-block:: bash
+    
+    cp ~/pyperMotionTracking/src/motionTracking.conf ~/.motionTracking.conf
 
 
 The following will install the additional dependencies for the GUI:
@@ -192,6 +200,14 @@ Finally download the motion tracking program using:
     
     git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
     
+If you want to use the command line interface, copy the motionTracking.conf file from the src folder
+to your home folder preceded by a dot. Assuming pyperMotionTracking is in your home folder, type the following
+command:
+
+.. code-block:: bash
+    
+    cp ~/pyperMotionTracking/src/motionTracking.conf ~/.motionTracking.conf
+    
 At the end if the program doesn't start, try running:
 
 .. code-block:: bash
@@ -237,6 +253,9 @@ Finally download the motion tracking program using:
 .. code-block:: Batch
     
     git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
+    
+If you want to use the command line interface, copy the motionTracking.conf file from the src folder
+to your home folder preceded by a dot.
    
 The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
     
