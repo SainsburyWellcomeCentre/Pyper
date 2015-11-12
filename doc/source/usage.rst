@@ -79,5 +79,8 @@ Using the Command Line Interface:
 ---------------------------------
 
 .. automodule:: tracking_cli
-.. autoprogram:: tracking_cli:parser
-    :prog: tracking_cli.py
+
+.. only :: isSystem
+
+    .. autoprogram:: tracking_cli:parser
+        :prog: tracking_cli.py
