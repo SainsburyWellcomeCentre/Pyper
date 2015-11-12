@@ -51,4 +51,4 @@ Documentation
 =============
 
 For further documentation, you can compile the documentation using sphinx
-or alternatively, head to http://www.margrie-lab.com/motionTracking
+or alternatively, head to http://pyper.readthedocs.org/en/latest/
