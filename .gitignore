@@ -10,3 +10,5 @@ doc/build/*
 testTrack.mpg
 resources/teleporter/*
 src/qml/MouseTracker.creator*
+.idea
+resources/recording.avi
