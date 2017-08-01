@@ -16,7 +16,7 @@ from cv2 import cv
 
 from video_stream import RecordedVideoStream
 
-from progressbar import Percentage, Bar,  ProgressBar
+from progressbar import Percentage, Bar, ProgressBar
 
 class Transcoder(RecordedVideoStream):
     """

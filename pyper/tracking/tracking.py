@@ -21,12 +21,12 @@ from progressbar import *
 
 from time import time
 
-from object_contour import ObjectContour
-from video_frame import Frame
-from video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
-from roi import Circle
+from pyper.contours.object_contour import ObjectContour
+from pyper.video.video_frame import Frame
+from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
+from pyper.contours.roi import Circle
 
-isPi = (platform.machine()).startswith('arm') # We assume all ARM is a raspberry pi
+isPi = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
 class Viewer(object):
     """

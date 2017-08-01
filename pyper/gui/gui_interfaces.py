@@ -21,18 +21,16 @@ matplotlib.use('qt5agg') # For OSX otherwise, the default backed doesn't allow t
 from matplotlib import pyplot as plt
 
 from PyQt5.QtWidgets import QFileDialog
-
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
-
 from PyQt5.QtCore import Qt
 
-from tracking import GuiTracker
-from video_stream import QuickRecordedVideoStream as VStream
-from video_stream import ImageListVideoStream
-from roi import Circle
-import video_analysis
-from camera_calibration import CameraCalibration
-from image_providers import CvImageProvider
+from pyper.tracking.tracking import GuiTracker
+from pyper.video.video_stream import QuickRecordedVideoStream as VStream
+from pyper.video.video_stream import ImageListVideoStream
+from pyper.contours.roi import Circle
+from pyper.analysis import video_analysis
+from pyper.camera.camera_calibration import CameraCalibration
+from pyper.gui.image_providers import CvImageProvider
 
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')

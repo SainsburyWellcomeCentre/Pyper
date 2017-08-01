@@ -10,8 +10,10 @@ Creates the graphical interface
 
 :author: crousse
 """
-
+import os
 import sys
+
+sys.path.append(os.path.abspath("./"))  # FIXME: to be done by setup.py
 
 from OpenGL import GL # Hack necessary to get qtQuick working
 
@@ -19,8 +21,10 @@ from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject, QUrl
 
-from gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface
-from image_providers import CvImageProvider, PyplotImageProvider
+from pyper.gui.gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface
+from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
+
+from pyper.exceptions.exceptions import PyperGUIError
 
 DEBUG = False
 
@@ -64,9 +68,12 @@ if __name__ == '__main__':
     appEngine.addImageProvider("analysisprovider", analysisImageProvider)
     analysisImageProvider2 = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider2", analysisImageProvider2)
-    appEngine.load(QUrl('./qml/MouseTracker.qml'))
-    
-    win = appEngine.rootObjects()[0]
+    appEngine.load(QUrl('./pyper/qml/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
+
+    try:
+        win = appEngine.rootObjects()[0]
+    except IndexError:
+        raise PyperGUIError("Could not start the QT GUI")
     
     if not DEBUG:
         logger = Logger(context, win, "log")

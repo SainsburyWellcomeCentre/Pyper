@@ -8,9 +8,10 @@ import os, sys, argparse, csv, shutil, tempfile
 
 from configobj import ConfigObj
 
-from tracking import Viewer, Tracker
-from roi import Circle
-from video_analysis import *
+from pyper.tracking.tracking import Viewer, Tracker
+from pyper.contours.roi import Circle
+from pyper.analysis.video_analysis import *
+
 
 def coords(string):
     try:

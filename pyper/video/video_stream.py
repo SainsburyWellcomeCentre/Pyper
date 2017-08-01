@@ -23,7 +23,7 @@ from cv2 import cv
 isPi = (platform.machine()).startswith('arm')
 if isPi:
     import picamera.array
-    from camera import CvPiCamera
+    from pyper.camera.camera import CvPiCamera
     
 DEFAULT_CAM = 0
 CODEC = cv.CV_FOURCC(*'mp4v') # TODO: check which codecs are available

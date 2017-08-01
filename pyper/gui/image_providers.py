@@ -13,7 +13,7 @@ The classes of this module supply sequences of images to the QT interface
 import cv2
 import numpy as np
 import matplotlib
-matplotlib.use('qt5agg') # For OSX otherwise, the default backed doesn't allow to draw to buffer
+matplotlib.use('qt5agg')  # For OSX otherwise, the default backed doesn't allow to draw to buffer
 
 from PyQt5.QtCore import QSize
 

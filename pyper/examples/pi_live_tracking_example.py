@@ -1,8 +1,8 @@
 from time import time, sleep
 from multiprocessing import Process
 
-from tracking import Tracker
-from roi import Circle
+from pyper.tracking.tracking import Tracker
+from pyper.contours.roi import Circle
 
 try:
     import RPi.GPIO as GPIO

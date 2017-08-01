@@ -1,4 +1,5 @@
-import os, platform
+import os
+import platform
 
 import numpy as np
 from scipy import misc
