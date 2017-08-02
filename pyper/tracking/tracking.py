@@ -135,6 +135,16 @@ def write_structure_not_found_msg(img, img_size, frame_idx):
     cv2.putText(img, line3, (x, y), font_type, font_size, font_color)
 
 
+def write_structure_size_incorrect_msg(img, img_size, msg):
+    x = int(50)
+    y_spacing = 40
+    y = int(img_size[0] / 2) - y_spacing
+    font_color = (255, 255, 0)  # yellow
+    font_size = 0.75  # percent
+    font_type = int(2)
+    cv2.putText(img, msg, (x, y), font_type, font_size, font_color)
+
+
 class Tracker(object):
     """
     A tracker object to track a mouse in a video stream
@@ -411,32 +421,38 @@ class Tracker(object):
                 plot_silhouette = (diff.color()).copy()
                 color = requested_color
             else:
-                raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
-                                          "for requestedOutput, got: {}".format(requested_output))
+                raise NotImplementedError("Expected one of ('raw', 'mask', 'diff') "
+                                          "for requested_output, got: {}".format(requested_output))
         else:
             color = 'w'
+            plot_silhouette = frame
         contour_found = False
         if biggest_contour is not None:
             area = cv2.contourArea(biggest_contour)
-            if self.min_area < area < self.max_area:
-                mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
+            mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
+            if self.plot:
                 mouse.draw()
+            if self.min_area < area < self.max_area:
                 self.positions[-1] = mouse.centre
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
-                self._handle_bad_size_contour(area)
+                if self.plot:
+                    self._handle_bad_size_contour(area, plot_silhouette)
+                else:
+                    self._handle_bad_size_contour(area)
         else:
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
 
-    def _handle_bad_size_contour(self, area):
+    def _handle_bad_size_contour(self, area, img=None):
         if area > self.max_area:
-            self._fast_print('Frame: {}, found something too big in the arena ({} > {})'
-                             .format(self._stream.current_frame_idx, area, self.max_area))
+            msg = 'Biggest structure too big ({} > {})'.format(area, self.max_area)
         else:
-            self._fast_print('Frame: {}, biggest structure too small ({} < {})'
-                             .format(self._stream.current_frame_idx, area, self.min_area))
+            msg = 'Biggest structure too small ({} < {})'.format(area, self.min_area)
+        self._fast_print(msg)
+        if img is not None:
+            write_structure_size_incorrect_msg(img, img.shape[:2], msg)
 
     def _fast_print(self, in_str):
         """
