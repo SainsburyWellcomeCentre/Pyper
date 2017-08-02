@@ -75,7 +75,7 @@ class Viewer(object):
                 if not frame.dtype == np.uint8:
                     frame = frame.astype(np.uint8)
                 frame = frame.copy()
-                kbdCode = frame.display(winName='Frame', text='Frame: {}'.format(frameId), delay=self.delay, getCode=True)
+                kbdCode = frame.display(win_name='Frame', text='Frame: {}'.format(frameId), delay=self.delay, get_code=True)
                 kbdCode = kbdCode if kbdCode==-1 else chr(kbdCode & 255)
                 if kbdCode == 'b': bgFrame = frameId
                 elif kbdCode == 's': trackStart = frameId
@@ -320,7 +320,7 @@ class Tracker(object):
         """
         sil = self.silhouette
         self.paint(sil)
-        sil.display(winName='Diff', text='Frame: {}'.format(self._stream.currentFrameIdx), curve=self.positions)
+        sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.currentFrameIdx), curve=self.positions)
 
     def callback(self):
         """
