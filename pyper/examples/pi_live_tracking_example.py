@@ -38,12 +38,12 @@ def rpi_call_back():
         p.daemon = True
         p.start()
 
-tracker = Tracker(destFilePath='/home/pi/testTrack.mpg',
-                  threshold=threshold, teleportationThreshold=1000,
+tracker = Tracker(dest_file_path='/home/pi/testTrack.mpg',
+                  threshold=threshold, teleportation_threshold=1000,
                   plot=True, fast=False,
-                  minArea=50,
-                  bgStart=5, trackFrom=10,
-                  trackTo=10000,
+                  min_area=50,
+                  bg_start=5, track_from=10,
+                  track_to=10000,
                   callback=rpi_call_back)
 positions = tracker.track(roi=roi, record=True)
 

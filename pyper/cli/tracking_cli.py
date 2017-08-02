@@ -112,14 +112,14 @@ if __name__ == '__main__':
         roi = None
         
     # TRACKING
-    tracker = Tracker(srcFilePath=args.videoFile, destFilePath=None,
-                      threshold=args.threshold, minArea=args.minArea,
-                      maxArea=args.maxArea, teleportationThreshold=args.teleportationThreshold,
-                      bgStart=args.bg_time, trackFrom=args.track_from, trackTo=args.track_to,
-                      nBackgroundFrames=args.nBackgroundFrames, nSds=args.nSds,
-                      clearBorders=args.clearBorders, normalise=False,
+    tracker = Tracker(src_file_path=args.videoFile, dest_file_path=None,
+                      threshold=args.threshold, min_area=args.minArea,
+                      max_area=args.maxArea, teleportation_threshold=args.teleportationThreshold,
+                      bg_start=args.bg_time, track_from=args.track_from, track_to=args.track_to,
+                      n_background_frames=args.nBackgroundFrames, n_sds=args.nSds,
+                      clear_borders=args.clearBorders, normalise=False,
                       plot=args.plot, fast=config['tracker']['fast'],
-                      extractArena=False)
+                      extract_arena=False)
     positions = tracker.track(roi=roi)
 
     # ANALYSIS

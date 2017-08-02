@@ -17,7 +17,7 @@ import cv2
 import numpy as np
 from scipy.misc import imsave
 import matplotlib
-matplotlib.use('qt5agg') # For OSX otherwise, the default backed doesn't allow to draw to buffer
+matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
 
 from PyQt5.QtWidgets import QFileDialog
@@ -35,41 +35,41 @@ from pyper.gui.image_providers import CvImageProvider
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
 
+
 class BaseInterface(QObject):
     """
+
     Abstract interface
-    This class is meant to be subclassed by the other classes of the module
+    This class is meant to be sub-classed by the other classes of the module
     PlayerInterface, TrackerIface (base themselves to ViewerIface, CalibrationIface, RecorderIface)
     It supplies the base methods and attributes to register an object with video in qml.
     It also possesses an instance of ParamsIface to 
     """
-    def __init__(self, app, context, parent, params, displayName, providerName, timerSpeed=20):
+    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         QObject.__init__(self, parent)
-        self.app = app # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
+        self.app = app  # necessary to avoid QPixmap bug: must construct a QGuiApplication before
         self.ctx = context
         self.win = parent
-        self.displayName = displayName
-        self.providerName = providerName
+        self.displayName = display_name
+        self.providerName = provider_name
         self.params = params
         
         self.timer = QTimer(self)
-        self.timerSpeed = timerSpeed
-        self.timer.timeout.connect(self.getImg)
+        self.timer_speed = timer_speed
+        self.timer.timeout.connect(self.get_img)
 
-    def getImg(self):
-        """
-        The method called by self.timer to play the video
-        """
+    def get_img(self):
+        """The method called by self.timer to play the video"""
         if self.stream.currentFrameIdx < self.nFrames and self.stream.currentFrameIdx >= -1:
             try:
                 self.display.reload()
-                self._updateDisplayIdx()
+                self._update_display_idx()
             except EOFError:
                 self.timer.stop()
         else:
             self.timer.stop()
 
-    def _setDisplay(self):
+    def _set_display(self):
         """
         Gets the display from the qml code
         
@@ -77,33 +77,33 @@ class BaseInterface(QObject):
         """
         self.display = self.win.findChild(QObject, self.displayName)
 
-    def _updateDisplayIdx(self):
+    def _update_display_idx(self):
         """
         Updates the value of the display progress bar
         """
         self.display.setProperty('value', self.stream.currentFrameIdx)
         
-    def _setDisplayMax(self):
+    def _set_display_max(self):
         """
         Sets the maximum of the display progress bar
         """
         self.display.setProperty('maximumValue', self.nFrames)
     
     @pyqtSlot(result=QVariant)
-    def getFrameIdx(self):
+    def get_frame_idx(self):
         """
         pyQT slot to return the index of the currently displayed frame
         """
         return str(self.stream.currentFrameIdx)
         
     @pyqtSlot(result=QVariant)
-    def getNFrames(self):
+    def get_n_frames(self):
         """
         pyQT slot to return the number of frames of the current display
         """
         return self.nFrames
         
-    def _updateImgProvider(self):
+    def _update_img_provider(self):
         """
         Registers the objects image provider with the qml code
         Based on self.providerName
@@ -111,7 +111,8 @@ class BaseInterface(QObject):
         engine = self.ctx.engine()
         self.imageProvider = CvImageProvider(requestedImType='pixmap', stream=self.stream)
         engine.addImageProvider(self.providerName, self.imageProvider)
-    
+
+
 class PlayerInterface(BaseInterface):
     """
     This (abstract) class extends the BaseInterface to allow controlable videos (play, pause, forward...)
@@ -121,7 +122,7 @@ class PlayerInterface(BaseInterface):
         """
         Start video (timer) playback
         """
-        self.timer.start(self.timerSpeed)
+        self.timer.start(self.timer_speed)
 
     @pyqtSlot()
     def pause(self):
@@ -131,40 +132,41 @@ class PlayerInterface(BaseInterface):
         self.timer.stop()
 
     @pyqtSlot(QVariant)
-    def move(self, stepSize):
+    def move(self, step_size):
         """
         Moves in the video by stepSize
         
-        :param int stepSize: The number of frames to scroll by (positive or negative)
+        :param int step_size: The number of frames to scroll by (positive or negative)
         """
-        targetFrame = self.stream.currentFrameIdx
-        targetFrame -= 1 # reset
-        targetFrame += int(stepSize)
-        self.stream.currentFrameIdx = self._validateFrameIdx(targetFrame)
-        self.getImg()
+        target_frame = self.stream.currentFrameIdx
+        target_frame -= 1  # reset
+        target_frame += int(step_size)
+        self.stream.currentFrameIdx = self._validate_frame_idx(target_frame)
+        self.get_img()
 
     @pyqtSlot(QVariant)
-    def seekTo(self, frameIdx):
+    def seek_to(self, frame_idx):
         """
         Seeks directly to frameIdx in the video
         
-        :param int frameIdx: The frame to get to
+        :param int frame_idx: The frame to get to
         """
-        self.stream.currentFrameIdx = self._validateFrameIdx(frameIdx)
-        self.getImg()
+        self.stream.currentFrameIdx = self._validate_frame_idx(frame_idx)
+        self.get_img()
     
-    def _validateFrameIdx(self, frameIdx):
+    def _validate_frame_idx(self, frame_idx):
         """
         Checks if the supplied frameIdx is within [0:nFrames]
 
         :returns: A bound index
         :rtype: int
         """
-        if frameIdx >= self.nFrames:
-            frameIdx = self.nFrames - 1
-        elif frameIdx < 0:
-            frameIdx = 0
-        return frameIdx
+        if frame_idx >= self.nFrames:
+            frame_idx = self.nFrames - 1
+        elif frame_idx < 0:
+            frame_idx = 0
+        return frame_idx
+
 
 class ViewerIface(PlayerInterface):
     """
@@ -177,12 +179,13 @@ class ViewerIface(PlayerInterface):
         """
         Loads the video into memory
         """
-        self.stream = VStream(self.params.srcPath, 0, 1)
-        self.nFrames = self.stream.nFrames - 1
+        self.stream = VStream(self.params.src_path, 0, 1)
+        self.n_frames = self.stream.nFrames - 1
         
-        self._setDisplay()
-        self._setDisplayMax()
-        self._updateImgProvider()
+        self._set_display()
+        self._set_display_max()
+        self._update_img_provider()
+
 
 class CalibrationIface(PlayerInterface):
     """
@@ -190,139 +193,131 @@ class CalibrationIface(PlayerInterface):
     It uses the CameraCalibration class to compute the camera matrix from a set of images containing a
     chessboard pattern.
     """
-    def __init__(self, app, context, parent, params, displayName, providerName, timerSpeed=200):
-        PlayerInterface.__init__(self, app, context, parent, params, displayName, providerName, timerSpeed)
+    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=200):
+        PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
-        self.nColumns = 9
+        self.n_columns = 9
         self.nRows = 6
-        self.matrixType = 'normal'
+        self.matrix_type = 'normal'
         
-        self._setDisplay()
-        self._setDisplay()
+        self._set_display()
+        self._set_display()
 
     @pyqtSlot()
     def calibrate(self):
         """
         Compute the camera matrix 
         """
-        self.calib = CameraCalibration(self.nColumns, self.nRows)
-        self.calib.calibrate(self.srcFolder)
+        self.calib = CameraCalibration(self.n_columns, self.nRows)
+        self.calib.calibrate(self.src_folder)
         self.params.calib = self.calib
         
-        self.nFrames = len(self.calib.srcImgs)
+        self.n_frames = len(self.calib.src_imgs)
         
-        self.stream = ImageListVideoStream(self.calib.srcImgs)
-        self._setDisplay()
-        self._setDisplayMax()
+        self.stream = ImageListVideoStream(self.calib.src_imgs)
+        self._set_display()
+        self._set_display_max()
         
-        self._updateImgProvider()
+        self._update_img_provider()
 
     @pyqtSlot(result=QVariant)
-    def getNRows(self):
+    def get_n_rows(self):
         """
         Get the number of inner rows in the chessboard pattern
         """
         return self.nRows
 
     @pyqtSlot(QVariant)
-    def setNRows(self, nRows):
-        """
-        Set the number of inner rows in the chessboard pattern
-        """
-        self.nRows = int(nRows)
+    def set_n_rows(self, n_rows):
+        """Set the number of inner rows in the chessboard pattern"""
+        self.nRows = int(n_rows)
 
     @pyqtSlot(result=QVariant)
-    def getNColumns(self):
-        """
-        Get the number of inner columns in the chessboard pattern
-        """
-        return self.nColumns
+    def get_n_columns(self):
+        """Get the number of inner columns in the chessboard pattern"""
+        return self.n_columns
 
     @pyqtSlot(QVariant)
-    def setNColumns(self, nColumns):
-        """
-        Set the number of inner rows in the chessboard pattern
-        """
-        self.nColumns = int(nColumns)
+    def set_n_columns(self, n_columns):
+        """Set the number of inner rows in the chessboard pattern"""
+        self.n_columns = int(n_columns)
 
     @pyqtSlot(result=QVariant)
-    def getFolderPath(self):
-        """
-        Get the path to the folder where the images with the pattern are stored
-        """
+    def get_folder_path(self):
+        """Get the path to the folder where the images with the pattern are stored"""
         diag = QFileDialog()
-        srcFolder = diag.getExistingDirectory(parent=diag, caption="Chose directory",
-                                            directory=os.getenv('HOME'))
-        self.srcFolder = srcFolder
-        return srcFolder
+        src_folder = diag.getExistingDirectory(parent=diag, caption="Chose directory", directory=os.getenv('HOME'))
+        self.src_folder = src_folder
+        return src_folder
 
     @pyqtSlot(QVariant)
-    def setMatrixType(self, matrixType):
+    def set_matrix_type(self, matrix_type):
         """
         Set the matrix type to be saved. Resolution independant (normal) or dependant (optimized)
         
-        :param string matrixType: The type of matrix to be saved. One of ['normal', 'optimized']
+        :param string matrix_type: The type of matrix to be saved. One of ['normal', 'optimized']
         """
-        matrixType = matrixType.lower()
-        if matrixType not in ['normal', 'optimized']:
-            raise KeyError("Expected one of ['normal', 'optimized'], got {}".format(matrixType))
+        matrix_type = matrix_type.lower()
+        if matrix_type not in ['normal', 'optimized']:
+            raise KeyError("Expected one of ['normal', 'optimized'], got {}".format(matrix_type))
         else:
-            self.matrixType = matrixType
+            self.matrix_type = matrix_type
 
     @pyqtSlot()
-    def saveCameraMatrix(self):
+    def save_camera_matrix(self):
         """
         Save the camera matrix selected as self.matrixType
         """
         diag = QFileDialog()
-        destPath = diag.getSaveFileName(parent=diag,
+        dest_path = diag.getSaveFileName(parent=diag,
                                     caption='Save matrix',
                                     directory=os.getenv('HOME'), 
                                     filter='Numpy (.npy)')
-        destPath = destPath[0]
-        if destPath:
-            if self.matrixType == 'normal':
-                np.save(destPath, self.cameraMatrix)
-            elif self.matrixType == 'optimized':
-                np.save(destPath, self.optimalCameraMatrix)
+        dest_path = dest_path[0]
+        if dest_path:
+            if self.matrix_type == 'normal':
+                np.save(dest_path, self.cameraMatrix)
+            elif self.matrix_type == 'optimized':
+                np.save(dest_path, self.optimalCameraMatrix)
 
     @pyqtSlot(QVariant)
-    def setFrameType(self, frameType):
+    def set_frame_type(self, frame_type):
         """
         Selects the type of frame to be displayed. (Before, during or after distortion correction)
         
-        :param string frameType: The selected frame type. One of ['source', 'detected', 'corrected']
+        :param string frame_type: The selected frame type. One of ['source', 'detected', 'corrected']
         """
-        frameType = frameType.lower()
-        currentIndex = self.stream.currentFrameIdx
-        if frameType == "source":
-            imgs = self.calib.srcImgs
-        elif frameType == "detected":
-            imgs = self.calib.detectedImgs
-        elif frameType == "corrected":
-            imgs = self.calib.correctedImgs
+        frame_type = frame_type.lower()
+        current_index = self.stream.current_frame_idx
+        if frame_type == "source":
+            imgs = self.calib.src_imgs
+        elif frame_type == "detected":
+            imgs = self.calib.detected_imgs
+        elif frame_type == "corrected":
+            imgs = self.calib.corrected_imgs
         else:
-            raise KeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frameType))
+            raise KeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frame_type))
         self.stream = ImageListVideoStream(imgs)
-        self._updateImgProvider()
-        self.stream.currentFrameIdx = self._validateFrameIdx(currentIndex -1) # reset to previous position
-        self.getImg()
+        self._update_img_provider()
+        self.stream.current_frame_idx = self._validate_frame_idx(current_index - 1) # reset to previous position
+        self.get_img()
+
 
 class TrackerIface(BaseInterface):
     """
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker object of the tracking module.
     """
-    def __init__(self, app, context, parent, params, displayName, providerName, analysisProvider1, analysisProvider2):
-        BaseInterface.__init__(self, app, context, parent, params, displayName, providerName)
+    def __init__(self, app, context, parent, params, display_name, provider_name, analysis_provider_1, analysis_provider_2):
+        BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
         
         self.positions = []
         self.roi = None
-        self.analysisImageProvider = analysisProvider1
-        self.analysisImageProvider2 = analysisProvider2
+        self.analysis_image_provider = analysis_provider_1
+        self.analysisImageProvider2 = analysis_provider_2
 
     @pyqtSlot(QVariant, result=QVariant)
-    def getRow(self, idx):
+    def get_row(self, idx):
         """
         Get the data (position and distancesFromArena) at row idx
         
@@ -330,7 +325,7 @@ class TrackerIface(BaseInterface):
         """
         idx = int(idx)
         if 0 <= idx < len(self.positions):
-            row = [idx] + list(self.positions[idx]) + list(self.distancesFromArena[idx])
+            row = [idx] + list(self.positions[idx]) + list(self.distances_from_arena[idx])
             return [str(e) for e in row]
         else:
             return -1
@@ -341,50 +336,50 @@ class TrackerIface(BaseInterface):
         Load the video and create the GuiTracker object
         Also registers the analysis image providers (for the analysis tab) with QT
         """
-        self.tracker = GuiTracker(self, srcFilePath=self.params.srcPath, destFilePath=None,
-                                nBackgroundFrames=1, plot=True,
-                                fast=False, cameraCalibration=self.params.calib,
-                                callback=None)
-        self.stream = self.tracker # To comply with BaseInterface
+        self.tracker = GuiTracker(self, src_file_path=self.params.src_path, dest_file_path=None,
+                                  n_background_frames=1, plot=True,
+                                  fast=False, camera_calibration=self.params.calib,
+                                  callback=None)
+        self.stream = self.tracker  # To comply with BaseInterface
         self.tracker.roi = self.roi
 
-        self.nFrames = self.tracker._stream.nFrames - 1
-        self.currentFrameIdx = self.tracker._stream.currentFrameIdx
+        self.n_frames = self.tracker._stream.nFrames - 1
+        self.current_frame_idx = self.tracker._stream.currentFrameIdx
         
-        if self.params.endFrameIdx == -1:
-            self.params.endFrameIdx = self.nFrames
+        if self.params.end_frame_idx == -1:
+            self.params.end_frame_idx = self.n_frames
         
-        self._setDisplay()
-        self._setDisplayMax()
-        self._updateImgProvider()
+        self._set_display()
+        self._set_display_max()
+        self._update_img_provider()
 
     @pyqtSlot()
     def start(self):
         """
         Start the tracking of the loaded video with the parameters from self.params
         """
-        self.positions = [] # reset between runs
-        self.distancesFromArena = []
+        self.positions = []  # reset between runs
+        self.distances_from_arena = []
         
         self.tracker._stream.bgStartFrame = self.params.bgFrameIdx
-        nBackgroundFrames = self.params.nBgFrames
-        self.tracker._stream.bgEndFrame = self.params.bgFrameIdx + nBackgroundFrames - 1
-        self.tracker.trackFrom = self.params.startFrameIdx
-        self.tracker.trackTo = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
+        n_background_frames = self.params.nBgFrames
+        self.tracker._stream.bgEndFrame = self.params.bgFrameIdx + n_background_frames - 1
+        self.tracker.track_from = self.params.startFrameIdx
+        self.tracker.track_to = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
         
         self.tracker.threshold = self.params.detectionThreshold
-        self.tracker.minArea = self.params.objectsMinArea
-        self.tracker.maxArea = self.params.objectsMaxArea
-        self.tracker.teleportationThreshold = self.params.teleportationThreshold
+        self.tracker.min_area = self.params.objectsMinArea
+        self.tracker.max_area = self.params.objectsMaxArea
+        self.tracker.teleportation_threshold = self.params.teleportationThreshold
         
-        self.tracker.nSds = self.params.nSds
-        self.tracker.clearBorders = self.params.clearBorders
+        self.tracker.n_sds = self.params.nSds
+        self.tracker.clear_borders = self.params.clearBorders
         self.tracker.normalise = self.params.normalise
-        self.tracker.extractArena = self.params.extractArena
+        self.tracker.extract_arena = self.params.extractArena
         
-        self.tracker.setRoi(self.roi)
+        self.tracker.set_roi(self.roi)
             
-        self.timer.start(self.timerSpeed)
+        self.timer.start(self.timer_speed)
 
     @pyqtSlot()
     def stop(self):
@@ -400,10 +395,10 @@ class TrackerIface(BaseInterface):
         :param string msg: The message to print upon stoping
         """
         self.timer.stop()
-        self.tracker._stream.stopRecording(msg)
+        self.tracker._stream.stop_recording(msg)
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
-    def setRoi(self, width, height, x, y, diameter):
+    def set_roi(self, width, height, x, y, diameter):
         """
         Sets the ROI (in which to check for the specimen) from the one drawn in QT
         Scaling is applied to match the (resolution difference) between the representation 
@@ -417,39 +412,39 @@ class TrackerIface(BaseInterface):
         :param diameter: The diameter of the ROI
         """
         if hasattr(self, 'tracker'):
-            streamWidth, streamHeight = self.tracker._stream.size # flipped for openCV
-            horizontalScalingFactor = streamWidth / width
-            verticalScalingFactor = streamHeight / height
+            stream_width, stream_height = self.tracker._stream.size # flipped for openCV
+            horizontal_scaling_factor = stream_width / width
+            vertical_scaling_factor = stream_height / height
             
             radius = diameter / 2.0
-            scaledX = (x + radius) * horizontalScalingFactor
-            scaledY = (y + radius) * verticalScalingFactor
-            scaledRadius = radius * horizontalScalingFactor
+            scaled_x = (x + radius) * horizontal_scaling_factor
+            scaled_y = (y + radius) * vertical_scaling_factor
+            scaled_radius = radius * horizontal_scaling_factor
             
-            self.roi = Circle((scaledX, scaledY), scaledRadius)
+            self.roi = Circle((scaled_x, scaled_y), scaled_radius)
 
     @pyqtSlot()
-    def removeRoi(self):
+    def remove_roi(self):
         self.roi = None
 
     @pyqtSlot(QVariant)
-    def save(self, defaultDest):
+    def save(self, default_dest):
         """
         Save the data (positions and distancesFromArena) as a csv style file
         """
         diag = QFileDialog()
-        if defaultDest:
-            defaultDest = os.path.splitext(defaultDest)[0] + '.csv'
+        if default_dest:
+            default_dest = os.path.splitext(default_dest)[0] + '.csv'
         else:
-            defaultDest = os.getenv('HOME')
-        destPath = diag.getSaveFileName(parent=diag,
-                                    caption='Save file',
-                                    directory=defaultDest,
-                                    filter="Text (*.txt *.dat *.csv)", 
-                                    initialFilter="Text (*.csv)")
-        destPath = destPath[0]
-        if destPath:
-            self.write(destPath)
+            default_dest = os.getenv('HOME')
+        dest_path = diag.getSaveFileName(parent=diag,
+                                        caption='Save file',
+                                        directory=default_dest,
+                                        filter="Text (*.txt *.dat *.csv)",
+                                        initialFilter="Text (*.csv)")
+        dest_path = dest_path[0]
+        if dest_path:
+            self.write(dest_path)
     
     def write(self, dest):
         """
@@ -461,57 +456,58 @@ class TrackerIface(BaseInterface):
                 writer.writerow([fid]+list(row))
 
     @pyqtSlot(QVariant)
-    def setFrameType(self, outputType):
+    def set_frame_type(self, output_type):
         """
         Set the type of frame to display. (As source, difference with background or binary mask)
         
-        :param string outputType: The type of frame to display. One of ['Raw', 'Diff', 'Mask']
+        :param string output_type: The type of frame to display. One of ['Raw', 'Diff', 'Mask']
         """
-        self.outputType = outputType.lower()
+        self.output_type = output_type.lower()
 
     @pyqtSlot()
-    def analyseAngles(self):
+    def analyse_angles(self):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
         fig, ax = plt.subplots()
-        angles = video_analysis.getAngles(self.positions)
-        video_analysis.plotAngles(angles, self.getSamplingFreq())
-        self.analysisImageProvider._fig = fig
+        angles = video_analysis.get_angles(self.positions)
+        video_analysis.plot_angles(angles, self.get_sampling_freq())
+        self.analysis_image_provider._fig = fig
 
     @pyqtSlot()
-    def analyseDistances(self):
+    def analyse_distances(self):
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
         fig, ax = plt.subplots()
-        distances = video_analysis.posToDistances(self.positions)
-        video_analysis.plotDistances(distances, self.getSamplingFreq())
+        distances = video_analysis.pos_to_distances(self.positions)
+        video_analysis.plot_distances(distances, self.get_sampling_freq())
         self.analysisImageProvider2._fig = fig
 
     @pyqtSlot()
-    def saveAnglesFig(self):
+    def save_angles_fig(self):
         """
         Save the graph as a png or jpeg image
         """
         diag = QFileDialog()
-        destPath = diag.getSaveFileName(parent=diag,
+        dest_path = diag.getSaveFileName(parent=diag,
                                     caption='Save file',
                                     directory=os.getenv('HOME'), 
                                     filter="Image (*.png *.jpg)")
-        destPath = destPath[0]
-        if destPath:
-            imsave(destPath, self.analysisImageProvider.getArray())
+        dest_path = dest_path[0]
+        if dest_path:
+            imsave(dest_path, self.analysis_image_provider.getArray())
 
-    def getSamplingFreq(self):
+    def get_sampling_freq(self):
         return self.tracker._stream.fps
 
-    def getImg(self):
-        if self.tracker._stream.currentFrameIdx < self.nFrames:
+    def get_img(self):
+        if self.tracker._stream.currentFrameIdx < self.n_frames:
             self.display.reload()
-            self._updateDisplayIdx()
+            self._update_display_idx()
         else:
             self._stop('End of recording reached')
+
 
 class RecorderIface(TrackerIface):
     """
@@ -522,7 +518,7 @@ class RecorderIface(TrackerIface):
     """
 
     @pyqtSlot()
-    def load(self): # TODO: check if worth keeping
+    def load(self):  # TODO: check if worth keeping
         pass
         
     @pyqtSlot(result=QVariant)
@@ -534,55 +530,55 @@ class RecorderIface(TrackerIface):
         """
         if not hasattr(self.params, 'destPath'):
             return False
-        vidExt = os.path.splitext(self.params.destPath)[1]
-        if vidExt not in VIDEO_FORMATS:
-            print('Unknow format: {}'.format(vidExt))
+        vid_ext = os.path.splitext(self.params.destPath)[1]
+        if vid_ext not in VIDEO_FORMATS:
+            print('Unknow format: {}'.format(vid_ext))
             return False
         
-        self.positions = [] # reset between runs
-        self.distancesFromArena = []
+        self.positions = []  # reset between runs
+        self.distances_from_arena = []
         
-        bgStart = self.params.bgFrameIdx
-        nBackgroundFrames = self.params.nBgFrames
-        trackFrom = self.params.startFrameIdx
-        trackTo = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
+        bg_start = self.params.bgFrameIdx
+        n_background_frames = self.params.nBgFrames
+        track_from = self.params.startFrameIdx
+        track_to = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
         
         threshold = self.params.detectionThreshold
-        minArea = self.params.objectsMinArea
-        maxArea = self.params.objectsMaxArea
-        teleportationThreshold = self.params.teleportationThreshold
+        min_area = self.params.objectsMinArea
+        max_area = self.params.objectsMaxArea
+        teleportation_threshold = self.params.teleportationThreshold
         
-        nSds = self.params.nSds
-        clearBorders = self.params.clearBorders
+        n_sds = self.params.nSds
+        clear_borders = self.params.clearBorders
         normalise = self.params.normalise
-        extractArena = self.params.extractArena
+        extract_arena = self.params.extractArena
         
-        self.tracker = GuiTracker(self, srcFilePath=None, destFilePath=self.params.destPath,
-                                threshold=threshold, minArea=minArea, maxArea=maxArea,
-                                teleportationThreshold=teleportationThreshold,
-                                bgStart=bgStart, trackFrom=trackFrom, trackTo=trackTo,
-                                nBackgroundFrames=nBackgroundFrames, nSds=nSds,
-                                clearBorders=clearBorders, normalise=normalise,
-                                plot=True, fast=False, extractArena=extractArena,
-                                cameraCalibration=self.params.calib,
-                                callback=None)
-        self.stream = self.tracker # To comply with BaseInterface
-        self._setDisplay()
-        self._updateImgProvider()
+        self.tracker = GuiTracker(self, src_file_path=None, dest_file_path=self.params.destPath,
+                                  threshold=threshold, min_area=min_area, max_area=max_area,
+                                  teleportation_threshold=teleportation_threshold,
+                                  bg_start=bg_start, track_from=track_from, track_to=track_to,
+                                  n_background_frames=n_background_frames, n_sds=n_sds,
+                                  clear_borders=clear_borders, normalise=normalise,
+                                  plot=True, fast=False, extract_arena=extract_arena,
+                                  camera_calibration=self.params.calib,
+                                  callback=None)
+        self.stream = self.tracker  # to comply with BaseInterface
+        self._set_display()
+        self._update_img_provider()
         
-        self.tracker.setRoi(self.roi)
+        self.tracker.set_roi(self.roi)
         
-        self.timer.start(self.timerSpeed)
+        self.timer.start(self.timer_speed)
         return True
         
-    def getSamplingFreq(self):
+    def get_sampling_freq(self):
         """
         Return the sampling frequency (note this is a maximum and can be limited by a slower CPU)
         """
-        return 1.0 / (self.timerSpeed / 1000.0) # timer speed in ms
+        return 1.0 / (self.timer_speed / 1000.0)  # timer speed in ms
         
     @pyqtSlot(result=QVariant)
-    def camDetected(self):
+    def cam_detected(self):
         """
         Check if a camera is available
         """
@@ -593,8 +589,9 @@ class RecorderIface(TrackerIface):
         cap.release()
         return detected
 
-    def getImg(self):
+    def get_img(self):
         self.display.reload()
+
 
 class ParamsIface(QObject):
     """
@@ -608,32 +605,32 @@ class ParamsIface(QObject):
         :param parent: the parent window
         """
         QObject.__init__(self, parent)
-        self.app = app # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
+        self.app = app  # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
         self.win = parent
         self.ctx = context
-        self._setDefaults()
+        self._set_defaults()
         
         self.calib = None
 
-    def _setDefaults(self):
+    def _set_defaults(self):
         """
         Reset the parameters to default.
         To customise the defaults, users should do this here.
         """
-        self.bgFrameIdx = 5
-        self.nBgFrames = 1
-        self.startFrameIdx = self.bgFrameIdx + self.nBgFrames
-        self.endFrameIdx = -1
+        self.bg_frame_idx = 5
+        self.n_bg_frames = 1
+        self.start_frame_idx = self.bg_frame_idx + self.n_bg_frames
+        self.end_frame_idx = -1
         
-        self.detectionThreshold = 50
-        self.objectsMinArea = 100
-        self.objectsMaxArea = 5000
-        self.teleportationThreshold = 10000
-        self.nSds = 5.0
+        self.detection_threshold = 50
+        self.objects_min_area = 100
+        self.objects_max_area = 5000
+        self.teleportation_threshold = 10000
+        self.n_sds = 5.0
         
-        self.clearBorders = False
+        self.clear_borders = False
         self.normalise = False
-        self.extractArena = False
+        self.extract_arena = False
 
     def __del__(self):
         """
@@ -642,151 +639,151 @@ class ParamsIface(QObject):
         sys.stdout = sys.__stdout__
 
     @pyqtSlot()
-    def chgCursor(self):
+    def chg_cursor(self):
         self.app.setOverrideCursor(Qt.CursorShape(Qt.CrossCursor))
 
     @pyqtSlot()
-    def restoreCursor(self):
+    def restore_cursor(self):
         self.app.restoreOverrideCursor()
     
     # BOOLEAN OPTIONS
     @pyqtSlot(bool)
-    def setClearBorders(self, status):
-        self.clearBorders = bool(status)
+    def set_clear_borders(self, status):
+        self.clear_borders = bool(status)
 
     @pyqtSlot(result=bool)
-    def getClearBorders(self):
-        return self.clearBorders
+    def get_clear_borders(self):
+        return self.clear_borders
 
     @pyqtSlot(bool)
-    def setNormalise(self, status):
+    def set_normalise(self, status):
         self.normalise = bool(status)
 
     @pyqtSlot(result=bool)
-    def getNormalise(self):
+    def get_normalise(self):
         return self.normalise
 
     @pyqtSlot(bool)
-    def setExtractArena(self, status):
-        self.extractArena = bool(status)
+    def set_extract_arena(self, status):
+        self.extract_arena = bool(status)
 
     @pyqtSlot(result=bool)
-    def getExtractArena(self):
-        return self.extractArena
+    def get_extract_arena(self):
+        return self.extract_arena
 
-    # DETECTION OPTIONS
+    # Detection options
     @pyqtSlot(result=QVariant)
-    def getDetectionThreshold(self):
-        return self.detectionThreshold
+    def get_detection_threshold(self):
+        return self.detection_threshold
 
     @pyqtSlot(QVariant)
-    def setDetectionThreshold(self, threshold):
+    def set_detection_threshold(self, threshold):
         thrsh = int(threshold)
         if 0 < thrsh < 256:
-            self.detectionThreshold = thrsh
+            self.detection_threshold = thrsh
 
     @pyqtSlot(result=QVariant)
-    def getMinArea(self):
-        return self.objectsMinArea
+    def get_min_area(self):
+        return self.objects_min_area
 
     @pyqtSlot(QVariant)
-    def setMinArea(self, area):
+    def set_min_area(self, area):
         area = int(area)
         if area > 0:
-            self.objectsMinArea = area
+            self.objects_min_area = area
 
     @pyqtSlot(result=QVariant)
-    def getMaxArea(self):
-        return self.objectsMaxArea
+    def get_max_area(self):
+        return self.objects_max_area
 
     @pyqtSlot(QVariant)
-    def setMaxArea(self, area):
+    def set_max_area(self, area):
         area = int(area)
         if area > 0:
-            self.objectsMaxArea = area
+            self.objects_max_area = area
 
     @pyqtSlot(result=QVariant)
-    def getMaxMovement(self):
-        return self.teleportationThreshold
+    def get_max_movement(self):
+        return self.teleportation_threshold
 
     @pyqtSlot(QVariant)
-    def setMaxMovement(self, movement):
+    def set_max_movement(self, movement):
         mvmt = int(movement)
         if mvmt > 0:
-            self.teleportationThreshold = mvmt
+            self.teleportation_threshold = mvmt
 
     @pyqtSlot(result=QVariant)
-    def getNSds(self):
-        return self.nSds
+    def get_n_sds(self):
+        return self.n_sds
 
     @pyqtSlot(QVariant)
-    def setNSds(self, n):
-        nSds = int(n)
-        if nSds > 0:
-            self.nSds = nSds
+    def set_n_sds(self, n):
+        n_sds = int(n)
+        if n_sds > 0:
+            self.n_sds = n_sds
 
-    # FRAME OPTIONS
+    # Frame options
     @pyqtSlot(QVariant)
-    def setBgFrameIdx(self, idx):
+    def set_bg_frame_idx(self, idx):
         idx = int(idx)
         idx = idx if idx >= 0 else 0
-        maxIdx = self.startFrameIdx - self.nBgFrames
-        self.bgFrameIdx = min(idx, maxIdx)
+        max_idx = self.start_frame_idx - self.n_bg_frames
+        self.bg_frame_idx = min(idx, max_idx)
     
     @pyqtSlot(result=QVariant)
-    def getBgFrameIdx(self):
-        return self.bgFrameIdx
+    def get_bg_frame_idx(self):
+        return self.bg_frame_idx
 
     @pyqtSlot(QVariant)
-    def setNBgFrames(self, n):
-        self.nBgFrames = int(n)
+    def set_n_bg_frames(self, n):
+        self.n_bg_frames = int(n)
     
     @pyqtSlot(result=QVariant)
-    def getNBgFrames(self):
-        return self.nBgFrames
+    def get_n_bg_frames(self):
+        return self.n_bg_frames
 
     @pyqtSlot(QVariant)
-    def setStartFrameIdx(self, idx):
+    def set_start_frame_idx(self, idx):
         idx = int(idx)
-        minIdx = (self.bgFrameIdx + self.nBgFrames)
-        self.startFrameIdx = max(minIdx, idx)
+        min_idx = (self.bg_frame_idx + self.n_bg_frames)
+        self.start_frame_idx = max(min_idx, idx)
 
     @pyqtSlot(result=QVariant)
-    def getStartFrameIdx(self):
-        return self.startFrameIdx
+    def get_start_frame_idx(self):
+        return self.start_frame_idx
 
     @pyqtSlot(QVariant)
-    def setEndFrameIdx(self, idx):
+    def set_end_frame_idx(self, idx):
         idx = int(idx)
         if idx > 0:
-            if idx <= self.startFrameIdx:
-                idx = self.startFrameIdx + self.nBgFrames
+            if idx <= self.start_frame_idx:
+                idx = self.start_frame_idx + self.n_bg_frames
         else:
             idx = -1
-        self.endFrameIdx = idx
+        self.end_frame_idx = idx
 
     @pyqtSlot(result=QVariant)
-    def getEndFrameIdx(self):
-        return self.endFrameIdx
+    def get_end_frame_idx(self):
+        return self.end_frame_idx
 
     @pyqtSlot(result=QVariant)
-    def openVideo(self):
+    def open_video(self):
         """
         The QT dialog to select the video to be used for preview or tracking
         """
         diag = QFileDialog()
         path = diag.getOpenFileName(parent=diag,
                                     caption='Open file',
-                                    directory=os.getenv('HOME'), 
+                                    directory=os.getenv('HOME'),
                                     filter=VIDEO_FILTERS)
-        srcPath = path[0]
-        if srcPath:
-            self.srcPath = srcPath
-            self._setDefaults()
-            return srcPath
+        src_path = path[0]
+        if src_path:
+            self.src_path = src_path
+            self._set_defaults()
+            return src_path
 
     @pyqtSlot(QVariant, result=QVariant)
-    def setSavePath(self, path):
+    def set_save_path(self, path):
         """
         The QT dialog to select the path to save the recorded video
         """
@@ -794,29 +791,29 @@ class ParamsIface(QObject):
         if not path:
             path = diag.getSaveFileName(parent=diag,
                                         caption='Save file',
-                                        directory=os.getenv('HOME'), 
+                                        directory=os.getenv('HOME'),
                                         filter=VIDEO_FILTERS, 
                                         initialFilter="Videos (*.avi)")
-            destPath = path[0]
+            dest_path = path[0]
         else:
-            destPath = path if (os.path.splitext(path)[1] in VIDEO_FORMATS) else ""
-        if destPath:
-            self.destPath = destPath
-            return destPath
+            dest_path = path if (os.path.splitext(path)[1] in VIDEO_FORMATS) else ""
+        if dest_path:
+            self.dest_path = dest_path
+            return dest_path
 
     @pyqtSlot(result=QVariant)
-    def isPathSelected(self):
-        return hasattr(self, "srcPath")
+    def is_path_selected(self):
+        return hasattr(self, "src_path")
 
     @pyqtSlot(result=QVariant)
-    def getPath(self):
-        return self.srcPath if self.isPathSelected() else ""
+    def get_path(self):
+        return self.src_path if self.is_path_selected() else ""
 
     @pyqtSlot(result=QVariant)
-    def getFileName(self):
-        path = self.getPath()
+    def get_file_name(self):
+        path = self.get_path()
         return os.path.basename(path) if path else ""
     
     @pyqtSlot(result=QVariant)
-    def getDestPath(self):
-        return self.destPath if hasattr(self, "destPath") else ""
+    def get_dest_path(self):
+        return self.dest_path if hasattr(self, "dest_path") else ""

@@ -28,124 +28,123 @@ from pyper.contours.roi import Circle
 
 isPi = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
+
 class Viewer(object):
     """
     A viewer class, a form of simplified Tracker for display purposes
     It can be used to retrieve some parameters of the video or just display
     """
-    def __init__(self, srcFilePath=None, bgStart=0, nBackgroundFrames=1, delay=5):
+    def __init__(self, src_file_path=None, bg_start=0, n_background_frames=1, delay=5):
         """
-        :param str srcFilePath: The source file path to read from (camera if None)
-        :param int bgStart: The frame to use as first background frame
-        :param int nBackgroundFrames: The number of frames to use for the background\
+        :param str src_file_path: The source file path to read from (camera if None)
+        :param int bg_start: The frame to use as first background frame
+        :param int n_background_frames: The number of frames to use for the background\
         A number >1 means average
         :param int delay: The time in ms to wait between frames
         """
-        trackRangeParams = (bgStart, nBackgroundFrames)
-        if srcFilePath is None:
+        track_range_params = (bg_start, n_background_frames)
+        if src_file_path is None:
             if isPi:
-                self._stream = PiVideoStream(destFilePath, *trackRangeParams)
+                self._stream = PiVideoStream(destFilePath, *track_range_params)
             else:
-                self._stream = UsbVideoStream(destFilePath, *trackRangeParams)
+                self._stream = UsbVideoStream(destFilePath, *track_range_params)
         else:
-            self._stream = RecordedVideoStream(srcFilePath, *trackRangeParams)
+            self._stream = RecordedVideoStream(src_file_path, *track_range_params)
         self.delay = delay
         
     def view(self):
         """
-        Displays the recording to the user and returns 3 variables
-        bgFrame, trackStart, trackEnd that are set using the keys
-        'b', 's', and 'e' respectively
+        Displays the recording to the user and allows assignment of background frames, tracking start and end
         The user can stop by pressing 'q'
         
-        :return: (bgFrame, trackStart, trackEnd)
-        :rtype: (int, int, int)
+        :return int bg_frame: set using the 'b' key
+        :return int track_start: set using the 's' key
+        :return int track_end:set using the 'q' key
         """
-        isRecording = hasattr(self._stream, 'nFrames')
-        if isRecording:
-            widgets=['Video Progress: ', Percentage(), Bar()]
+        is_recording = hasattr(self._stream, 'nFrames')
+        if is_recording:
+            widgets = ['Video Progress: ', Percentage(), Bar()]
             pbar = ProgressBar(widgets=widgets, maxval=self._stream.nFrames).start()
-        bgFrame = trackStart = trackEnd = None
+        bg_frame = track_start = track_end = None
         while True:
             try:
                 frame = self._stream.read()
-                frameId = self._stream.currentFrameIdx
+                frame_id = self._stream.current_frame_idx
                 if frame.shape[2] == 1:
                     frame = np.dstack([frame]*3)
                 if not frame.dtype == np.uint8:
                     frame = frame.astype(np.uint8)
                 frame = frame.copy()
-                kbdCode = frame.display(win_name='Frame', text='Frame: {}'.format(frameId), delay=self.delay, get_code=True)
-                kbdCode = kbdCode if kbdCode==-1 else chr(kbdCode & 255)
-                if kbdCode == 'b': bgFrame = frameId
-                elif kbdCode == 's': trackStart = frameId
-                elif kbdCode == 'e': trackEnd = frameId
-                elif kbdCode == 'q':
+                kbd_code = frame.display(win_name='Frame', text='Frame: {}'.format(frame_id), delay=self.delay, get_code=True)
+                kbd_code = kbd_code if kbd_code == -1 else chr(kbd_code & 255)
+                if kbd_code == 'b': bg_frame = frame_id
+                elif kbd_code == 's': track_start = frame_id
+                elif kbd_code == 'e': track_end = frame_id
+                elif kbd_code == 'q':
                     break
                     
-                if (bgFrame is not None) and (trackStart is not None) and (trackEnd is not None):
+                if (bg_frame is not None) and (track_start is not None) and (track_end is not None):
                     break
-                if isRecording: pbar.update(frameId)
+                if is_recording: pbar.update(frame_id)
             except VideoStreamFrameException: pass
             except (KeyboardInterrupt, EOFError) as e:
-                if isRecording: pbar.finish()
+                if is_recording: pbar.finish()
                 msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
-                self._stream.stopRecording(msg)
+                self._stream.stop_recording(msg)
                 break
-        if trackEnd is None:
-            trackEnd = self._stream.currentFrameIdx
-        if bgFrame is None:
-            bgFrame = 0
+        if track_end is None:
+            track_end = self._stream.current_frame_idx
+        if bg_frame is None:
+            bg_frame = 0
         if __debug__:
-            print(bgFrame, trackStart, trackEnd)
-        return (bgFrame, trackStart, trackEnd)
+            print(bg_frame, track_start, track_end)
+        return bg_frame, track_start, track_end
         
-    def timeStrToFrameIdx(self, timeStr):
+    def time_str_to_frame_idx(self, time_str):
         """
         Returns the frame number that corresponds to that time.
         
-        :param str timeStr: A string of the form 'mm:ss'
+        :param str time_str: A string of the form 'mm:ss'
         :return Idx: The corresponding frame index
         :rtype: int
         """
-        return self._stream.timeStrToFrameIdx(timeStr)
+        return self._stream.timeStrToFrameIdx(time_str)
+
 
 class Tracker(object):
     """
     A tracker object to track a mouse in a video stream
     """
-    def __init__(self, srcFilePath=None, destFilePath=None, 
-                threshold=20, minArea=100, maxArea=5000,
-                teleportationThreshold=10,
-                bgStart=0, trackFrom=1, trackTo=None,
-                nBackgroundFrames=1, nSds=5.0,
-                clearBorders=False, normalise=False,
-                plot=False, fast=False, extractArena=False,
-                cameraCalibration=None,
-                callback=None):
+    def __init__(self, src_file_path=None, dest_file_path=None,
+                 threshold=20, min_area=100, max_area=5000,
+                 teleportation_threshold=10,
+                 bg_start=0, track_from=1, track_to=None,
+                 n_background_frames=1, n_sds=5.0,
+                 clear_borders=False, normalise=False,
+                 plot=False, fast=False, extract_arena=False,
+                 camera_calibration=None, callback=None):
         """
-        :param str srcFilePath: The source file path to read from (camera if None)
-        :param str destFilePath: The destinatiopn file path to save the video
+        :param str src_file_path: The source file path to read from (camera if None)
+        :param str dest_file_path: The destination file path to save the video
         :param int threshold: The numeric threshold for the masks (0<t<256)
-        :param int minArea: The minimum area in pixels to be considered a valid mouse
-        :param int minArea: The maximum area in pixels to be considered a valid mouse
-        :param teleportationThreshold: The maximum number of pixels the mouse can \
-        move in either dimesion (x,y) between 2 frames.
-        :param int bgStart: The frame to use as first background frame
-        :param int nBackgroundFrames: The number of frames to use for the background\
+        :param int min_area: The minimum area in pixels to be considered a valid mouse
+        :param teleportation_threshold: The maximum number of pixels the mouse can \
+        move in either dimension (x,y) between 2 frames.
+        :param int bg_start: The frame to use as first background frame
+        :param int n_background_frames: The number of frames to use for the background\
         A number >1 means average
-        :param int nSds: The number of standard deviations the signal has to be above\
+        :param int n_sds: The number of standard deviations the signal has to be above\
         to be considered above threshold. This option is not used if \
         nBackgroundFrames < 2
-        :param int trackFrom: The frame to start tracking from
-        :param int trackTo: The frame to stop tracking at
-        :param bool clearBorders: Whether to clear objects that touch the outer borders\
+        :param int track_from: The frame to start tracking from
+        :param int track_to: The frame to stop tracking at
+        :param bool clear_borders: Whether to clear objects that touch the outer borders\
         of the image.
         :param bool normalise: TODO
         :param bool plot: Whether to display the data during tracking:
         :param bool fast: Whether to skip some processing (e.g. frame denoising) for \
         the sake of acquisition speed.
-        :param bool extractArena: Whether to detect the arena (it should be brighter than\
+        :param bool extract_arena: Whether to detect the arena (it should be brighter than\
         the surrounding) from the background as an ROI.
         :param callback: The function to be executed upon finding the mouse in the ROI \
         during tracking.
@@ -153,39 +152,39 @@ class Tracker(object):
         """
 
         if callback is not None: self.callback = callback
-        trackRangeParams = (bgStart, nBackgroundFrames)
-        if srcFilePath is None:
+        track_range_params = (bg_start, n_background_frames)
+        if src_file_path is None:
             if isPi:
-                self._stream = PiVideoStream(destFilePath, *trackRangeParams)
+                self._stream = PiVideoStream(dest_file_path, *track_range_params)
             else:
-                self._stream = UsbVideoStream(destFilePath, *trackRangeParams)
+                self._stream = UsbVideoStream(dest_file_path, *track_range_params)
         else:
-            self._stream = RecordedVideoStream(srcFilePath, *trackRangeParams)
+            self._stream = RecordedVideoStream(src_file_path, *track_range_params)
         
         self.threshold = threshold
-        self.minArea = minArea
-        self.maxArea = maxArea
-        self.teleportationThreshold = teleportationThreshold
+        self.min_area = min_area
+        self.max_area = max_area
+        self.teleportation_threshold = teleportation_threshold
         
-        self.trackFrom = trackFrom
-        self.trackTo = trackTo
+        self.track_from = track_from
+        self.track_to = track_to
         
-        self.clearBorders = clearBorders
+        self.clear_borders = clear_borders
         self.normalise = normalise
         self.plot = plot
         self.fast = fast
-        self.extractArena = extractArena
+        self.extract_arena = extract_arena
         
-        self.nSds = nSds
+        self.n_sds = n_sds
         self.bg = None
-        self.bgStd = None
+        self.bg_std = None
         
-        self.cameraCalibration = cameraCalibration
+        self.camera_calibration = camera_calibration
         
-        self.defaultPos = (-1, -1)
+        self.default_pos = (-1, -1)
         self.positions = []
         
-    def _extractArena(self):
+    def _extract_arena(self):
         """
         Finds the arena in the current background frame and
         converts it to an roi object.
@@ -196,122 +195,121 @@ class Tracker(object):
         bg = self.bg.copy()
         bg = bg.astype(np.uint8)
         mask = bg.threshold(self.threshold)
-        cnt = self._getBiggestContour(mask)
+        cnt = self._get_biggest_contour(mask)
         arena = Circle(*cv2.minEnclosingCircle(cnt))
-        self.distancesFromArena = []
+        self.distances_from_arena = []
         return arena
         
-    def _makeBottomSquare(self):
+    def _make_bottom_square(self):
         """
         Creates a set of diagonaly opposed points to use as the corners
         of the square displayed by the default callback method.
         """
-        bottomRightPt = self._stream.size
-        topLeftPt = tuple([p-50 for p in bottomRightPt])
-        self.bottomSquare = (topLeftPt, bottomRightPt)
+        bottom_right_pt = self._stream.size
+        top_left_pt = tuple([p-50 for p in bottom_right_pt])
+        self.bottom_square = (top_left_pt, bottom_right_pt)
         
-    def track(self, roi=None, checkFps=False, record=False, reset=True):
-        """
-        | The main function.
-        | Loops until the end of the recording (ctrl+c if acquiring).
+    def track(self, roi=None, check_fps=False, record=False, reset=True):
+        """The main function. Loops until the end of the recording (ctrl+c if acquiring).
         
         :param roi: optional roi e.g. Circle((250, 350), 25)
-        :type roi: roi subclass
-        :param bool checkFps: Whether to print the current frame per second processing speed
+        :type roi: roi sub-class
+        :param bool check_fps: Whether to print the current frame per second processing speed
         :param bool record: Whether to save the frames being processed
         :param bool reset: whether to reset the recording (restart the background and arena ...).\
         If this parameter is False, the recording will continue from the previous frame.
         
-        :returns: the list of positions
-        :rtype: list
+        :returns list positions:
         """
         self.roi = roi
         if roi is not None:
-            self._makeBottomSquare()
+            self._make_bottom_square()
         
-        isRecording = type(self._stream) == RecordedVideoStream
-        self.bg = None # reset for each track
-        if isRecording:
-            widgets=['Tracking frames: ', Percentage(), Bar()]
+        is_recording = type(self._stream) == RecordedVideoStream
+        self.bg = None  # reset for each track
+        if is_recording:
+            widgets = ['Tracking frames: ', Percentage(), Bar()]
             pbar = ProgressBar(widgets=widgets, maxval=self._stream.nFrames).start()
         elif isPi:
             self._stream.restartRecording(reset)
 
-        if checkFps: prevTime = time()
+        if check_fps: prev_time = time()
         while True:
             try:
-                if checkFps: prevTime = self._checkFps(prevTime)
+                if check_fps: prev_time = self._check_fps(prev_time)
                 frame = self._stream.read()
-                if self.cameraCalibration is not None:
-                    frame = self.cameraCalibration.remap(frame)
-                fid = self._stream.currentFrameIdx
-                if self.trackTo and (fid > self.trackTo):
-                    raise KeyboardInterrupt # stop recording
+                if self.camera_calibration is not None:
+                    frame = self.camera_calibration.remap(frame)
+                fid = self._stream.current_frame_idx
+                if self.track_to and (fid > self.track_to):
+                    raise KeyboardInterrupt  # stop recording
                     
-                if fid < self._stream.bgStartFrame:
-                    continue # Skip junk frames
-                elif self._stream.isBgFrame():
-                    self._buildBg(frame)
-                elif self._stream.bgEndFrame < fid < self.trackFrom:
-                    continue # Skip junk frames
-                else: # Tracked frame
-                    if fid == self.trackFrom: self._finaliseBg()
-                    sil = self._trackFrame(frame)
+                if fid < self._stream.bg_start_frame:
+                    continue  # Skip junk frames
+                elif self._stream.is_bg_frame():
+                    self._build_bg(frame)
+                elif self._stream.bg_end_frame < fid < self.track_from:
+                    continue  # Skip junk frames
+                else:  # Tracked frame
+                    if fid == self.track_from: self._finalise_bg()
+                    sil = self._track_frame(frame)
                     if sil is None:
-                        continue # Skip if no contour found
+                        continue  # Skip if no contour found
                     else:
                         self.silhouette = sil.copy()
-                    if self.roi is not None: self._checkMouseInRoi()
+                    if self.roi is not None: self._check_mouse_in_roi()
                     if self.plot: self._plot()
                     if record: self._stream._save(self.silhouette)
-                if isRecording: pbar.update(self._stream.currentFrameIdx)
+                if is_recording: pbar.update(self._stream.current_frame_idx)
             except VideoStreamFrameException as e:
                 print('Error with video_stream at frame {}: \n{}'.format(fid, e))
             except (KeyboardInterrupt, EOFError) as e:
-                if isRecording: pbar.finish()
+                if is_recording: pbar.finish()
                 msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
-                self._stream.stopRecording(msg)
+                self._stream.stop_recording(msg)
                 return self.positions
                 
-    def _lastPosIsDefault(self):
-        lastPos = tuple(self.positions[-1])
-        if lastPos == self.defaultPos:
+    def _last_pos_is_default(self):
+        last_pos = tuple(self.positions[-1])
+        if last_pos == self.default_pos:
             return True
         else:
             return False
 
-    def _checkMouseInRoi(self):
+    def _check_mouse_in_roi(self):
         """
         Checks whether the mouse is within the specified ROI and
         calls the specified callback method if so.
         """
-        if self._lastPosIsDefault():
+        if self._last_pos_is_default():
             return
-        if self.roi.pointInRoi(self.positions[-1]):
+        if self.roi.point_in_roi(self.positions[-1]):
             self.callback()
             self.silhouette = self.silhouette.copy()
             
-    def _getDistanceFromArenaBorder(self):
-        if self._lastPosIsDefault():
+    def _get_distance_from_arena_border(self):
+        if self._last_pos_is_default():
             return
-        if self.extractArena:
-            lastPos = tuple(self.positions[-1])
-            return self.arena.distFromBorder(lastPos)
+        if self.extract_arena:
+            last_pos = tuple(self.positions[-1])
+            return self.arena.dist_from_border(last_pos)
             
-    def _getDistanceFromArenaCenter(self):
-        if self._lastPosIsDefault():
+    def _get_distance_from_arena_center(self):
+        if self._last_pos_is_default():
             return
-        if self.extractArena:
-            lastPos = tuple(self.positions[-1])
-            return self.arena.distFromCenter(lastPos)
+        if self.extract_arena:
+            last_pos = tuple(self.positions[-1])
+            return self.arena.dist_from_center(last_pos)
             
-    def paint(self, frame, roiColor='y', arenaColor='m'):
+    def paint(self, frame, roi_color='y', arena_color='m'):
         if self.roi is not None:
-            roiContour = ObjectContour(self.roi.points, frame, contourType='raw', color=roiColor, lineThickness=2)
-            roiContour.draw()
-        if self.extractArena:
-            arenaContour = ObjectContour(self.arena.points, frame, contourType='raw', color=arenaColor, lineThickness=2)
-            arenaContour.draw()
+            roi_contour = ObjectContour(self.roi.points, frame, contour_type='raw',
+                                        color=roi_color, line_thickness=2)
+            roi_contour.draw()
+        if self.extract_arena:
+            arena_contour = ObjectContour(self.arena.points, frame, contour_type='raw',
+                                          color=arena_color, line_thickness=2)
+            arena_contour.draw()
 
     def _plot(self):
         """
@@ -320,16 +318,16 @@ class Tracker(object):
         """
         sil = self.silhouette
         self.paint(sil)
-        sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.currentFrameIdx), curve=self.positions)
+        sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.current_frame_idx), curve=self.positions)
 
     def callback(self):
         """
         The method called when the mouse is found in the roi.
         This method is meant to be overwritten in subclasses of Tracker.
         """
-        cv2.rectangle(self.silhouette, self.bottomSquare[0], self.bottomSquare[1], (0, 255, 255), -1)
+        cv2.rectangle(self.silhouette, self.bottom_square[0], self.bottom_square[1], (0, 255, 255), -1)
 
-    def _buildBg(self, frame):
+    def _build_bg(self, frame):
         """
         Initialise the background if empty, expand otherwise.
         Will also initialise the arena roi if the option is selected
@@ -344,95 +342,97 @@ class Tracker(object):
             self.bg = bg
         else:
             self.bg = Frame(np.dstack((self.bg, bg)))
-        if self.extractArena:
-            self.arena = self._extractArena()
+        if self.extract_arena:
+            self.arena = self._extract_arena()
                 
-    def _finaliseBg(self):
+    def _finalise_bg(self):
         """
         Finalise the background (average stack and compute SD if more than one image)
         """
         if self.bg.ndim > 2:
-            self.bgStd = np.std(self.bg, axis=2)
+            self.bg_std = np.std(self.bg, axis=2)
             self.bg = np.average(self.bg, axis=2)
         if self.normalise:
-            self.bgAvgAvg = self.bg.mean()# TODO: rename
+            self.bg_avg_avg = self.bg.mean()  # TODO: rename
     
-    def _trackFrame(self, frame, requestedColor='r', requestedOutput='raw'):
+    def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
         Get the position of the mouse in frame and append to self.positions
         Returns the mask of the current frame with the mouse potentially drawn
         
         :param frame: The video frame to use.
         :type: video_frame.Frame
-        :param str requestedColor: A character (for list of supported charaters see ObjectContour) idicating the color to draw the contour
-        :param str requestedOutput: Which frame type to output (one of ['raw', 'mask', 'diff'])
+        :param str requested_color: A character (for list of supported charaters see ObjectContour) idicating the color to draw the contour
+        :param str requested_output: Which frame type to output (one of ['raw', 'mask', 'diff'])
         :returns: silhouette
         :rtype: binary mask or None
         """
-        treatedFrame = frame.gray()
+        treated_frame = frame.gray()
         fast = self.fast
         if not isPi and not fast:
-            treatedFrame = treatedFrame.denoise().blur()
-        silhouette, diff = self._getSilhouette(treatedFrame)
+            treated_frame = treated_frame.denoise().blur()
+        silhouette, diff = self._get_silhouette(treated_frame)
         
-        biggestContour = self._getBiggestContour(silhouette)
+        biggest_contour = self._get_biggest_contour(silhouette)
         
-        plotSilhouette = None
+        plot_silhouette = None
         if fast:
-            requestedOutput = 'mask'
-        self.positions.append(self.defaultPos)
-        if biggestContour is not None:
-            area = cv2.contourArea(biggestContour)
-            if self.minArea < area < self.maxArea:
+            requested_output = 'mask'
+        self.positions.append(self.default_pos)
+        if biggest_contour is not None:
+            area = cv2.contourArea(biggest_contour)
+            if self.min_area < area < self.max_area:
                 if self.plot:
-                    if requestedOutput == 'raw':
-                        plotSilhouette = (frame.color()).copy()
-                        color = requestedColor
-                    elif requestedOutput == 'mask':
-                        plotSilhouette = silhouette.copy()
+                    if requested_output == 'raw':
+                        plot_silhouette = (frame.color()).copy()
+                        color = requested_color
+                    elif requested_output == 'mask':
+                        plot_silhouette = silhouette.copy()
                         color = 'w'
-                    elif requestedOutput == 'diff':
-                        plotSilhouette = (diff.color()).copy()
-                        color = requestedColor
+                    elif requested_output == 'diff':
+                        plot_silhouette = (diff.color()).copy()
+                        color = requested_color
                     else:
-                        raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] for requestedOutput, got: {}".format(requestedOutput))
+                        raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
+                                                  "for requestedOutput, got: {}".format(requested_output))
                 else:
                     color = 'w'
-                mouse = ObjectContour(biggestContour, plotSilhouette, contourType='raw', color=color)
-                if plotSilhouette is not None:
+                mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
+                if plot_silhouette is not None:
                     mouse.draw()
                 self.positions[-1] = mouse.centre
             else:
-                if area > self.maxArea:
+                if area > self.max_area:
                     if not fast:
-                        print('Frame: {}, found something too big in the arena ({} > {})'.format(
-                        self._stream.currentFrameIdx, area, self.maxArea))
+                        print('Frame: {}, found something too big in the arena ({} > {})'
+                              ''.format(self._stream.current_frame_idx, area, self.max_area))
                 else:
                     if not fast:
-                        print('Frame: {}, biggest structure too small ({} < {})'.format(
-                        self._stream.currentFrameIdx, area, self.minArea))
+                        print('Frame: {}, biggest structure too small ({} < {})'
+                              ''.format(self._stream.current_frame_idx, area, self.min_area))
                 return None
         else:
-            print('Frame {}, no contour found'.format(self._stream.currentFrameIdx))
+            print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
             return None
-        self._checkTeleportation(frame, silhouette)
-        return plotSilhouette if plotSilhouette is not None else silhouette
-        
-    def _checkFps(self, prevTime):
+        self._check_teleportation(frame, silhouette)
+        return plot_silhouette if plot_silhouette is not None else silhouette
+
+    @staticmethod
+    def _check_fps(prev_time):
         """
         Prints the number of frames per second
         using the time elapsed since prevTime.
         
-        :param prevTime: 
-        :type prevTime: time object
+        :param prev_time:
+        :type prev_time: time object
         :returns: The new time
         :rtype: time object
         """
-        fps = 1/(time()-prevTime)
+        fps = 1/(time() - prev_time)
         print("{} fps".format(fps))
         return time()
         
-    def _checkTeleportation(self, frame, silhouette):
+    def _check_teleportation(self, frame, silhouette):
         """
         Check if the mouse moved too much, which would indicate an issue with the tracking
         notably the fitting in the past. If so, call self._stream.stopRecording() and raise
@@ -448,15 +448,17 @@ class Tracker(object):
         if len(self.positions) < 2:
             return
         lastVector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
-        if (lastVector > self.teleportationThreshold).any():
+        if (lastVector > self.teleportation_threshold).any():
             silhouette.save('teleportingSilhouette.tif')
             frame.save('teleportingFrame.tif')
-            errMsg = 'Frame: {}, mouse teleported from {} to {}'.format(self._stream.currentFrameIdx, *self.positions[-2:])
-            errMsg += '\nPlease see teleportingSilhouette.tif and teleportingFrame.tif for debuging'
-            self._stream.stopRecording(errMsg)
+            errMsg = 'Frame: {}, mouse teleported from {} to {}' \
+                     ''.format(self._stream.current_frame_idx, *self.positions[-2:])
+            errMsg += '\nPlease see teleportingSilhouette.tif and teleportingFrame.tif for debugging'
+            self._stream.stop_recording(errMsg)
             raise EOFError('End of recording reached')
-            
-    def _getBiggestContour(self, silhouette):
+
+    @staticmethod
+    def _get_biggest_contour(silhouette):
         """
         We need to rerun if too many contours are found as it should means
         that the findContours function returned nonsense.
@@ -467,13 +469,13 @@ class Tracker(object):
         :return: The contours and the biggest contour from the mask (None, None) if no contour found
         """
         contours, hierarchy = cv2.findContours(np.copy(silhouette),
-                                                mode=cv2.RETR_LIST, 
-                                                method=cv2.CHAIN_APPROX_NONE) # TODO: check if CHAIN_APPROX_SIMPLE better
+                                               mode=cv2.RETR_LIST,
+                                               method=cv2.CHAIN_APPROX_NONE)  # TODO: is CHAIN_APPROX_SIMPLE better?
         if contours:
             idx = np.argmax([cv2.contourArea(c) for c in contours])
             return contours[idx]
         
-    def _getSilhouette(self, frame):
+    def _get_silhouette(self, frame):
         """
         Get the binary mask (8bits) of the mouse 
         from the thresholded difference between frame and the background
@@ -485,58 +487,59 @@ class Tracker(object):
         :rtype: video_frame.Frame
         """
         if self.normalise:
-            frame = frame.normalise(self.bgAvgAvg)
+            frame = frame.normalise(self.bg_avg_avg)
         diff = Frame(cv2.absdiff(frame, self.bg))
-        if self.bgStd is not None:
-            threshold = self.bgStd * self.nSds
+        if self.bg_std is not None:
+            threshold = self.bg_std * self.n_sds
             silhouette = diff > threshold
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)
             silhouette = diff.threshold(self.threshold)
-        if self.clearBorders:
+        if self.clear_borders:
             silhouette.clearBorders()
         return silhouette, diff
+
 
 class GuiTracker(Tracker):
     """
     A subclass of Tracker that reimplements trackFrame for use with the GUI
     This class implements read() to behave as a stream
     """
-    def __init__(self, uiIface, srcFilePath=None, destFilePath=None, 
-                threshold=20, minArea=100, maxArea=5000,
-                teleportationThreshold=10,
-                bgStart=0, trackFrom=1, trackTo=None,
-                nBackgroundFrames=1, nSds=5.0,
-                clearBorders=False, normalise=False,
-                plot=False, fast=False, extractArena=False,
-                cameraCalibration=None,
-                callback=None):
+    def __init__(self, ui_iface, src_file_path=None, dest_file_path=None,
+                 threshold=20, min_area=100, max_area=5000,
+                 teleportation_threshold=10,
+                 bg_start=0, track_from=1, track_to=None,
+                 n_background_frames=1, n_sds=5.0,
+                 clear_borders=False, normalise=False,
+                 plot=False, fast=False, extract_arena=False,
+                 camera_calibration=None,
+                 callback=None):
         """
-        :param TrackerInterface uiIface: the interface this tracker is called from
+        :param TrackerInterface ui_iface: the interface this tracker is called from
         
         For the other parameters, see Tracker
         """
-        Tracker.__init__(self, srcFilePath=srcFilePath, destFilePath=destFilePath, 
-                        threshold=threshold, minArea=minArea, maxArea=maxArea,
-                        teleportationThreshold=teleportationThreshold,
-                        bgStart=bgStart, trackFrom=trackFrom, trackTo=trackTo,
-                        nBackgroundFrames=nBackgroundFrames, nSds=nSds,
-                        clearBorders=clearBorders, normalise=normalise,
-                        plot=plot, fast=fast, extractArena=extractArena,
-                        cameraCalibration=cameraCalibration,
-                        callback=callback)
-        self.uiIface = uiIface
-        self.currentFrameIdx = 0
-        self.record = destFilePath is not None
+        Tracker.__init__(self, src_file_path=src_file_path, dest_file_path=dest_file_path,
+                         threshold=threshold, min_area=min_area, max_area=max_area,
+                         teleportation_threshold=teleportation_threshold,
+                         bg_start=bg_start, track_from=track_from, track_to=track_to,
+                         n_background_frames=n_background_frames, n_sds=n_sds,
+                         clear_borders=clear_borders, normalise=normalise,
+                         plot=plot, fast=fast, extract_arena=extract_arena,
+                         camera_calibration=camera_calibration,
+                         callback=callback)
+        self.ui_iface = ui_iface
+        self.current_frame_idx = 0
+        self.record = dest_file_path is not None
     
-    def setRoi(self, roi):
+    def set_roi(self, roi):
         """
         Set the region of interest and enable it
         """
         self.roi = roi
         if roi is not None:
-            self._makeBottomSquare()
+            self._make_bottom_square()
 
     def read(self):
         """
@@ -545,68 +548,68 @@ class GuiTracker(Tracker):
         It also updates the uiIface positions accordingly
         """
         try:
-            self.currentFrameIdx = self._stream.currentFrameIdx + 1
-            result = self.trackFrame(record=self.record, requestedOutput=self.uiIface.outputType)
+            self.current_frame_idx = self._stream.current_frame_idx + 1
+            result = self.track_frame(record=self.record, requested_output=self.ui_iface.outputType)
         except EOFError:
-            self.uiIface._stop('End of recording reached')
+            self.ui_iface._stop('End of recording reached')
             return
         except cv2.error as e:
-            self.uiIface.timer.stop()
-            self._stream.stopRecording('Error {} stopped recording'.format(e))
+            self.ui_iface.timer.stop()
+            self._stream.stop_recording('Error {} stopped recording'.format(e))
             return
         if result is not None:
             img, position, distances = result
-            self.uiIface.positions.append(position)
-            self.uiIface.distancesFromArena.append(distances)
+            self.ui_iface.positions.append(position)
+            self.ui_iface.distancesFromArena.append(distances)
             return img
         else:
-            self.uiIface.positions.append(self.defaultPos)
-            self.uiIface.distancesFromArena.append(self.defaultPos)
+            self.ui_iface.positions.append(self.default_pos)
+            self.ui_iface.distancesFromArena.append(self.default_pos)
     
-    def trackFrame(self, record=False, requestedOutput='raw'):
+    def track_frame(self, record=False, requested_output='raw'):
         """
         Reimplementation of Tracker.trackFrame for the GUI
         """
         try:
             frame = self._stream.read()
-            if self.cameraCalibration is not None:
-                frame = Frame(self.cameraCalibration.remap(frame))
-            fid = self._stream.currentFrameIdx
-            if self.trackTo and (fid > self.trackTo):
-                raise KeyboardInterrupt # stop recording
+            if self.camera_calibration is not None:
+                frame = Frame(self.camera_calibration.remap(frame))
+            fid = self._stream.current_frame_idx
+            if self.track_to and (fid > self.track_to):
+                raise KeyboardInterrupt  # stop recording
                 
-            if fid < self._stream.bgStartFrame:
-                return frame.color(), self.defaultPos, self.defaultPos # Skip junk frames
-            elif self._stream.isBgFrame():
-                self._buildBg(frame)
+            if fid < self._stream.bg_start_frame:
+                return frame.color(), self.default_pos, self.default_pos  # Skip junk frames
+            elif self._stream.is_bg_frame():
+                self._build_bg(frame)
                 if record: self._stream._save(frame)
-                return frame.color(), self.defaultPos, self.defaultPos
-            elif self._stream.bgEndFrame < fid < self.trackFrom:
+                return frame.color(), self.default_pos, self.default_pos
+            elif self._stream.bg_end_frame < fid < self.track_from:
                 if record: self._stream._save(frame)
-                return frame.color(), self.defaultPos, self.defaultPos # Skip junk frames
-            else: # Tracked frame
-                if fid == self.trackFrom: self._finaliseBg()
-                sil = self._trackFrame(frame, 'b', requestedOutput=requestedOutput)
+                return frame.color(), self.default_pos, self.default_pos  # Skip junk frames
+            else:  # Tracked frame
+                if fid == self.track_from: self._finalise_bg()
+                sil = self._track_frame(frame, 'b', requested_output=requested_output)
                 if sil is None:
                     if record: self._stream._save(frame)
-                    return None, self.defaultPos, self.defaultPos # Skip if no contour found
+                    return None, self.default_pos, self.default_pos # Skip if no contour found
                 else:
                     self.silhouette = sil.copy()
-                if self.roi is not None: self._checkMouseInRoi()
+                if self.roi is not None: self._check_mouse_in_roi()
                 self.paint(self.silhouette, 'c')
                 self.silhouette.paint(curve=self.positions)
                 if record: self._stream._save(self.silhouette)
                 result = [self.silhouette, self.positions[-1]]
-                if self.extractArena:
-                    distances = (self._getDistanceFromArenaCenter(), self._getDistanceFromArenaBorder())
-                    self.distancesFromArena.append(distances)
-                    result.append(self.distancesFromArena[-1])
+                if self.extract_arena:
+                    distances = (self._get_distance_from_arena_center(), self._get_distance_from_arena_border())
+                    self.distances_from_arena.append(distances)
+                    result.append(self.distances_from_arena[-1])
                 else:
-                    result.append(self.defaultPos)
+                    result.append(self.default_pos)
                 return result
         except VideoStreamFrameException as e:
             print('Error with video_stream at frame {}: \n{}'.format(fid, e))
         except (KeyboardInterrupt, EOFError) as e:
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
-            self._stream.stopRecording(msg)
+            self._stream.stop_recording(msg)
             raise EOFError
