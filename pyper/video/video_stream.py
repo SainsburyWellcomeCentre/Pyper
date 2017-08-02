@@ -60,10 +60,10 @@ class VideoStream(object):
         if not hasattr(self, 'size'):
             self.size = FRAME_SIZE # TODO: put as option
         
-        self.bgStartFrame = bgStart
-        self.bgEndFrame = self.bgStartFrame + nBackgroundFrames - 1
+        self.bg_start_frame = bgStart
+        self.bg_end_frame = self.bg_start_frame + nBackgroundFrames - 1
         
-        self.currentFrameIdx = -1 # We start out since we increment upon frame loading
+        self.current_frame_idx = -1 # We start out since we increment upon frame loading
         
 #    def __del__(self):
 #        self.stopRecording("Recording stopped automatically")
@@ -111,20 +111,20 @@ class VideoStream(object):
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
             
-    def isBgFrame(self):
+    def is_bg_frame(self):
         """
         Checks if the current frame is in the background frames range
         
         :return: Whether the current frame is in the background range
         :rtype: bool
         """
-        return (self.bgStartFrame <= self.currentFrameIdx <= self.bgEndFrame)
+        return (self.bg_start_frame <= self.current_frame_idx <= self.bg_end_frame)
     
     def recordCurrentFrameToDisk(self):
         """ Saves current frame to video file (self.dest) """
         self._save(self.read())
         
-    def stopRecording(self, msg):
+    def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
         
@@ -235,14 +235,14 @@ class RecordedVideoStream(VideoStream):
         
         :raises: EOFError when end of stream is reached
         """
-        self.currentFrameIdx += 1
-        if self.currentFrameIdx > self.nFrames:
+        self.current_frame_idx += 1
+        if self.current_frame_idx > self.nFrames:
             raise EOFError("End of recording reached")
         gotFrame, frame = self.stream.read()
         if gotFrame:
             return Frame(frame.astype(np.float32))
         else:
-            raise VideoStreamFrameException("Could not get frame at index {}".format(self.currentFrameIdx))
+            raise VideoStreamFrameException("Could not get frame at index {}".format(self.current_frame_idx))
         
     def timeStrToFrameIdx(self, timeStr):
         """
@@ -262,15 +262,15 @@ class RecordedVideoStream(VideoStream):
             raise NotImplementedError
         return seconds * self.fps
         
-    def stopRecording(self, msg):
+    def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
         
         :param str msg: The message to print on closing.
         """
-        VideoStream.stopRecording(self, msg)
+        VideoStream.stop_recording(self, msg)
         self.stream.set(cv.CV_CAP_PROP_POS_FRAMES, 0)
-        self.currentFrameIdx = -1
+        self.current_frame_idx = -1
     
 
 class UsbVideoStream(VideoStream):
@@ -337,14 +337,14 @@ class UsbVideoStream(VideoStream):
         else:
             raise VideoStreamFrameException("UsbVideoStream frame not found")
             
-    def stopRecording(self, msg):
+    def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
         
         :param str msg: The message to print upon closing.
         """
         self.stream.release()
-        VideoStream.stopRecording(self, msg)
+        VideoStream.stop_recording(self, msg)
         self.currentFrameIdx = -1
 
 class PiVideoStream(VideoStream):
@@ -394,7 +394,7 @@ class PiVideoStream(VideoStream):
         :rtype: video_frame.Frame
         """
         stream = self.stream
-        self._cam.quickCapture(stream)
+        self._cam.quick_capture(stream)
         # stream.array now contains the image data in BGR order
         frame = stream.array
         stream.truncate(0)
@@ -413,14 +413,14 @@ class PiVideoStream(VideoStream):
             self.stream, self.videoWriter = self._startVideoCaptureSession(self.savePath)
             self.currentFrameIdx = -1
     
-    def stopRecording(self, msg):
+    def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
         
         :param str msg: The message to print before closing.
         """
-        VideoStream.stopRecording(self, msg)
-        self._cam.closeEncoder()
+        VideoStream.stop_recording(self, msg)
+        self._cam.close_encoder()
         self._cam.close()
         
 class VideoStreamFrameException(Exception):
@@ -523,7 +523,7 @@ class ImageListVideoStream(object):
         :param list imgsList: The list of images constituting the stream
         """
         self.imgs = imgsList
-        self.currentFrameIdx = 0
+        self.current_frame_idx = 0
 
     def read(self):
         """
@@ -534,9 +534,9 @@ class ImageListVideoStream(object):
         
         :raises: EOFError when end of stream is reached
         """
-        if self.currentFrameIdx > (len(self.imgs) - 2):
+        if self.current_frame_idx > (len(self.imgs) - 2):
             raise EOFError("End of recording reached")
-        img = self.imgs[self.currentFrameIdx]
+        img = self.imgs[self.current_frame_idx]
         frame = Frame(img)
-        self.currentFrameIdx += 1
+        self.current_frame_idx += 1
         return frame
