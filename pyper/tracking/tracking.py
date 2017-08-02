@@ -25,6 +25,7 @@ from pyper.contours.object_contour import ObjectContour
 from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
 from pyper.contours.roi import Circle
+from pyper.exceptions.exceptions import PyperNotImplementedError
 
 IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
@@ -393,8 +394,8 @@ class Tracker(object):
                         plot_silhouette = (diff.color()).copy()
                         color = requested_color
                     else:
-                        raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
-                                                  "for requestedOutput, got: {}".format(requested_output))
+                        raise PyperNotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
+                                                       "for requestedOutput, got: {}".format(requested_output))
                 else:
                     color = 'w'
                 mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)

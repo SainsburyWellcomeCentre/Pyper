@@ -3,14 +3,13 @@ from multiprocessing import Process
 
 from pyper.tracking.tracking import Tracker
 from pyper.contours.roi import Circle
+from pyper.exceptions.exceptions import PyperRuntimeError
 
 try:
     import RPi.GPIO as GPIO
-except RuntimeError:
-    print(
-        'Error import RPi.GPIO',
-        'Check that module is installed with aptitude install python-rpi.gpio or python3-rpi.gpio',
-        'Also, make sure that you are root')
+except RuntimeError as e:
+    print(e)
+    raise PyperRuntimeError()
 
 roi = Circle((85, 175), 30)
 

@@ -20,6 +20,8 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtQuick import QQuickImageProvider
 
+from pyper.exceptions.exceptions import PyperNotImplementedError
+
 
 class TrackingImageProvider(QQuickImageProvider):
     """
@@ -34,7 +36,7 @@ class TrackingImageProvider(QQuickImageProvider):
         elif requestedImType == 'pixmap':
             imType = QQuickImageProvider.Pixmap
         else:
-            raise NotImplementedError('Unknown type: {}'.format(requestedImType))
+            raise PyperNotImplementedError('Unknown type: {}'.format(requestedImType))
         QQuickImageProvider.__init__(self, imType)
     
     def requestPixmap(self, id, qSize):
@@ -78,7 +80,7 @@ class TrackingImageProvider(QQuickImageProvider):
         return img
         
     def getBaseImg(self, size):
-        raise NotImplementedError("TrackingImageProvider missing method getBaseImg")
+        raise PyperNotImplementedError("TrackingImageProvider missing method getBaseImg")
 
 
 class CvImageProvider(TrackingImageProvider):

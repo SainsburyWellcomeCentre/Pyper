@@ -12,6 +12,7 @@ import numpy as np
 import cv2
 from skimage.segmentation import clear_border
 from scipy import misc
+from pyper.exceptions.exceptions import PyperNotImplementedError
 
 
 class Frame(np.ndarray):
@@ -76,8 +77,7 @@ class Frame(np.ndarray):
         if self.ndim == 2:  # Single channel images:
             return Frame(np.dstack([self]*3))
         elif self.ndim == 3 and self.shape[2] == 1:
-            raise NotImplementedError("Image is color but has only one channel."
-                                      "This type is not supported yet")
+            raise PyperNotImplementedError("Image is color but has only one channel. This type is not supported yet")
         return Frame(cv2.cvtColor(self.copy(), cv2.COLOR_BGR2GRAY))
         
     def color(self):

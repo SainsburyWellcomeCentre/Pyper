@@ -26,7 +26,7 @@ from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
 
 from pyper.exceptions.exceptions import PyperGUIError
 
-DEBUG = False
+DEBUG = True
 
 
 class Logger(QObject):

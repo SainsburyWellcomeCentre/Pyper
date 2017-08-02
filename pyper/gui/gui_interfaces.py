@@ -31,6 +31,7 @@ from pyper.contours.roi import Circle
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
+from pyper.exceptions.exceptions import PyperKeyError
 
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
@@ -259,7 +260,7 @@ class CalibrationIface(PlayerInterface):
         """
         matrix_type = matrix_type.lower()
         if matrix_type not in ['normal', 'optimized']:
-            raise KeyError("Expected one of ['normal', 'optimized'], got {}".format(matrix_type))
+            raise PyperKeyError("Expected one of ['normal', 'optimized'], got {}".format(matrix_type))
         else:
             self.matrix_type = matrix_type
 
@@ -296,7 +297,7 @@ class CalibrationIface(PlayerInterface):
         elif frame_type == "corrected":
             imgs = self.calib.corrected_imgs
         else:
-            raise KeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frame_type))
+            raise PyperKeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frame_type))
         self.stream = ImageListVideoStream(imgs)
         self._update_img_provider()
         self.stream.current_frame_idx = self._validate_frame_idx(current_index - 1)  # reset to previous position
@@ -308,7 +309,8 @@ class TrackerIface(BaseInterface):
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker object of the tracking module.
     """
-    def __init__(self, app, context, parent, params, display_name, provider_name, analysis_provider_1, analysis_provider_2):
+    def __init__(self, app, context, parent, params, display_name,
+                 provider_name, analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
         
         self.positions = []

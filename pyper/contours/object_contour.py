@@ -12,7 +12,7 @@ This class makes it easier to extract contour features and draw them
 """
 from cv2 import ellipse as cv2_ellipse
 from cv2 import fitEllipse, drawContours, moments
-
+from pyper.exceptions.exceptions import PyperNotImplementedError
 import numpy as np
 
 
@@ -67,8 +67,8 @@ class ObjectContour(object):
             y = self.fit['m01'] / self.fit['m00']
             self.centre = (x, y)
         else:
-            raise NotImplementedError("The show function\
-            does not currently support {} contour types".format(self.contour_type))
+            raise PyperNotImplementedError("The show function\
+            does not currently support {} contour types".format(self.contourType))
         
     def draw(self):
         """
@@ -85,7 +85,7 @@ class ObjectContour(object):
         elif self.contour_type == 'raw':
             drawContours(self.frame, [self.contour], 0, self.color, self.line_thickness)
         else:
-            raise NotImplementedError("The show function\
+            raise PyperNotImplementedError("The show function\
             does not currently support {} contour types".format(self.contour_type))
 
     def write_coordinates_to_file(self, path, frame_idx):

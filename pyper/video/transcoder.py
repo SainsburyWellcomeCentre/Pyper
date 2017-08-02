@@ -18,6 +18,7 @@ from video_stream import RecordedVideoStream
 
 from progressbar import Percentage, Bar, ProgressBar
 
+
 class Transcoder(RecordedVideoStream):
     """
     The transcoder class.
