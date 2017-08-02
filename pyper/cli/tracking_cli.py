@@ -4,7 +4,12 @@ Pyper, The command line interface
 :author: crousse
 """
 
-import os, sys, argparse, csv, shutil, tempfile
+import os
+import sys
+import argparse
+import csv
+import shutil
+import tempfile
 
 from configobj import ConfigObj
 
@@ -17,10 +22,12 @@ def coords(string):
     try:
         return int(string.strip())
     except:
-        raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(s))
-############################## CLI #############################
+        raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(string))
+
+# CLI
 configPath = os.path.expanduser(os.path.normcase('~/.motionTracking.conf'))
-config = ConfigObj(configPath, encoding="UTF8", indent_type='    ', unrepr=True, create_empty=True, write_empty_values=True)
+config = ConfigObj(configPath, encoding="UTF8", indent_type='    ', unrepr=True,
+                   create_empty=True, write_empty_values=True)
 config.reload()
 
 parser = argparse.ArgumentParser(prog=sys.argv[0])
@@ -53,48 +60,50 @@ parser.add_argument('--prefix', type=str, help='A prefix to append to the saved 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    assert 0 <= args.threshold < 256, "The threshold must be between 0 and 255, got: {}".format(args.threshold) # Avoids list from boundaries in argparse
+    assert 0 <= args.threshold < 256, \
+        "The threshold must be between " \
+        "0 and 255, got: {}".format(args.threshold)  # Avoids list from boundaries in argparse
 
-    def promptDelete(folder):
+    def prompt_delete(folder):
         msg = 'The folder {} exists, '.format(folder)
         msg += "do you want to delete it ('Y','N')?\n"
         answer = raw_input(msg).upper()
         if answer not in ('Y', 'N'):
             print('{} is not a valid answer'.format(answer))
-            answer = promptDelete(folder)
+            answer = prompt_delete(folder)
         return True if answer == 'Y' else False
         
-    def createDestFolder(srcFolder, prefix):
-        destFolder = os.path.join(srcFolder, prefix)
-        if os.path.isdir(destFolder):
-            if promptDelete(destFolder):
-                tmpDest = os.path.join(tempfile.gettempdir(), prefix)
-                if os.path.isdir(tmpDest): shutil.rmtree(tmpDest)
-                shutil.move(destFolder, tmpDest)
-                print('Your folder has been moved to {}, where you can retrive it before it is deleted by a reboot of your machine'\
-                .format(tmpDest))
-        os.mkdir(destFolder)
-        return destFolder
+    def create_dest_folder(src_folder, prefix):
+        dest_folder = os.path.join(src_folder, prefix)
+        if os.path.isdir(dest_folder):
+            if prompt_delete(dest_folder):
+                tmp_dest = os.path.join(tempfile.gettempdir(), prefix)
+                if os.path.isdir(tmp_dest):
+                    shutil.rmtree(tmp_dest)
+                shutil.move(dest_folder, tmp_dest)
+                print('Your folder has been moved to {}, where you can retrieve it before it is deleted '
+                      'by rebooting your machine'.format(tmp_dest))
+        os.mkdir(dest_folder)
+        return dest_folder
 
     # Folders and files
-    srcFolder = os.path.dirname(args.videoFile)
-    vidName = os.path.basename(args.videoFile)
+    src_folder = os.path.dirname(args.videoFile)
+    vid_name = os.path.basename(args.videoFile)
     prefix = None
-    if args.saveGraphs:
-        if not args.prefix:
-            prefix = os.path.splitext(vidName)[0]
+    if args.saveGraphs and not args.prefix:
+        prefix = os.path.splitext(vid_name)[0]
     prefix = prefix if prefix is not None else args.prefix
-    destFolder = createDestFolder(srcFolder, prefix)
-    imgExt = '.'+args.imgFileFormat
+    dest_folder = create_dest_folder(src_folder, prefix)
+    img_ext = '.' + args.imgFileFormat
 
     # Time information
     viewer = Viewer(args.videoFile)
-    if args.bgTime is None and args.trackFrom is None and args.trackTo is None:
-        args.bgTime, args.trackFrom, args.trackTo = viewer.view()
+    if args.bg_time is None and args.track_from is None and args.track_to is None:
+        args.bg_time, args.track_from, args.track_to = viewer.view()
     else:
-        args.bgTime = viewer.timeStrToFrameIdx(args.bgTime)
-        args.trackFrom = viewer.timeStrToFrameIdx(args.trackFrom)
-        args.trackTo = viewer.timeStrToFrameIdx(args.trackTo)
+        args.bg_time = viewer.time_str_to_frame_idx(args.bg_time)
+        args.track_from = viewer.time_str_to_frame_idx(args.track_from)
+        args.track_to = viewer.time_str_to_frame_idx(args.track_to)
 
     # ROI
     if args.center and args.radius:
@@ -102,49 +111,45 @@ if __name__ == '__main__':
     else:
         roi = None
         
-    ############################### TRACKING ########################################
+    # TRACKING
     tracker = Tracker(srcFilePath=args.videoFile, destFilePath=None,
-                    threshold=args.threshold, minArea=args.minArea,
-                    maxArea=args.maxArea, teleportationThreshold=args.teleportationThreshold,
-                    bgStart=args.bgTime, trackFrom=args.trackFrom, trackTo=args.trackTo,
-                    nBackgroundFrames=args.nBackgroundFrames, nSds=args.nSds,
-                    clearBorders=args.clearBorders, normalise=False,
-                    plot=args.plot, fast=config['tracker']['fast'], 
-                    extractArena=False)
+                      threshold=args.threshold, minArea=args.minArea,
+                      maxArea=args.maxArea, teleportationThreshold=args.teleportationThreshold,
+                      bgStart=args.bg_time, trackFrom=args.track_from, trackTo=args.track_to,
+                      nBackgroundFrames=args.nBackgroundFrames, nSds=args.nSds,
+                      clearBorders=args.clearBorders, normalise=False,
+                      plot=args.plot, fast=config['tracker']['fast'],
+                      extractArena=False)
     positions = tracker.track(roi=roi)
 
-    ################################ ANALYSIS ########################################
-    os.chdir(destFolder)
-    positions = filterPositions(positions, args.oneDKernel) if args.oneDKernel else positions
+    # ANALYSIS
+    os.chdir(dest_folder)
+    positions = filter_positions(positions, args.oneDKernel) if args.oneDKernel else positions
     samplingFreq = 1.0/tracker._stream.fps
 
-    # Track
-    plotTrack(positions, tracker.bg)
-    plt.savefig('mousePath'+imgExt) if args.saveGraphs else plt.show()
+    plot_track(positions, tracker.bg)
+    plt.savefig('mousePath' + img_ext) if args.saveGraphs else plt.show()
 
-    # Angles
-    angles = getAngles(positions)
-    writeDataList(angles, 'angles.dat')
+    angles = get_angles(positions)
+    write_data_list(angles, 'angles.dat')
     plt.figure()
-    plotAngles(angles, samplingFreq)
-    plt.savefig('angles'+imgExt) if args.saveGraphs else plt.show()
+    plot_angles(angles, samplingFreq)
+    plt.savefig('angles' + img_ext) if args.saveGraphs else plt.show()
 
-    # Distances
-    distances = posToDistances(positions)
-    writeDataList(distances, 'distances.dat')
+    distances = pos_to_distances(positions)
+    write_data_list(distances, 'distances.dat')
     plt.figure()
-    plotDistances(distances, samplingFreq)
-    plt.savefig('distances'+imgExt) if args.saveGraphs else plt.show()
+    plot_distances(distances, samplingFreq)
+    plt.savefig('distances' + img_ext) if args.saveGraphs else plt.show()
 
-    # Integrals
     plt.figure()
-    plotIntegrals(angles, samplingFreq)
-    plt.savefig('integrals'+imgExt) if args.saveGraphs else plt.show()
+    plot_integrals(angles, samplingFreq)
+    plt.savefig('integrals' + img_ext) if args.saveGraphs else plt.show()
 
     header = ('frameNum', 'centreX', 'centreY', 'width', 'height', 'angle')
 
-    ################################ SAVE DATA AND PARAMS ##########################
-    def writeCsv(header, table, dest):
+    # SAVE DATA AND PARAMS
+    def write_csv(header, table, dest):
         with open(dest, 'w') as csvFile:
             writer = csv.writer(csvFile, delimiter='\t', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             if header:
@@ -152,7 +157,7 @@ if __name__ == '__main__':
             for row in table:
                 writer.writerow(row)
                 
-    writeCsv(header, positions, 'data.dat')
-    paramsHeader = ('param_name', 'param_value')
+    write_csv(header, positions, 'data.dat')
+    params_header = ('param_name', 'param_value')
     params = sorted(vars(args).items())
-    writeCsv(paramsHeader, params, 'params.dat')
+    write_csv(params_header, params, 'params.dat')
