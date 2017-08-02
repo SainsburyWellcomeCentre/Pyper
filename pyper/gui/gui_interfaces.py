@@ -173,7 +173,7 @@ class ViewerIface(PlayerInterface):
     Implements the PlayerInterface class with a QuickRecordedVideoStream
     It is meant for video preview with frame precision seek
     """
-    
+
     @pyqtSlot()
     def load(self):
         """
@@ -181,7 +181,7 @@ class ViewerIface(PlayerInterface):
         """
         self.stream = VStream(self.params.src_path, 0, 1)
         self.n_frames = self.stream.n_frames - 1
-        
+
         self._set_display()
         self._set_display_max()
         self._update_img_provider()
@@ -773,10 +773,14 @@ class ParamsIface(QObject):
     @pyqtSlot(result=QVariant)
     def open_video(self):
         """The QT dialog to select the video to be used for preview or tracking"""
+        if hasattr(self, 'src_path'):  # FIXME: should check vs None
+            src_dir = os.path.dirname(self.src_path)
+        else:
+            src_dir = os.getenv('HOME')
         diag = QFileDialog()
         path = diag.getOpenFileName(parent=diag,
                                     caption='Open file',
-                                    directory=os.getenv('HOME'),
+                                    directory=src_dir,
                                     filter=VIDEO_FILTERS)
         src_path = path[0]
         if src_path:
