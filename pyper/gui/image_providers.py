@@ -10,7 +10,6 @@ The classes of this module supply sequences of images to the QT interface
 :author: crousse
 """
 
-import cv2
 import numpy as np
 import matplotlib
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backed doesn't allow to draw to buffer
@@ -19,6 +18,8 @@ from PyQt5.QtCore import QSize
 
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtQuick import QQuickImageProvider
+
+from pyper.tracking.tracking import write_structure_not_found_msg
 
 
 class TrackingImageProvider(QQuickImageProvider):
@@ -96,27 +97,6 @@ class CvImageProvider(TrackingImageProvider):
         """
         TrackingImageProvider.__init__(self, requestedImType=requestedImType)
         self._stream = stream
-        
-    def _writeErrorMsg(self, img, imgSize):
-        """
-        Write an error message on the image supplied as argument. The operation is performed in place
-        
-        :param img: The source image to write onto
-        :param tuple imgSize: The size of the source image
-        """
-        text = "No contour found at frame: {}".format(self._stream.current_frame_idx)
-        text2 = "Please check your parameters"
-        text3 = "And ensure specimen is there"
-        x = 10
-        y = imgSize[0]/2
-        ySpacing = 40
-        yellow = (255, 255, 0)
-        fontSize = 75/100.0
-        cv2.putText(img, text, (x, y), 2, fontSize, yellow)
-        y += ySpacing
-        cv2.putText(img, text2, (x, y), 2, fontSize, yellow)
-        y += ySpacing
-        cv2.putText(img, text3, (x, y), 2, fontSize, yellow)
 
     def getBaseImg(self, size):
         """
@@ -133,10 +113,10 @@ class CvImageProvider(TrackingImageProvider):
                 size = img.shape[:2]
             else:                
                 img = self.getRndmImg(size)
-                self._writeErrorMsg(img, size)
+                write_structure_not_found_msg(img, size, self._stream.current_frame_idx)
         else:
             img = self.getRndmImg(size)
-        img = (img[:, :, :3]).copy() # For images with transparency channel, take only first 3 channels
+        img = (img[:, :, :3]).copy()  # For images with transparency channel, take only first 3 channels
         w, h = size
         qimg = QImage(img, h, w, QImage.Format_RGB888)
         return qimg

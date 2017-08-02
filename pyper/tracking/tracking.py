@@ -111,6 +111,30 @@ class Viewer(object):
         return self._stream.time_str_to_frame_idx(time_str)
 
 
+def write_structure_not_found_msg(img, img_size, frame_idx):
+    """
+    Write an error message on the image supplied as argument. The operation is performed in place
+
+    :param int frame_idx: The frame at which the structure cannot be found
+    :param img: The source image to write onto
+    :param tuple img_size: The size of the source image
+    """
+    line1 = "No contour found at frame: {}".format(frame_idx)
+    line2 = "Please check your parameters"
+    line3 = "And ensure specimen is there"
+    x = int(50)
+    y = int(img_size[0] / 2)
+    y_spacing = 40
+    font_color = (255, 255, 0)  # yellow
+    font_size = 0.75  # percent
+    font_type = int(2)
+    cv2.putText(img, line1, (x, y), font_type, font_size, font_color)
+    y += y_spacing
+    cv2.putText(img, line2, (x, y), font_type, font_size, font_color)
+    y += y_spacing
+    cv2.putText(img, line3, (x, y), font_type, font_size, font_color)
+
+
 class Tracker(object):
     """
     A tracker object to track a mouse in a video stream
@@ -252,11 +276,10 @@ class Tracker(object):
                     continue  # Skip junk frames
                 else:  # Tracked frame
                     if fid == self.track_from: self._finalise_bg()
-                    sil = self._track_frame(frame)
-                    if sil is None:
-                        continue  # Skip if no contour found
-                    else:
-                        self.silhouette = sil.copy()
+                    contour_found, sil = self._track_frame(frame)
+                    self.silhouette = sil.copy()
+                    if not contour_found:
+                        continue
                     if self.roi is not None: self._check_mouse_in_roi()
                     if self.plot: self._plot()
                     if record: self._stream._save(self.silhouette)
@@ -368,54 +391,62 @@ class Tracker(object):
         :rtype: binary mask or None
         """
         treated_frame = frame.gray()
-        fast = self.fast
-        if not IS_PI and not fast:
+        if not IS_PI and not self.fast:
             treated_frame = treated_frame.denoise().blur()
         silhouette, diff = self._get_silhouette(treated_frame)
         
         biggest_contour = self._get_biggest_contour(silhouette)
-        
-        plot_silhouette = None
-        if fast:
+
+        if IS_PI and self.fast:
             requested_output = 'mask'
         self.positions.append(self.default_pos)
+        if self.plot:
+            if requested_output == 'raw':
+                plot_silhouette = (frame.color()).copy()
+                color = requested_color
+            elif requested_output == 'mask':
+                plot_silhouette = silhouette.copy()
+                color = 'w'
+            elif requested_output == 'diff':
+                plot_silhouette = (diff.color()).copy()
+                color = requested_color
+            else:
+                raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
+                                          "for requestedOutput, got: {}".format(requested_output))
+        else:
+            color = 'w'
+        contour_found = False
         if biggest_contour is not None:
             area = cv2.contourArea(biggest_contour)
             if self.min_area < area < self.max_area:
-                if self.plot:
-                    if requested_output == 'raw':
-                        plot_silhouette = (frame.color()).copy()
-                        color = requested_color
-                    elif requested_output == 'mask':
-                        plot_silhouette = silhouette.copy()
-                        color = 'w'
-                    elif requested_output == 'diff':
-                        plot_silhouette = (diff.color()).copy()
-                        color = requested_color
-                    else:
-                        raise NotImplementedError("Expected one of ['raw', 'mask', 'diff'] "
-                                                  "for requestedOutput, got: {}".format(requested_output))
-                else:
-                    color = 'w'
                 mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
-                if plot_silhouette is not None:
-                    mouse.draw()
+                mouse.draw()
                 self.positions[-1] = mouse.centre
+                self._check_teleportation(frame, silhouette)
+                contour_found = True
             else:
-                if area > self.max_area:
-                    if not fast:
-                        print('Frame: {}, found something too big in the arena ({} > {})'
-                              .format(self._stream.current_frame_idx, area, self.max_area))
-                else:
-                    if not fast:
-                        print('Frame: {}, biggest structure too small ({} < {})'
-                              .format(self._stream.current_frame_idx, area, self.min_area))
-                return None
+                self._handle_bad_size_contour(area)
         else:
-            print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
-            return None
-        self._check_teleportation(frame, silhouette)
-        return plot_silhouette if plot_silhouette is not None else silhouette
+            self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
+        return contour_found, plot_silhouette
+
+    def _handle_bad_size_contour(self, area):
+        if area > self.max_area:
+            self._fast_print('Frame: {}, found something too big in the arena ({} > {})'
+                             .format(self._stream.current_frame_idx, area, self.max_area))
+        else:
+            self._fast_print('Frame: {}, biggest structure too small ({} < {})'
+                             .format(self._stream.current_frame_idx, area, self.min_area))
+
+    def _fast_print(self, in_str):
+        """
+        Print only if not `fast` option not selected
+
+        :param str in_str: The string to print
+        :return:
+        """
+        if not self.fast:
+            print(in_str)
 
     @staticmethod
     def _check_fps(prev_time):
@@ -587,12 +618,13 @@ class GuiTracker(Tracker):
                 return frame.color(), self.default_pos, self.default_pos  # Skip junk frames
             else:  # Tracked frame
                 if fid == self.track_from: self._finalise_bg()
-                sil = self._track_frame(frame, 'b', requested_output=requested_output)
-                if sil is None:
+                contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
+                self.silhouette = sil.copy()
+                if not contour_found:
                     if record: self._stream._save(frame)
-                    return None, self.default_pos, self.default_pos # Skip if no contour found
-                else:
-                    self.silhouette = sil.copy()
+                    write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
+                    return self.silhouette, self.default_pos, self.default_pos  # Skip if no contour found
+
                 if self.roi is not None: self._check_mouse_in_roi()
                 self.paint(self.silhouette, 'c')
                 self.silhouette.paint(curve=self.positions)
