@@ -50,15 +50,15 @@ class Transcoder(RecordedVideoStream):
         finalWidth, finalHeight = self.getFinalSize()
         print('Final size: {},  {}'.format(finalWidth, finalHeight))
         widgets=['Encoding Progress: ', Percentage(), Bar()]
-        pbar = ProgressBar(widgets=widgets, maxval=self.nFrames).start()
-        for i in range(self.nFrames):
+        pbar = ProgressBar(widgets=widgets, maxval=self.n_frames).start()
+        for i in range(self.n_frames):
             pbar.update(i)
             frame = self.read()
             frame = frame[cropParams[0][0]: -cropParams[0][1],  cropParams[1][0]: -cropParams[1][1]]
             scale = np.concatenate((self.scaleParams, np.array([1]))) * frame.shape
             frame = imresize(frame, scale.astype(int), interp='bilinear')
             self.videoWriter.write(frame)
-#            self.videoWriter.write(np.uint8(np.dstack([frame]*3)))
+#            self.video_writer.write(np.uint8(np.dstack([frame]*3)))
         pbar.finish()
         self.videoWriter.release()
         self.videoWriter = None

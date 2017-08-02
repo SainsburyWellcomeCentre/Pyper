@@ -47,9 +47,9 @@ Rectangle {
         anchors.horizontalCenter: previewImage.horizontalCenter
 
         color: "#ffffff"
-        text: py_iface.getFileName()
+        text: py_iface.get_file_name()
         function reload() {
-            text = py_iface.getFileName();
+            text = py_iface.get_file_name();
         }
 
         style: Text.Raised
@@ -70,7 +70,7 @@ Rectangle {
         enabled: false
 
         source: "image://viewerprovider/img"
-        onProgressClicked: py_viewer.seekTo(frameId)
+        onProgressClicked: py_viewer.seek_to(frameId)
         onProgressWheel: {
             angleDelta /= 120
             var stepSize = vidControl.sliderValue * angleDelta
@@ -79,7 +79,7 @@ Rectangle {
         Roi{
             anchors.fill: parent
             onReleased: {
-                py_tracker.setRoi(roiX, roiY, roiWidth)
+                py_tracker.set_roi(roiX, roiY, roiWidth)
             }
         }
     }
@@ -108,8 +108,8 @@ Rectangle {
         onPauseClicked: { py_viewer.pause() }
         onForwardClicked: { py_viewer.move(sliderValue) }
         onBackwardClicked: { py_viewer.move(-sliderValue) }
-        onStartClicked: { py_viewer.seekTo(-1) }
-        onEndClicked: { py_viewer.seekTo(py_viewer.getNFrames()) }
+        onStartClicked: { py_viewer.seek_to(-1) }
+        onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames()) }
     }
     Rectangle{
         id: frameControls
@@ -138,42 +138,42 @@ Rectangle {
                 enabled: parent.enabled
                 label: "Ref"
                 tooltip: "Select the reference frame"
-                text: py_iface.getBgFrameIdx()
+                text: py_iface.get_bg_frame_idx()
                 onTextChanged: {
-                    py_iface.setBgFrameIdx(text);
+                    py_iface.set_bg_frame_idx(text);
                     reload();
                 }
-                onClicked: { text = py_viewer.getFrameIdx() }
+                onClicked: { text = py_viewer.get_frame_idx() }
                 onEnabledChanged: reload()
-                function reload(){ text = py_iface.getBgFrameIdx() }
+                function reload(){ text = py_iface.get_bg_frame_idx() }
             }
             IntButton {
                 width: parent.width
                 enabled: parent.enabled
                 label: "Start"
                 tooltip: "Select the first data frame"
-                text: py_iface.getStartFrameIdx()
+                text: py_iface.get_start_frame_idx()
                 onTextChanged: {
-                    py_iface.setStartFrameIdx(text);
+                    py_iface.set_start_frame_idx(text);
                     reload();
                 }
-                onClicked: { text = py_viewer.getFrameIdx() }
+                onClicked: { text = py_viewer.get_frame_idx() }
                 onEnabledChanged: reload()
-                function reload(){ text = py_iface.getStartFrameIdx() }
+                function reload(){ text = py_iface.get_start_frame_idx() }
             }
             IntButton {
                 width: parent.width
                 enabled: parent.enabled
                 label: "End"
                 tooltip: "Select the last data frame"
-                text: py_iface.getEndFrameIdx()
+                text: py_iface.get_end_frame_idx()
                 onTextChanged: {
-                    py_iface.setEndFrameIdx(text);
+                    py_iface.set_end_frame_idx(text);
                     reload();
                 }
-                onClicked: { text = py_viewer.getFrameIdx() }
+                onClicked: { text = py_viewer.get_frame_idx() }
                 onEnabledChanged: reload()
-                function reload(){ text = py_iface.getEndFrameIdx() }
+                function reload(){ text = py_iface.get_end_frame_idx() }
             }
         }
     }

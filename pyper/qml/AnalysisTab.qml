@@ -64,9 +64,9 @@ Rectangle {
             label: "Save"
             onClicked: {
                 if (trackingLabel.checked){
-                    py_tracker.save(py_iface.getPath())
+                    py_tracker.save(py_iface.get_path())
                 } else if (recordingLabel.checked){
-                    py_recorder.save(py_iface.getDestPath())
+                    py_recorder.save(py_iface.get_dest_path())
                 }
             }
         }
@@ -88,9 +88,9 @@ Rectangle {
             label: "Angles"
             onClicked: {
                 if (trackingLabel.checked){
-                    py_tracker.analyseAngles();
+                    py_tracker.analyse_angles();
                 } else if (recordingLabel.checked){
-                    py_recorder.analyseAngles();
+                    py_recorder.analyse_angles();
                 }
                 analysisImage.reload();
             }
@@ -101,9 +101,9 @@ Rectangle {
             label: "Distances"
             onClicked: {
                 if (trackingLabel.checked){
-                    py_tracker.analyseDistances();
+                    py_tracker.analyse_distances();
                 } else if (recordingLabel.checked){
-                    py_recorder.analyseDistances();
+                    py_recorder.analyse_distances();
                 }
                 analysisImage2.reload();
             }
@@ -116,9 +116,9 @@ Rectangle {
         anchors.horizontalCenter: trackingControlsGrid.horizontalCenter
         function getRow(iface, idx){
             if (iface === "tracker"){
-                return py_tracker.getRow(idx);
+                return py_tracker.get_row(idx);
             } else if (iface === "recorder"){
-                return py_recorder.getRow(idx);
+                return py_recorder.get_row(idx);
             }
         }
     }
@@ -133,9 +133,9 @@ Rectangle {
 
         onRightClicked:{
             if (trackingLabel.checked){
-                py_tracker.saveAnglesFig();
+                py_tracker.save_angles_fig();
             } else if (recordingLabel.checked){
-                py_recorder.saveAnglesFig();
+                py_recorder.save_angles_fig();
             }
         }
         function reload() {

@@ -50,8 +50,8 @@ class BaseInterface(QObject):
         self.app = app  # necessary to avoid QPixmap bug: must construct a QGuiApplication before
         self.ctx = context
         self.win = parent
-        self.displayName = display_name
-        self.providerName = provider_name
+        self.display_name = display_name
+        self.provider_name = provider_name
         self.params = params
         
         self.timer = QTimer(self)
@@ -60,7 +60,7 @@ class BaseInterface(QObject):
 
     def get_img(self):
         """The method called by self.timer to play the video"""
-        if self.stream.currentFrameIdx < self.nFrames and self.stream.currentFrameIdx >= -1:
+        if -1 <= self.stream.current_frame_idx < self.n_frames:
             try:
                 self.display.reload()
                 self._update_display_idx()
@@ -73,44 +73,44 @@ class BaseInterface(QObject):
         """
         Gets the display from the qml code
         
-        :param string displayName: The exact name of the display in the qml code
+        :param string display_name: The exact name of the display in the qml code
         """
-        self.display = self.win.findChild(QObject, self.displayName)
+        self.display = self.win.findChild(QObject, self.display_name)
 
     def _update_display_idx(self):
         """
         Updates the value of the display progress bar
         """
-        self.display.setProperty('value', self.stream.currentFrameIdx)
+        self.display.setProperty('value', self.stream.current_frame_idx)
         
     def _set_display_max(self):
         """
         Sets the maximum of the display progress bar
         """
-        self.display.setProperty('maximumValue', self.nFrames)
+        self.display.setProperty('maximumValue', self.n_frames)
     
     @pyqtSlot(result=QVariant)
     def get_frame_idx(self):
         """
         pyQT slot to return the index of the currently displayed frame
         """
-        return str(self.stream.currentFrameIdx)
+        return str(self.stream.current_frame_idx)
         
     @pyqtSlot(result=QVariant)
     def get_n_frames(self):
         """
         pyQT slot to return the number of frames of the current display
         """
-        return self.nFrames
+        return self.n_frames
         
     def _update_img_provider(self):
         """
         Registers the objects image provider with the qml code
-        Based on self.providerName
+        Based on self.provider_name
         """
         engine = self.ctx.engine()
-        self.imageProvider = CvImageProvider(requestedImType='pixmap', stream=self.stream)
-        engine.addImageProvider(self.providerName, self.imageProvider)
+        self.image_provider = CvImageProvider(requestedImType='pixmap', stream=self.stream)
+        engine.addImageProvider(self.provider_name, self.image_provider)
 
 
 class PlayerInterface(BaseInterface):
@@ -138,10 +138,10 @@ class PlayerInterface(BaseInterface):
         
         :param int step_size: The number of frames to scroll by (positive or negative)
         """
-        target_frame = self.stream.currentFrameIdx
+        target_frame = self.stream.current_frame_idx
         target_frame -= 1  # reset
         target_frame += int(step_size)
-        self.stream.currentFrameIdx = self._validate_frame_idx(target_frame)
+        self.stream.current_frame_idx = self._validate_frame_idx(target_frame)
         self.get_img()
 
     @pyqtSlot(QVariant)
@@ -151,18 +151,18 @@ class PlayerInterface(BaseInterface):
         
         :param int frame_idx: The frame to get to
         """
-        self.stream.currentFrameIdx = self._validate_frame_idx(frame_idx)
+        self.stream.current_frame_idx = self._validate_frame_idx(frame_idx)
         self.get_img()
     
     def _validate_frame_idx(self, frame_idx):
         """
-        Checks if the supplied frameIdx is within [0:nFrames]
+        Checks if the supplied frameIdx is within [0:n_frames]
 
         :returns: A bound index
         :rtype: int
         """
-        if frame_idx >= self.nFrames:
-            frame_idx = self.nFrames - 1
+        if frame_idx >= self.n_frames:
+            frame_idx = self.n_frames - 1
         elif frame_idx < 0:
             frame_idx = 0
         return frame_idx
@@ -180,7 +180,7 @@ class ViewerIface(PlayerInterface):
         Loads the video into memory
         """
         self.stream = VStream(self.params.src_path, 0, 1)
-        self.n_frames = self.stream.nFrames - 1
+        self.n_frames = self.stream.n_frames - 1
         
         self._set_display()
         self._set_display_max()
@@ -197,7 +197,7 @@ class CalibrationIface(PlayerInterface):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
         self.n_columns = 9
-        self.nRows = 6
+        self.n_rows = 6
         self.matrix_type = 'normal'
         
         self._set_display()
@@ -208,7 +208,7 @@ class CalibrationIface(PlayerInterface):
         """
         Compute the camera matrix 
         """
-        self.calib = CameraCalibration(self.n_columns, self.nRows)
+        self.calib = CameraCalibration(self.n_columns, self.n_rows)
         self.calib.calibrate(self.src_folder)
         self.params.calib = self.calib
         
@@ -225,12 +225,12 @@ class CalibrationIface(PlayerInterface):
         """
         Get the number of inner rows in the chessboard pattern
         """
-        return self.nRows
+        return self.n_rows
 
     @pyqtSlot(QVariant)
     def set_n_rows(self, n_rows):
         """Set the number of inner rows in the chessboard pattern"""
-        self.nRows = int(n_rows)
+        self.n_rows = int(n_rows)
 
     @pyqtSlot(result=QVariant)
     def get_n_columns(self):
@@ -270,15 +270,15 @@ class CalibrationIface(PlayerInterface):
         """
         diag = QFileDialog()
         dest_path = diag.getSaveFileName(parent=diag,
-                                    caption='Save matrix',
-                                    directory=os.getenv('HOME'), 
-                                    filter='Numpy (.npy)')
+                                         caption='Save matrix',
+                                         directory=os.getenv('HOME'),
+                                         filter='Numpy (.npy)')
         dest_path = dest_path[0]
         if dest_path:
             if self.matrix_type == 'normal':
-                np.save(dest_path, self.cameraMatrix)
+                np.save(dest_path, self.camera_matrix)
             elif self.matrix_type == 'optimized':
-                np.save(dest_path, self.optimalCameraMatrix)
+                np.save(dest_path, self.optimal_camera_matrix)
 
     @pyqtSlot(QVariant)
     def set_frame_type(self, frame_type):
@@ -299,7 +299,7 @@ class CalibrationIface(PlayerInterface):
             raise KeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frame_type))
         self.stream = ImageListVideoStream(imgs)
         self._update_img_provider()
-        self.stream.current_frame_idx = self._validate_frame_idx(current_index - 1) # reset to previous position
+        self.stream.current_frame_idx = self._validate_frame_idx(current_index - 1)  # reset to previous position
         self.get_img()
 
 
@@ -343,8 +343,8 @@ class TrackerIface(BaseInterface):
         self.stream = self.tracker  # To comply with BaseInterface
         self.tracker.roi = self.roi
 
-        self.n_frames = self.tracker._stream.nFrames - 1
-        self.current_frame_idx = self.tracker._stream.currentFrameIdx
+        self.n_frames = self.tracker._stream.n_frames - 1
+        self.current_frame_idx = self.tracker._stream.current_frame_idx
         
         if self.params.end_frame_idx == -1:
             self.params.end_frame_idx = self.n_frames
@@ -361,21 +361,21 @@ class TrackerIface(BaseInterface):
         self.positions = []  # reset between runs
         self.distances_from_arena = []
         
-        self.tracker._stream.bgStartFrame = self.params.bgFrameIdx
-        n_background_frames = self.params.nBgFrames
-        self.tracker._stream.bgEndFrame = self.params.bgFrameIdx + n_background_frames - 1
-        self.tracker.track_from = self.params.startFrameIdx
-        self.tracker.track_to = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
+        self.tracker._stream.bg_start_frame = self.params.bg_frame_idx  # FIXME: params attributes case
+        n_background_frames = self.params.n_bg_frames
+        self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
+        self.tracker.track_from = self.params.start_frame_idx
+        self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
         
-        self.tracker.threshold = self.params.detectionThreshold
-        self.tracker.min_area = self.params.objectsMinArea
-        self.tracker.max_area = self.params.objectsMaxArea
-        self.tracker.teleportation_threshold = self.params.teleportationThreshold
+        self.tracker.threshold = self.params.detection_threshold
+        self.tracker.min_area = self.params.objects_min_area
+        self.tracker.max_area = self.params.objects_max_area
+        self.tracker.teleportation_threshold = self.params.teleportation_threshold
         
-        self.tracker.n_sds = self.params.nSds
-        self.tracker.clear_borders = self.params.clearBorders
+        self.tracker.n_sds = self.params.n_sds
+        self.tracker.clear_borders = self.params.clear_borders
         self.tracker.normalise = self.params.normalise
-        self.tracker.extract_arena = self.params.extractArena
+        self.tracker.extract_arena = self.params.extract_arena
         
         self.tracker.set_roi(self.roi)
             
@@ -412,7 +412,7 @@ class TrackerIface(BaseInterface):
         :param diameter: The diameter of the ROI
         """
         if hasattr(self, 'tracker'):
-            stream_width, stream_height = self.tracker._stream.size # flipped for openCV
+            stream_width, stream_height = self.tracker._stream.size  # flipped for openCV
             horizontal_scaling_factor = stream_width / width
             vertical_scaling_factor = stream_height / height
             
@@ -438,10 +438,10 @@ class TrackerIface(BaseInterface):
         else:
             default_dest = os.getenv('HOME')
         dest_path = diag.getSaveFileName(parent=diag,
-                                        caption='Save file',
-                                        directory=default_dest,
-                                        filter="Text (*.txt *.dat *.csv)",
-                                        initialFilter="Text (*.csv)")
+                                         caption='Save file',
+                                         directory=default_dest,
+                                         filter="Text (*.txt *.dat *.csv)",
+                                         initialFilter="Text (*.csv)")
         dest_path = dest_path[0]
         if dest_path:
             self.write(dest_path)
@@ -491,18 +491,18 @@ class TrackerIface(BaseInterface):
         """
         diag = QFileDialog()
         dest_path = diag.getSaveFileName(parent=diag,
-                                    caption='Save file',
-                                    directory=os.getenv('HOME'), 
-                                    filter="Image (*.png *.jpg)")
+                                         caption='Save file',
+                                         directory=os.getenv('HOME'),
+                                         filter="Image (*.png *.jpg)")
         dest_path = dest_path[0]
         if dest_path:
-            imsave(dest_path, self.analysis_image_provider.getArray())
+            imsave(dest_path, self.analysis_image_provider.get_array())
 
     def get_sampling_freq(self):
         return self.tracker._stream.fps
 
     def get_img(self):
-        if self.tracker._stream.currentFrameIdx < self.n_frames:
+        if self.tracker._stream.current_frame_idx < self.n_frames:
             self.display.reload()
             self._update_display_idx()
         else:
@@ -528,9 +528,10 @@ class RecorderIface(TrackerIface):
         
         :returns: The recording was started status code
         """
-        if not hasattr(self.params, 'destPath'):
+        print("Recording starting")  # FIXME: DEBUG:
+        if not hasattr(self.params, 'dest_path'):
             return False
-        vid_ext = os.path.splitext(self.params.destPath)[1]
+        vid_ext = os.path.splitext(self.params.dest_path)[1]
         if vid_ext not in VIDEO_FORMATS:
             print('Unknow format: {}'.format(vid_ext))
             return False
@@ -538,22 +539,22 @@ class RecorderIface(TrackerIface):
         self.positions = []  # reset between runs
         self.distances_from_arena = []
         
-        bg_start = self.params.bgFrameIdx
-        n_background_frames = self.params.nBgFrames
-        track_from = self.params.startFrameIdx
-        track_to = self.params.endFrameIdx if (self.params.endFrameIdx > 0) else None
+        bg_start = self.params.bg_frame_idx
+        n_background_frames = self.params.n_bg_frames
+        track_from = self.params.start_frame_idx
+        track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
         
-        threshold = self.params.detectionThreshold
-        min_area = self.params.objectsMinArea
-        max_area = self.params.objectsMaxArea
-        teleportation_threshold = self.params.teleportationThreshold
+        threshold = self.params.detection_threshold
+        min_area = self.params.objects_min_area
+        max_area = self.params.objects_max_area
+        teleportation_threshold = self.params.teleportation_threshold
         
-        n_sds = self.params.nSds
-        clear_borders = self.params.clearBorders
+        n_sds = self.params.n_sds
+        clear_borders = self.params.clear_borders
         normalise = self.params.normalise
-        extract_arena = self.params.extractArena
+        extract_arena = self.params.extract_arena
         
-        self.tracker = GuiTracker(self, src_file_path=None, dest_file_path=self.params.destPath,
+        self.tracker = GuiTracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                   threshold=threshold, min_area=min_area, max_area=max_area,
                                   teleportation_threshold=teleportation_threshold,
                                   bg_start=bg_start, track_from=track_from, track_to=track_to,

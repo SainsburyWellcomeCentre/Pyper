@@ -17,7 +17,7 @@ ApplicationWindow {
                 text: qsTr("&Open")
                 shortcut: "Ctrl+O"
                 onTriggered: {
-                    if (py_iface.openVideo()) {
+                    if (py_iface.open_video()) {
                         infoScreen.flash(2000);
                         if (tabs){
                             if (previewTab) {
@@ -51,7 +51,7 @@ ApplicationWindow {
             id: timer
         }
         function checkPathLoaded(idx){
-            if (py_iface.isPathSelected()){
+            if (py_iface.is_path_selected()){
                 tabs.currentIndex = idx;
             } else {
                 errorScreen.flash(2000);

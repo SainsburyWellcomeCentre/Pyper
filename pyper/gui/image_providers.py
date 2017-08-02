@@ -20,6 +20,7 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtQuick import QQuickImageProvider
 
+
 class TrackingImageProvider(QQuickImageProvider):
     """
     Abstract class to supply image sequences (videos) to the QT interface
@@ -79,6 +80,7 @@ class TrackingImageProvider(QQuickImageProvider):
     def getBaseImg(self, size):
         raise NotImplementedError("TrackingImageProvider missing method getBaseImg")
 
+
 class CvImageProvider(TrackingImageProvider):
     """
     This class implements TrackingImageProvider for openCV images.
@@ -90,7 +92,7 @@ class CvImageProvider(TrackingImageProvider):
     def __init__(self, requestedImType='img', stream=None):
         """
         :param string requestedImType: The type of image to return to the QT interface (one of ['img', 'pixmap'])
-        :param stream: An object that implements a read() method that returns an image and a currentFrameIdx counter attribute
+        :param stream: An object that implements a read() method that returns an image and a current_frame_idx counter attribute
         """
         TrackingImageProvider.__init__(self, requestedImType=requestedImType)
         self._stream = stream
@@ -102,7 +104,7 @@ class CvImageProvider(TrackingImageProvider):
         :param img: The source image to write onto
         :param tuple imgSize: The size of the source image
         """
-        text = "No contour found at frame: {}".format(self._stream.currentFrameIdx)
+        text = "No contour found at frame: {}".format(self._stream.current_frame_idx)
         text2 = "Please check your parameters"
         text3 = "And ensure specimen is there"
         x = 10
@@ -138,6 +140,7 @@ class CvImageProvider(TrackingImageProvider):
         w, h = size
         qimg = QImage(img, h, w, QImage.Format_RGB888)
         return qimg
+
 
 class PyplotImageProvider(TrackingImageProvider):
     """

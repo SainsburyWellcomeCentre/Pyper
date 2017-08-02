@@ -48,7 +48,7 @@ Rectangle {
 
         tooltip: "Select folder with the calibration images"
         onClicked: {
-            pathTextField.text = py_calibration.getFolderPath();
+            pathTextField.text = py_calibration.get_folder_path();
             loadBtn.enabled = true;
         }
     }
@@ -88,26 +88,26 @@ Rectangle {
                 label: "Rows"
                 tooltip: "Number of rows in pattern"
                 readOnly: false
-                text: py_calibration.getNRows()
+                text: py_calibration.get_n_rows()
                 onTextChanged: {
                     if (validateInt()) {
-                        py_calibration.setNRows(text);
+                        py_calibration.set_n_rows(text);
                     }
                 }
-                function reload() {text = py_calibration.getNRows() }
+                function reload() {text = py_calibration.get_n_rows() }
             }
             IntLabel{
                 width: parent.width
                 label: "Columns"
                 tooltip: "Number of columns in pattern"
                 readOnly: false
-                text: py_calibration.getNColumns()
+                text: py_calibration.get_n_columns()
                 onTextChanged: {
                     if (validateInt()) {
-                        py_calibration.setNColumns(text);
+                        py_calibration.set_n_columns(text);
                     }
                 }
-                function reload() {text = py_calibration.getNColumns() }
+                function reload() {text = py_calibration.get_n_columns() }
             }
         }
     }
@@ -126,8 +126,8 @@ Rectangle {
         onPauseClicked: { py_calibration.pause() }
         onForwardClicked: { py_calibration.move(1) }
         onBackwardClicked: { py_calibration.move(-1) }
-        onStartClicked: { py_calibration.seekTo(-1) }
-        onEndClicked: { py_calibration.seekTo(py_calibration.getNFrames()) }
+        onStartClicked: { py_calibration.seek_to(-1) }
+        onEndClicked: { py_calibration.seek_to(py_calibration.get_n_frames()) }
     }
     Video {
         id: calibrateImage
@@ -171,7 +171,7 @@ Rectangle {
                 model: ["Source", "Detected", "Corrected"]
                 onCurrentTextChanged:{
                     if (enabled){
-                        py_calibration.setFrameType(currentText);
+                        py_calibration.set_frame_type(currentText);
                     }
                 }
             }
@@ -209,7 +209,7 @@ Rectangle {
 
                     model: ["Normal", "Optimized"]
                     onCurrentTextChanged:{
-                        py_calibration.setMatrixType(currentText);
+                        py_calibration.set_matrix_type(currentText);
                     }
                 }
                 CustomButton {
@@ -221,7 +221,7 @@ Rectangle {
 
                     tooltip: "Select the destination of the camera matrix"
                     onClicked: {
-                        pathTextField.text = py_calibration.saveCameraMatrix();
+                        pathTextField.text = py_calibration.save_camera_matrix();
                     }
                 }
             }

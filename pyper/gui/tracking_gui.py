@@ -28,6 +28,7 @@ from pyper.exceptions.exceptions import PyperGUIError
 
 DEBUG = False
 
+
 class Logger(QObject):
     """
     A qml object for logging the events
@@ -35,11 +36,11 @@ class Logger(QObject):
     It is not meant to be interacted with directly (use print() instead)
     """
     
-    def __init__(self, context, parent=None, logObjectName="log"):
+    def __init__(self, context, parent=None, log_object_name="log"):
         QObject.__init__(self, parent)
         self.win = parent
         self.ctx = context
-        self.log = self.win.findChild(QObject, logObjectName)
+        self.log = self.win.findChild(QObject, log_object_name)
     
     def write(self, text):
         """
@@ -49,9 +50,9 @@ class Logger(QObject):
         :param string text: The text to append at the end of the current qml component text
         """
         if text:
-            previousText = self.log.property('text')
-            outputText = '{}\n>>>{}'.format(previousText, text)
-            self.log.setProperty('text', outputText)
+            previous_text = self.log.property('text')
+            output_text = '{}\n>>>{}'.format(previous_text, text)
+            self.log.setProperty('text', output_text)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -59,15 +60,15 @@ if __name__ == '__main__':
     appEngine = QQmlApplicationEngine()
     
     context = appEngine.rootContext()
-    appEngine.addImageProvider('viewerprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('trackerprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('recorderprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('calibrationprovider', CvImageProvider()) # Hack to make qml believe provider is valid before its creation
+    appEngine.addImageProvider('viewerprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
+    appEngine.addImageProvider('trackerprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
+    appEngine.addImageProvider('recorderprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
+    appEngine.addImageProvider('calibrationprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
     
-    analysisImageProvider = PyplotImageProvider(fig=None)
-    appEngine.addImageProvider("analysisprovider", analysisImageProvider)
-    analysisImageProvider2 = PyplotImageProvider(fig=None)
-    appEngine.addImageProvider("analysisprovider2", analysisImageProvider2)
+    analysis_image_provider = PyplotImageProvider(fig=None)
+    appEngine.addImageProvider("analysisprovider", analysis_image_provider)
+    analysis_image_provider2 = PyplotImageProvider(fig=None)
+    appEngine.addImageProvider("analysisprovider2", analysis_image_provider2)
     appEngine.load(QUrl('./pyper/qml/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
 
     try:
@@ -82,8 +83,10 @@ if __name__ == '__main__':
     # REGISTER PYTHON CLASSES WITH QML
     params = ParamsIface(app, context, win)
     viewer = ViewerIface(app, context, win, params, "preview", "viewerprovider")
-    tracker = TrackerIface(app, context, win, params, "trackerDisplay", "trackerprovider", analysisImageProvider, analysisImageProvider2)
-    recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider", analysisImageProvider, analysisImageProvider2)
+    tracker = TrackerIface(app, context, win, params, "trackerDisplay", "trackerprovider",
+                           analysis_image_provider, analysis_image_provider2)
+    recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider",
+                             analysis_image_provider, analysis_image_provider2)
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
     
     context.setContextProperty('py_iface', params)

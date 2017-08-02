@@ -26,7 +26,7 @@ from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
 from pyper.contours.roi import Circle
 
-isPi = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
+IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
 
 class Viewer(object):
@@ -44,10 +44,10 @@ class Viewer(object):
         """
         track_range_params = (bg_start, n_background_frames)
         if src_file_path is None:
-            if isPi:
-                self._stream = PiVideoStream(destFilePath, *track_range_params)
+            if IS_PI:
+                self._stream = PiVideoStream(dest_file_path, *track_range_params)
             else:
-                self._stream = UsbVideoStream(destFilePath, *track_range_params)
+                self._stream = UsbVideoStream(dest_file_path, *track_range_params)
         else:
             self._stream = RecordedVideoStream(src_file_path, *track_range_params)
         self.delay = delay
@@ -61,10 +61,10 @@ class Viewer(object):
         :return int track_start: set using the 's' key
         :return int track_end:set using the 'q' key
         """
-        is_recording = hasattr(self._stream, 'nFrames')
+        is_recording = hasattr(self._stream, 'n_frames')
         if is_recording:
             widgets = ['Video Progress: ', Percentage(), Bar()]
-            pbar = ProgressBar(widgets=widgets, maxval=self._stream.nFrames).start()
+            pbar = ProgressBar(widgets=widgets, maxval=self._stream.n_frames).start()
         bg_frame = track_start = track_end = None
         while True:
             try:
@@ -108,7 +108,7 @@ class Viewer(object):
         :return Idx: The corresponding frame index
         :rtype: int
         """
-        return self._stream.timeStrToFrameIdx(time_str)
+        return self._stream.time_str_to_frame_idx(time_str)
 
 
 class Tracker(object):
@@ -154,7 +154,7 @@ class Tracker(object):
         if callback is not None: self.callback = callback
         track_range_params = (bg_start, n_background_frames)
         if src_file_path is None:
-            if isPi:
+            if IS_PI:
                 self._stream = PiVideoStream(dest_file_path, *track_range_params)
             else:
                 self._stream = UsbVideoStream(dest_file_path, *track_range_params)
@@ -229,9 +229,9 @@ class Tracker(object):
         self.bg = None  # reset for each track
         if is_recording:
             widgets = ['Tracking frames: ', Percentage(), Bar()]
-            pbar = ProgressBar(widgets=widgets, maxval=self._stream.nFrames).start()
-        elif isPi:
-            self._stream.restartRecording(reset)
+            pbar = ProgressBar(widgets=widgets, maxval=self._stream.n_frames).start()
+        elif IS_PI:
+            self._stream.restart_recording(reset)
 
         if check_fps: prev_time = time()
         while True:
@@ -369,7 +369,7 @@ class Tracker(object):
         """
         treated_frame = frame.gray()
         fast = self.fast
-        if not isPi and not fast:
+        if not IS_PI and not fast:
             treated_frame = treated_frame.denoise().blur()
         silhouette, diff = self._get_silhouette(treated_frame)
         
@@ -405,11 +405,11 @@ class Tracker(object):
                 if area > self.max_area:
                     if not fast:
                         print('Frame: {}, found something too big in the arena ({} > {})'
-                              ''.format(self._stream.current_frame_idx, area, self.max_area))
+                              .format(self._stream.current_frame_idx, area, self.max_area))
                 else:
                     if not fast:
                         print('Frame: {}, biggest structure too small ({} < {})'
-                              ''.format(self._stream.current_frame_idx, area, self.min_area))
+                              .format(self._stream.current_frame_idx, area, self.min_area))
                 return None
         else:
             print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
@@ -447,14 +447,14 @@ class Tracker(object):
         """
         if len(self.positions) < 2:
             return
-        lastVector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
-        if (lastVector > self.teleportation_threshold).any():
+        last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
+        if (last_vector > self.teleportation_threshold).any():
             silhouette.save('teleportingSilhouette.tif')
             frame.save('teleportingFrame.tif')
-            errMsg = 'Frame: {}, mouse teleported from {} to {}' \
-                     ''.format(self._stream.current_frame_idx, *self.positions[-2:])
-            errMsg += '\nPlease see teleportingSilhouette.tif and teleportingFrame.tif for debugging'
-            self._stream.stop_recording(errMsg)
+            err_msg = 'Frame: {}, mouse teleported from {} to {}'\
+                .format(self._stream.current_frame_idx, *self.positions[-2:])
+            err_msg += '\nPlease see teleportingSilhouette.tif and teleportingFrame.tif for debugging'
+            self._stream.stop_recording(err_msg)
             raise EOFError('End of recording reached')
 
     @staticmethod
@@ -497,7 +497,7 @@ class Tracker(object):
             diff = diff.astype(np.uint8)
             silhouette = diff.threshold(self.threshold)
         if self.clear_borders:
-            silhouette.clearBorders()
+            silhouette.clear_borders()
         return silhouette, diff
 
 
@@ -534,9 +534,7 @@ class GuiTracker(Tracker):
         self.record = dest_file_path is not None
     
     def set_roi(self, roi):
-        """
-        Set the region of interest and enable it
-        """
+        """Set the region of interest and enable it"""
         self.roi = roi
         if roi is not None:
             self._make_bottom_square()
@@ -544,12 +542,12 @@ class GuiTracker(Tracker):
     def read(self):
         """
         The required method to behave as a video stream
-        It calls self.track() and increments the currentFrameIdx
+        It calls self.track() and increments the current_frame_idx
         It also updates the uiIface positions accordingly
         """
         try:
             self.current_frame_idx = self._stream.current_frame_idx + 1
-            result = self.track_frame(record=self.record, requested_output=self.ui_iface.outputType)
+            result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
         except EOFError:
             self.ui_iface._stop('End of recording reached')
             return
@@ -560,11 +558,11 @@ class GuiTracker(Tracker):
         if result is not None:
             img, position, distances = result
             self.ui_iface.positions.append(position)
-            self.ui_iface.distancesFromArena.append(distances)
+            self.ui_iface.distances_from_arena.append(distances)
             return img
         else:
             self.ui_iface.positions.append(self.default_pos)
-            self.ui_iface.distancesFromArena.append(self.default_pos)
+            self.ui_iface.distances_from_arena.append(self.default_pos)
     
     def track_frame(self, record=False, requested_output='raw'):
         """
