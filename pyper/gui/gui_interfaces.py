@@ -338,7 +338,7 @@ class TrackerIface(BaseInterface):
         """
         self.tracker = GuiTracker(self, src_file_path=self.params.src_path, dest_file_path=None,
                                   n_background_frames=1, plot=True,
-                                  fast=False, camera_calibration=self.params.calib,
+                                  fast=True, camera_calibration=self.params.calib,
                                   callback=None)
         self.stream = self.tracker  # To comply with BaseInterface
         self.tracker.roi = self.roi
@@ -560,7 +560,7 @@ class RecorderIface(TrackerIface):
                                   bg_start=bg_start, track_from=track_from, track_to=track_to,
                                   n_background_frames=n_background_frames, n_sds=n_sds,
                                   clear_borders=clear_borders, normalise=normalise,
-                                  plot=True, fast=False, extract_arena=extract_arena,
+                                  plot=True, fast=True, extract_arena=extract_arena,
                                   camera_calibration=self.params.calib,
                                   callback=None)
         self.stream = self.tracker  # to comply with BaseInterface
