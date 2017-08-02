@@ -469,34 +469,37 @@ class TrackerIface(BaseInterface):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
-        fig, ax = plt.subplots()
-        angles = video_analysis.get_angles(self.positions)
-        video_analysis.plot_angles(angles, self.get_sampling_freq())
-        self.analysis_image_provider._fig = fig
+        if hasattr(self, 'tracker'):
+            fig, ax = plt.subplots()
+            angles = video_analysis.get_angles(self.positions)
+            video_analysis.plot_angles(angles, self.get_sampling_freq())
+            self.analysis_image_provider._fig = fig
 
     @pyqtSlot()
     def analyse_distances(self):
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
-        fig, ax = plt.subplots()
-        distances = video_analysis.pos_to_distances(self.positions)
-        video_analysis.plot_distances(distances, self.get_sampling_freq())
-        self.analysisImageProvider2._fig = fig
+        if hasattr(self, 'tracker'):
+            fig, ax = plt.subplots()
+            distances = video_analysis.pos_to_distances(self.positions)
+            video_analysis.plot_distances(distances, self.get_sampling_freq())
+            self.analysisImageProvider2._fig = fig
 
     @pyqtSlot()
     def save_angles_fig(self):
         """
         Save the graph as a png or jpeg image
         """
-        diag = QFileDialog()
-        dest_path = diag.getSaveFileName(parent=diag,
-                                         caption='Save file',
-                                         directory=os.getenv('HOME'),
-                                         filter="Image (*.png *.jpg)")
-        dest_path = dest_path[0]
-        if dest_path:
-            imsave(dest_path, self.analysis_image_provider.get_array())
+        if hasattr(self, 'tracker'):
+            diag = QFileDialog()
+            dest_path = diag.getSaveFileName(parent=diag,
+                                             caption='Save file',
+                                             directory=os.getenv('HOME'),
+                                             filter="Image (*.png *.jpg)")
+            dest_path = dest_path[0]
+            if dest_path:
+                imsave(dest_path, self.analysis_image_provider.get_array())
 
     def get_sampling_freq(self):
         return self.tracker._stream.fps
@@ -769,9 +772,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(result=QVariant)
     def open_video(self):
-        """
-        The QT dialog to select the video to be used for preview or tracking
-        """
+        """The QT dialog to select the video to be used for preview or tracking"""
         diag = QFileDialog()
         path = diag.getOpenFileName(parent=diag,
                                     caption='Open file',
