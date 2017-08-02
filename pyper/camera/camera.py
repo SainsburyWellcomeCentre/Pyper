@@ -12,15 +12,16 @@ camera for openCV processing
 :author: crousse
 """
 
+
 class CvPiCamera(PiCamera):
     """
-    A subclass of the picamera that keeps a reference of its encoder
-    and doesn't close it between frames. This speeds up the acquisition
-    process substantialy.
+    A subclass of picamera that keeps a reference of its encoder and doesn't close it between frames.
+    This speeds up the acquisition process substantially.
     
     .. note:: This class is meant to acquire in format 'bgr' (for openCV)
     
     """
+
     def __init__(self):
         """
         Initialises the camera and sets the isFirstFrame attribute to allow
@@ -30,10 +31,7 @@ class CvPiCamera(PiCamera):
         self.isFirstFrame = True
 
     def _init_encoder(self):
-        """
-        Creates the 'bgr' encoder to be reused for each frame.
-        To be used for first frame only.
-        """
+        """Creates the 'bgr' encoder to be reused for each frame. To be used for first frame only."""
         self.splitter_port = 0
         use_video_port = True
         fmt = 'bgr'
@@ -43,22 +41,20 @@ class CvPiCamera(PiCamera):
         encoder = self._get_image_encoder(camera_port, output_port, fmt, resize)
         self.encoder = encoder
         self._encoders[self.splitter_port] = encoder
-        
-    def closeEncoder(self):
-        """
-        closes self.encoder and deletes the encoder from self._encoders
-        """
+
+    def close_encoder(self):
+        """Closes self.encoder and deletes the encoder from self._encoders"""
         self.encoder.close()
         with self._encoders_lock:
             del self._encoders[self.splitter_port]
-        
-    def quickCapture(self, output): # resize=None
+
+    def quick_capture(self, output):  # resize=None
         """
         A method similar to the standard capture except it reuses the encoder
         
         :param output: The stream to write to (the frame gets written to stream.array)
         :type output: picamera.array.PiRGBArray
-        :raises: PiCameraRuntimeError if times out
+        :raises PiCameraRuntimeError: if timeout occurs
         """
         if self.isFirstFrame:
             self._init_encoder()
