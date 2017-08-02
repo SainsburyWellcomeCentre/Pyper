@@ -4,7 +4,7 @@
 The roi module
 **************
 
-This module is used to check the position of the mouse relative to an roi
+This module is used to check the position of the mouse relative to a region of interest (ROI)
 
 :author: crousse
 """
@@ -14,66 +14,66 @@ from math import radians, cos, sin
 import cv2
 from cv2 import norm
 
+
 class Roi(object):
     """
-    A generic roi object meant to be subclassed by specific roi shapes.
+    A generic ROI object meant to be sub-classed by specific ROI shapes.
     It is used to obtain information about points relative to itself.
     """
     def __init__(self):
         pass
     
-    def pointInRoi(self, point):
+    def point_in_roi(self, point):
         """
-        Returns True if the point is in the roi
+        Returns True if the point is in the ROI
         
-        :param tuple point: and (x,y) point
+        :param tuple point: the (x, y) point to check
         """
         return cv2.pointPolygonTest(self.points, point, False) > 0
         
-    def distFromBorder(self, point):
+    def dist_from_border(self, point):
         """
-        Returns the distance from the point to the border of the roi
+        Returns the distance from the point to the border of the ROI
         
-        :param tuple point: The (x, y) point to check
+        :param tuple point: the (x, y) point to check
         """
         return cv2.pointPolygonTest(self.points, point, True)
         
-    def distFromCenter(self, point):
+    def dist_from_center(self, point):
         """
-        Returns the distance from the point to the center of mass of the roi
+        Returns the distance from the point to the center of mass of the ROI
         
-        :param tuple point: The (x, y) point to check
+        :param tuple point: the (x, y) point to check
         """
         return norm(self.center, point)
         
 
 class Circle(Roi):
     """
-    A circle Object that contains an array of points distributed
-    on its periphery
+    A circle Object that contains an array of points distributed on its perimeter
     
     Use as follows:
     
     >>> roi = Circle((256, 256), 30) # creates a circle of radius 30 at center 256, 256
-    >>> mousePosition = (250, 242)
-    >>> if roi.pointInRoi(mousePosition):
+    >>> mouse_position = (250, 242)
+    >>> if roi.point_in_roi(mouse_position):
     >>>     print('The mouse entered the ROI')
     """
 
     def __init__(self, center, radius):
         """
-        Initialises a circle at center and with given radius
+        Initialises a circle
         
-        :param tuple center: The center of the circle
+        :param tuple center: the center of the circle
         :param int radius: the radius in pixels
         """
         Roi.__init__(self)
         self.center = center
         self.radius = radius
-        points = self.getPoints().astype(np.int32)
+        points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
         
-    def circlePoint(self, angle):
+    def circle_point(self, angle):
         """
         Gets a point on the circle at the given angle
         
@@ -85,15 +85,14 @@ class Circle(Roi):
         y = center[1] + radius * sin(angle)
         return x, y
 
-    def getPoints(self):
+    def get_points(self):
         """
-        Get 360 points evenly spread on the circle
+        Get 360 points evenly spaced around the circle perimeter
         
-        :return: The list of points.
-        :rtype: np.array
+        :return np.array points: the list of points.
         """
-        nPoints = 360
-        points = np.empty((nPoints, 2), dtype=np.float32)
-        for i in range(nPoints):
-            points[i] = self.circlePoint(radians(i))
+        n_points = 360
+        points = np.empty((n_points, 2), dtype=np.float32)
+        for i in range(n_points):
+            points[i] = self.circle_point(radians(i))
         return points

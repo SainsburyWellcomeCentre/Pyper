@@ -10,22 +10,23 @@ This class makes it easier to extract contour features and draw them
 
 :author: crousse
 """
-from cv2 import ellipse as cv2Ellipse
+from cv2 import ellipse as cv2_ellipse
 from cv2 import fitEllipse, drawContours, moments
 
 import numpy as np
 
+
 class ObjectContour(object):
     """ A contour object to easily extract features from objects and draw """
-    def __init__(self, contour, frame, contourType='ellipse', color='w', lineThickness=1):
+    def __init__(self, contour, frame, contour_type='ellipse', color='w', line_thickness=1):
         """
         :param contour: The contour to make an ObjectContour
         :type contour: array of shape [nPoints, 1, 2]
         :param frame: The frame to draw the contour onto
         :type frame: an image
-        :param str contourType: The type to fit the contour (ellipse or raw) (not fit performed fot raw.
+        :param str contour_type: The type to fit the contour (ellipse or raw) (not fit performed fot raw.
         :param str color: The color to draw the contour. One of 'w', 'r', 'g', 'b', 'y', 'm'.
-        :param int lineThickness: The thickness in pixels of the line to draw the contour
+        :param int line_thickness: The thickness in pixels of the line to draw the contour
         """
         colors = {'w': (255, 255, 255),
                   'r': (0, 0, 255),
@@ -36,9 +37,9 @@ class ObjectContour(object):
                   'm': (255, 0, 255)}
         self.contour = contour
         self.frame = frame
-        self.contourType = contourType
+        self.contour_type = contour_type
         self.color = colors[color]
-        self.lineThickness = lineThickness
+        self.line_thickness = line_thickness
         self._fit()
 
     @property
@@ -55,19 +56,19 @@ class ObjectContour(object):
         
         :raise NotImplementedError: if self.contourType not supported
         """
-        if self.contourType == 'ellipse':
+        if self.contour_type == 'ellipse':
             self.fit = fitEllipse(self.contour)
             self.centre = self.fit[0]
 #           self.angle = np.round(self.ellipse[2], 1)
 #           self.width, self.height = tuple(np.round(self.ellipse[1], 1))
-        elif self.contourType == 'raw':
-            self.fit = moments(self.contour.astype(np.float32)) # FIXME: should not have to convert on the fly
+        elif self.contour_type == 'raw':
+            self.fit = moments(self.contour.astype(np.float32))  # FIXME: should not have to convert on the fly
             x = self.fit['m10'] / self.fit['m00']
             y = self.fit['m01'] / self.fit['m00']
             self.centre = (x, y)
         else:
             raise NotImplementedError("The show function\
-            does not currently support {} contour types".format(self.contourType))
+            does not currently support {} contour types".format(self.contour_type))
         
     def draw(self):
         """
@@ -79,23 +80,22 @@ class ObjectContour(object):
             if __debug__:
                 print('Frame empty skipping drawing')
             return
-        if self.contourType == 'ellipse':
-            cv2Ellipse(self.frame, self.fit, color=self.color, thickness=self.lineThickness)
-        elif self.contourType == 'raw':
-            drawContours(self.frame, [self.contour], 0, self.color, self.lineThickness)
+        if self.contour_type == 'ellipse':
+            cv2_ellipse(self.frame, self.fit, color=self.color, thickness=self.line_thickness)
+        elif self.contour_type == 'raw':
+            drawContours(self.frame, [self.contour], 0, self.color, self.line_thickness)
         else:
             raise NotImplementedError("The show function\
-            does not currently support {} contour types".format(self.contourType))
-        
+            does not currently support {} contour types".format(self.contour_type))
 
-    def writeCoordinatesToFile(self, path, frameIdx):
+    def write_coordinates_to_file(self, path, frame_idx):
         """
         Writes parameters to file following:
         'frameNum', 'centreX', 'centreY', 'width', 'height', 'angle'
         
         :param str path: The destination path
-        :param int frame: The frame number corresponding to the contour
+        :param int frame_idx: The frame number corresponding to the contour
         """
-        with open(path, 'a') as outFile:
-            outFile.write('{}\t'.format(frameIdx))
-            outFile.write('{}\t{}\t'.format(*self.centre))
+        with open(path, 'a') as out_file:
+            out_file.write('{}\t'.format(frame_idx))
+            out_file.write('{}\t{}\t'.format(*self.centre))
