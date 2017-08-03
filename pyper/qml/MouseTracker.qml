@@ -40,6 +40,21 @@ ApplicationWindow {
                 onTriggered: Qt.quit();
             }
         }
+                Menu {
+            title: qsTr("Tracking Method")
+            MenuItem {
+                text: qsTr("Open field")
+                onTriggered: {
+                    py_iface.set_tracker_type("GuiTracker")
+                }
+            }
+            MenuItem {
+                text: qsTr("Pupil tracking")
+                onTriggered: {
+                    py_iface.set_tracker_type("PupilGuiTracker")
+                }
+            }
+        }
     }
 
     Rectangle{

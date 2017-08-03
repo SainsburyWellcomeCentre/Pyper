@@ -25,6 +25,7 @@ from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 from PyQt5.QtCore import Qt
 
 from pyper.tracking.tracking import GuiTracker
+from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
 from pyper.contours.roi import Circle, Rectangle
@@ -37,6 +38,11 @@ from pyper.exceptions.exceptions import VideoStreamIOException
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
 
+Tracker = GuiTracker
+TRACKER_CLASSES = {
+    'GuiTracker': GuiTracker,
+    'PupilGuiTracker': PupilGuiTracker
+}
 
 class BaseInterface(QObject):
     """
@@ -313,7 +319,7 @@ class CalibrationIface(PlayerInterface):
 class TrackerIface(BaseInterface):
     """
     This class implements the BaseInterface to provide a qml interface
-    to the GuiTracker object of the tracking module.
+    to the GuiTracker (or subclass thereof) object of the tracking module.
     """
     def __init__(self, app, context, parent, params, display_name, provider_name, analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
@@ -341,14 +347,14 @@ class TrackerIface(BaseInterface):
     @pyqtSlot()
     def load(self):
         """
-        Load the video and create the GuiTracker object
+        Load the video and create the GuiTracker object (or subclass)
         Also registers the analysis image providers (for the analysis tab) with QT
         """
         try:
-            self.tracker = GuiTracker(self, src_file_path=self.params.src_path, dest_file_path=None,
-                                      n_background_frames=1, plot=True,
-                                      fast=True, camera_calibration=self.params.calib,
-                                      callback=None)
+            self.tracker = Tracker(self, src_file_path=self.params.src_path, dest_file_path=None,
+                                   n_background_frames=1, plot=True,
+                                   fast=True, camera_calibration=self.params.calib,
+                                   callback=None)
         except VideoStreamIOException:
             self.tracker = None
             error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
@@ -596,7 +602,7 @@ class RecorderIface(TrackerIface):
         normalise = self.params.normalise
         extract_arena = self.params.extract_arena
 
-        self.tracker = GuiTracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
+        self.tracker = Tracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                   threshold=threshold, min_area=min_area, max_area=max_area,
                                   teleportation_threshold=teleportation_threshold,
                                   bg_start=bg_start, track_from=track_from, track_to=track_to,
@@ -681,6 +687,14 @@ class ParamsIface(QObject):
         """
         sys.stdout = sys.__stdout__
 
+    @pyqtSlot(str)
+    def set_tracker_type(self, tracker_type):
+        try:
+            tracker_class = TRACKER_CLASSES[tracker_type]
+            globals()["Tracker"] = tracker_class
+        except KeyError:
+            print("Type must be one of {}, got: {}".format(TRACKER_CLASSES.keys(), tracker_type))
+
     @pyqtSlot()
     def chg_cursor(self):
         self.app.setOverrideCursor(Qt.CursorShape(Qt.CrossCursor))
@@ -692,7 +706,7 @@ class ParamsIface(QObject):
     # BOOLEAN OPTIONS
     @pyqtSlot(bool)
     def set_clear_borders(self, status):
-        self.clear_borders = bool(status)
+        self.clear_borders = status
 
     @pyqtSlot(result=bool)
     def get_clear_borders(self):
@@ -700,7 +714,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(bool)
     def set_normalise(self, status):
-        self.normalise = bool(status)
+        self.normalise = status
 
     @pyqtSlot(result=bool)
     def get_normalise(self):
@@ -708,7 +722,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(bool)
     def set_extract_arena(self, status):
-        self.extract_arena = bool(status)
+        self.extract_arena = status
 
     @pyqtSlot(result=bool)
     def get_extract_arena(self):
