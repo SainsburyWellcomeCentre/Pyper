@@ -392,6 +392,12 @@ class Tracker(object):
         if self.normalise:
             self.bg_avg_avg = self.bg.mean()  # TODO: rename
     
+    def _pre_process_frame(self, frame):
+        treated_frame = frame.gray()
+        if not IS_PI and not self.fast:
+            treated_frame = treated_frame.denoise().blur()
+        return treated_frame
+        
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
         Get the position of the mouse in frame and append to self.positions
@@ -405,11 +411,8 @@ class Tracker(object):
         :returns: silhouette
         :rtype: binary mask or None
         """
-        treated_frame = frame.gray()
-        if not IS_PI and not self.fast:
-            treated_frame = treated_frame.denoise().blur()
+        treated_frame = self._pre_process_frame(frame)
         silhouette, diff = self._get_silhouette(treated_frame)
-        
         biggest_contour = self._get_biggest_contour(silhouette)
 
         if IS_PI and self.fast:
