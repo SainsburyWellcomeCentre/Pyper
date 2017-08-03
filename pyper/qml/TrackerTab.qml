@@ -89,8 +89,8 @@ Rectangle {
                     splash.visible = true;
                 }
                 onClicked: {
-                    if (roi.isDrawn){
-                        py_tracker.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
+                    if (mouseRoi.isDrawn){
+                        py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth);
                     }
                     py_tracker.start()
                 }
@@ -143,8 +143,8 @@ Rectangle {
 
         source: "image://trackerprovider/img"
 
-        Roi{
-            id: roi
+        CircleRoi {
+            id: mouseRoi
             anchors.fill: parent
             isActive: roiButton.isDown
             onReleased: {
@@ -153,6 +153,21 @@ Rectangle {
                         py_tracker.set_roi(width, height, roiX, roiY, roiWidth);
                     } else {
                         py_tracker.remove_roi();
+                        eraseRoi();
+                    }
+                }
+            }
+        }
+        RectangleRoi {
+            id: restrictionRoi
+            anchors.fill: parent
+            isActive: restrictionRoiButton.isDown
+            onReleased: {
+                if (isDrawn) {
+                    if (isActive) {
+                        py_tracker.set_tracking_region_roi(width, height, roiX, roiY, roiWidth, roiHeight)
+                    } else {
+                        py_tracker.remove_tracking_region_roi();
                         eraseRoi();
                     }
                 }
@@ -416,17 +431,58 @@ Rectangle {
         onReleased: {}
 
         onClicked: {
-            if (isDown){
+            if (isDown) { // already active -> revert
                 py_iface.restore_cursor();
                 iconSource = oldSource;
                 isDown = false;
                 infoScreen.visible = false;
-            } else {
+            } else {  // activate
                 py_iface.chg_cursor();
                 oldSource = iconSource;
                 iconSource = pressedSource;
                 isDown = true;
                 infoScreen.visible = true;
+                mouseRoi.z = 10;
+                restrictionRoi.z = 9;
+            }
+        }
+    }
+    CustomButton {
+        id: restrictionRoiButton
+
+        property bool isDown
+        isDown: false
+        property string oldSource
+        oldSource: iconSource
+
+        anchors.top: comboBox1.bottom
+        anchors.topMargin: 10
+        anchors.left: roiButton.right
+
+        width: startTrackBtn.width
+        height: width
+
+        iconSource: "../../resources/icons/roi.png"
+        pressedSource: "../../resources/icons/roi_pressed.png"
+        tooltip: "Draw tracking area ROI"
+
+        onPressed: {}
+        onReleased: {}
+
+        onClicked: {
+            if (isDown) { // already active -> revert
+                py_iface.restore_cursor();
+                iconSource = oldSource;
+                isDown = false;
+                infoScreen.visible = false;
+            } else { // activate
+                py_iface.chg_cursor();
+                oldSource = iconSource;
+                iconSource = pressedSource;
+                isDown = true;
+                infoScreen.visible = true;
+                restrictionRoi.z = 10;
+                mouseRoi.z = 9;
             }
         }
     }

@@ -27,7 +27,7 @@ from PyQt5.QtCore import Qt
 from pyper.tracking.tracking import GuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Circle
+from pyper.contours.roi import Circle, Rectangle
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
@@ -40,7 +40,6 @@ VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
 
 class BaseInterface(QObject):
     """
-
     Abstract interface
     This class is meant to be sub-classed by the other classes of the module
     PlayerInterface, TrackerIface (base themselves to ViewerIface, CalibrationIface, RecorderIface)
@@ -321,6 +320,7 @@ class TrackerIface(BaseInterface):
         
         self.positions = []
         self.roi = None
+        self.tracking_region_roi = None
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
@@ -395,6 +395,7 @@ class TrackerIface(BaseInterface):
         self.tracker.extract_arena = self.params.extract_arena
         
         self.tracker.set_roi(self.roi)
+        self.tracker.set_tracking_region_roi(self.tracking_region_roi)
             
         self.timer.start(self.timer_speed)
 
@@ -413,6 +414,12 @@ class TrackerIface(BaseInterface):
         """
         self.timer.stop()
         self.tracker._stream.stop_recording(msg)
+
+    def __getScalingFactors(self, width, height):
+        streamWidth, streamHeight = self.tracker._stream.size  # flipped for openCV
+        horizontalScalingFactor = streamWidth / width
+        verticalScalingFactor = streamHeight / height
+        return horizontalScalingFactor, verticalScalingFactor
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_roi(self, width, height, x, y, diameter):
@@ -429,9 +436,7 @@ class TrackerIface(BaseInterface):
         :param diameter: The diameter of the ROI
         """
         if hasattr(self, 'tracker'):
-            stream_width, stream_height = self.tracker._stream.size  # flipped for openCV
-            horizontal_scaling_factor = stream_width / width
-            vertical_scaling_factor = stream_height / height
+            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
             
             radius = diameter / 2.0
             scaled_x = (x + radius) * horizontal_scaling_factor
@@ -440,9 +445,27 @@ class TrackerIface(BaseInterface):
             
             self.roi = Circle((scaled_x, scaled_y), scaled_radius)
 
+    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
+    def set_tracking_region_roi(self, width, height, roi_x, roi_y, roi_width, roi_height):
+        if hasattr(self, 'tracker'):
+            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
+            scaled_x = roi_x * horizontal_scaling_factor
+            scaled_x -= 1
+            scaled_y = roi_y * vertical_scaling_factor
+            scaled_y -= 1
+            scaled_width = roi_width * horizontal_scaling_factor
+            scaled_height = roi_height * vertical_scaling_factor
+            self.tracking_region_roi = Rectangle(scaled_x, scaled_y, scaled_width, scaled_height)
+        else:
+            print("No tracker object")
+
     @pyqtSlot()
     def remove_roi(self):
         self.roi = None
+
+    @pyqtSlot()
+    def remove_tracking_region_roi(self):
+        self.tracking_region_roi = None
 
     @pyqtSlot(QVariant)
     def save(self, default_dest):
@@ -691,7 +714,7 @@ class ParamsIface(QObject):
     def get_extract_arena(self):
         return self.extract_arena
 
-    # Detection options
+    # DETECTION OPTIONS
     @pyqtSlot(result=QVariant)
     def get_detection_threshold(self):
         return self.detection_threshold
@@ -742,7 +765,7 @@ class ParamsIface(QObject):
         if n_sds > 0:
             self.n_sds = n_sds
 
-    # Frame options
+    # FRAME OPTIONS
     @pyqtSlot(QVariant)
     def set_bg_frame_idx(self, idx):
         idx = int(idx)

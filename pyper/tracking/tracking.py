@@ -75,7 +75,10 @@ class Viewer(object):
                 if not frame.dtype == np.uint8:
                     frame = frame.astype(np.uint8)
                 frame = frame.copy()
-                kbd_code = frame.display(win_name='Frame', text='Frame: {}'.format(frame_id), delay=self.delay, get_code=True)
+                kbd_code = frame.display(win_name='Frame',
+                                         text='Frame: {}'.format(frame_id),
+                                         delay=self.delay,
+                                         get_code=True)
                 kbd_code = kbd_code if kbd_code == -1 else chr(kbd_code & 255)
                 if kbd_code == 'b': bg_frame = frame_id
                 elif kbd_code == 's': track_start = frame_id
@@ -217,6 +220,7 @@ class Tracker(object):
         
         self.default_pos = (-1, -1)
         self.positions = []
+        self.tracking_region_roi = None
         
     def _extract_arena(self):
         """
@@ -267,7 +271,7 @@ class Tracker(object):
         elif IS_PI:
             self._stream.restart_recording(reset)
 
-        if check_fps: prev_time = time()
+        if check_fps: prev_time = time.time()
         while True:
             try:
                 if check_fps: prev_time = self._check_fps(prev_time)
@@ -395,7 +399,8 @@ class Tracker(object):
         
         :param frame: The video frame to use.
         :type: video_frame.Frame
-        :param str requested_color: A character (for list of supported charaters see ObjectContour) idicating the color to draw the contour
+        :param str requested_color: A character (for list of supported characters see ObjectContour)\
+         indicating the color to draw the contour
         :param str requested_output: Which frame type to output (one of ['raw', 'mask', 'diff'])
         :returns: silhouette
         :rtype: binary mask or None
@@ -431,7 +436,8 @@ class Tracker(object):
             area = cv2.contourArea(biggest_contour)
             mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
             if self.plot:
-                mouse.draw()
+                mouse.draw()  # even if wrong size to held spot issues
+                self._draw_subregion_roi(plot_silhouette)
             if self.min_area < area < self.max_area:
                 self.positions[-1] = mouse.centre
                 self._check_teleportation(frame, silhouette)
@@ -444,6 +450,11 @@ class Tracker(object):
         else:
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
+
+    def _draw_subregion_roi(self, img, color='y'):
+        if self.tracking_region_roi is not None:
+            test_roi = ObjectContour(self.tracking_region_roi.points, img, contour_type='raw', color=color)
+            test_roi.draw()
 
     def _handle_bad_size_contour(self, area, img=None):
         if area > self.max_area:
@@ -475,9 +486,9 @@ class Tracker(object):
         :returns: The new time
         :rtype: time object
         """
-        fps = 1/(time() - prev_time)
+        fps = 1/(time.time() - prev_time)
         print("{} fps".format(fps))
-        return time()
+        return time.time()
         
     def _check_teleportation(self, frame, silhouette):
         """
@@ -487,7 +498,8 @@ class Tracker(object):
         
         :param frame: The current frame (to be saved for troubleshooting if teleportation occured)
         :type frame: video_frame.Frame
-        :param silhouette: The binary mask of the current frame (to be saved for troubleshooting if teleportation occured)
+        :param silhouette: The binary mask of the current frame\
+         (to be saved for troubleshooting if teleportation occured)
         :type silhouette: video_frame.Frame
         
         :raises: EOFError if the mouse teleported
@@ -504,8 +516,13 @@ class Tracker(object):
             self._stream.stop_recording(err_msg)
             raise EOFError('End of recording reached')
 
-    @staticmethod
-    def _get_biggest_contour(silhouette):
+    def __all_contour_points_in_roi(self, contour):
+        for p in contour:
+            if not self.tracking_region_roi.point_in_roi(tuple(p[0])):  # at least one point outside of ROI
+                return False
+        return True
+
+    def _get_biggest_contour(self, silhouette):
         """
         We need to rerun if too many contours are found as it should means
         that the findContours function returned nonsense.
@@ -519,8 +536,17 @@ class Tracker(object):
                                                mode=cv2.RETR_LIST,
                                                method=cv2.CHAIN_APPROX_NONE)  # TODO: is CHAIN_APPROX_SIMPLE better?
         if contours:
-            idx = np.argmax([cv2.contourArea(c) for c in contours])
-            return contours[idx]
+            descending_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+            if self.tracking_region_roi is None:
+                return descending_contours[0]
+            else:
+                for cnt in descending_contours:  # use cv2.contourArea(c)
+                    closed_contour = len(cnt) >= 4
+                    if closed_contour and self.__all_contour_points_in_roi(cnt):
+                        return cnt
+                    else:
+                        continue
+                return None  # all contours have failed
         
     def _get_silhouette(self, frame):
         """
@@ -585,6 +611,9 @@ class GuiTracker(Tracker):
         self.roi = roi
         if roi is not None:
             self._make_bottom_square()
+
+    def set_tracking_region_roi(self, roi):
+        self.tracking_region_roi = roi
 
     def read(self):
         """

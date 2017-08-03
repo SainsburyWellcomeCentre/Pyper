@@ -68,18 +68,14 @@ Rectangle {
 
                 enabled: false
                 onClicked:{
-                    console.log("Clicked")
                     if (py_recorder.cam_detected()){
-                        console.log("Clicked and cam detected")
                         if (roi.isDrawn){
                             py_recorder.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
                         }
                         if (py_recorder.start()) {
-                            console.log("Recording started")
                             enabled = false;
                             stopBtn.enabled = true;
                         }
-                        console.log("Done")
                     } else {
                         errorScreen.flash(3000);
                     }
@@ -118,7 +114,6 @@ Rectangle {
             pathTextField.text = py_iface.set_save_path("");
             if (py_recorder.cam_detected()){
                 recordBtn.enabled = true;
-                console.log("Enabling recording button")
             } else {
                 errorScreen.flash(3000);
             }
@@ -136,7 +131,6 @@ Rectangle {
             py_iface.set_save_path(text);
             if (py_recorder.cam_detected()){
                 recordBtn.enabled = true;
-                console.log("Enabling recording button")
             } else {
                 errorScreen.flash(3000);
             }
@@ -153,7 +147,7 @@ Rectangle {
 
         source: "image://recorderprovider/img"
 
-        Roi{
+        CircleRoi {
             id: roi
             anchors.fill: parent
             isActive: roiButton.isDown

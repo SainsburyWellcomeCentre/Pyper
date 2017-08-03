@@ -96,3 +96,25 @@ class Circle(Roi):
         for i in range(n_points):
             points[i] = self.circle_point(radians(i))
         return points
+
+
+class Rectangle(Roi):
+
+    def __init__(self, top_left_x, top_left_y, width, height):
+        Roi.__init__(self)
+        self.top_left_point = (top_left_x, top_left_y)
+        self.width = width
+        self.height = height
+        self.center = (int(top_left_x + (width / 2)), int(top_left_y + (height / 2)))
+        points = self.get_points().astype(np.int32)
+        self.points = np.expand_dims(points, axis=1)
+
+    def get_points(self):
+        n_points = 4  # the 4 corners
+        points = np.empty((n_points, 2), dtype=np.float32)
+        top_x, top_y = self.top_left_point
+        points[0] = self.top_left_point
+        points[1] = (top_x + self.width, top_y)  # FIXME: use point type instead
+        points[2] = (top_x + self.width, top_y + self.height)
+        points[3] = (top_x, top_y + self.height)
+        return points

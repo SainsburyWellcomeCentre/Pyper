@@ -15,6 +15,8 @@ from cv2 import fitEllipse, drawContours, moments
 
 import numpy as np
 
+DEFAULT_POSITION = (-1, -1)
+
 
 class ObjectContour(object):
     """ A contour object to easily extract features from objects and draw """
@@ -63,12 +65,15 @@ class ObjectContour(object):
 #           self.width, self.height = tuple(np.round(self.ellipse[1], 1))
         elif self.contour_type == 'raw':
             self.fit = moments(self.contour.astype(np.float32))  # FIXME: should not have to convert on the fly
-            x = self.fit['m10'] / self.fit['m00']
-            y = self.fit['m01'] / self.fit['m00']
-            self.centre = (x, y)
+            try:
+                x = self.fit['m10'] / self.fit['m00']
+                y = self.fit['m01'] / self.fit['m00']
+                self.centre = (x, y)
+            except ZeroDivisionError:
+                self.centre = DEFAULT_POSITION
         else:
-            raise NotImplementedError("The show function\
-            does not currently support {} contour types".format(self.contour_type))
+            raise NotImplementedError("The show function does not currently"
+                                      " support {} contour types".format(self.contour_type))
         
     def draw(self):
         """
