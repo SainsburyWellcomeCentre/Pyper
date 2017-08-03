@@ -32,6 +32,8 @@ from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 
+from pyper.exceptions.exceptions import VideoStreamIOException
+
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
 
@@ -179,7 +181,13 @@ class ViewerIface(PlayerInterface):
         """
         Loads the video into memory
         """
-        self.stream = VStream(self.params.src_path, 0, 1)
+        try:
+            self.stream = VStream(self.params.src_path, 0, 1)
+        except VideoStreamIOException:
+            self.stream = None
+            error_screen = self.win.findChild(QObject, 'viewerVideoLoadingErrorScreen')
+            error_screen.setProperty('doFlash', True)
+            return
         self.n_frames = self.stream.n_frames - 1
 
         self._set_display()
@@ -336,10 +344,16 @@ class TrackerIface(BaseInterface):
         Load the video and create the GuiTracker object
         Also registers the analysis image providers (for the analysis tab) with QT
         """
-        self.tracker = GuiTracker(self, src_file_path=self.params.src_path, dest_file_path=None,
-                                  n_background_frames=1, plot=True,
-                                  fast=True, camera_calibration=self.params.calib,
-                                  callback=None)
+        try:
+            self.tracker = GuiTracker(self, src_file_path=self.params.src_path, dest_file_path=None,
+                                      n_background_frames=1, plot=True,
+                                      fast=True, camera_calibration=self.params.calib,
+                                      callback=None)
+        except VideoStreamIOException:
+            self.tracker = None
+            error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
+            error_screen.setProperty('doFlash', True)
+            return
         self.stream = self.tracker  # To comply with BaseInterface
         self.tracker.roi = self.roi
 
@@ -358,6 +372,9 @@ class TrackerIface(BaseInterface):
         """
         Start the tracking of the loaded video with the parameters from self.params
         """
+        if self.tracker is None:
+            return
+
         self.positions = []  # reset between runs
         self.distances_from_arena = []
         
@@ -531,7 +548,6 @@ class RecorderIface(TrackerIface):
         
         :returns: The recording was started status code
         """
-        print("Recording starting")  # FIXME: DEBUG:
         if not hasattr(self.params, 'dest_path'):
             return False
         vid_ext = os.path.splitext(self.params.dest_path)[1]
@@ -556,7 +572,7 @@ class RecorderIface(TrackerIface):
         clear_borders = self.params.clear_borders
         normalise = self.params.normalise
         extract_arena = self.params.extract_arena
-        
+
         self.tracker = GuiTracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                   threshold=threshold, min_area=min_area, max_area=max_area,
                                   teleportation_threshold=teleportation_threshold,

@@ -10,6 +10,8 @@ Rectangle{
     property alias labelAnchors: label.anchors
     property alias labelWidth: label.width
 
+    property bool doFlash: false
+
     width: 200
     height: 100
     radius: 10

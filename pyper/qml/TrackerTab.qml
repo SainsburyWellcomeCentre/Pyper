@@ -36,6 +36,24 @@ Rectangle {
         visible: false
         z: 1
     }
+    ErrorScreen{
+        id: videoErrorScreen
+        objectName: "videoLoadingErrorScreen"
+
+        anchors.centerIn: trackerDisplay
+        width: 400
+        height: 200
+
+        text: "Loading video failed"
+        visible: false
+        z: 1
+        onDoFlashChanged: {
+            if (doFlash) {
+                flash(3000)
+            }
+            doFlash = false
+        }
+    }
 
     Rectangle {
         id: controls

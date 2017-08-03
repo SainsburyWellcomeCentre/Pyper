@@ -94,6 +94,24 @@ Rectangle {
         visible: false
         anchors.centerIn: previewImage
     }
+    ErrorScreen{
+        id: videoErrorScreen
+        objectName: "viewerVideoLoadingErrorScreen"
+
+        anchors.centerIn: previewImage
+        width: 400
+        height: 200
+
+        text: "Loading video failed"
+        visible: false
+        z: 1
+        onDoFlashChanged: {
+            if (doFlash) {
+                flash(3000)
+            }
+            doFlash = false
+        }
+    }
 
     VideoControls {
         id: vidControl

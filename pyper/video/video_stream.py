@@ -216,7 +216,7 @@ class RecordedVideoStream(VideoStream):
 #        else
 #            n_frames = 0
         n_frames = 0
-        print("Computing number of frames, this may take some time.  ")
+        print("Computing number of frames, this may take some time.")
         while True:
             got_frame, _ = stream.read()
             if got_frame:
@@ -225,7 +225,6 @@ class RecordedVideoStream(VideoStream):
                 n_frames += 1
             else:
                 break
-        print("\nDone")
         if n_frames == 0:
             raise VideoStreamIOException("Could not read video")
         else:
