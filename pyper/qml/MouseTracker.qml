@@ -40,21 +40,35 @@ ApplicationWindow {
                 onTriggered: Qt.quit();
             }
         }
-                Menu {
+        Menu {
+            id: trackingAlgorithmMenu
             title: qsTr("Tracking Method")
             MenuItem {
                 text: qsTr("Open field")
+                checkable: true
+                exclusiveGroup: trackingAlgorithmExclusiveGroup
                 onTriggered: {
                     py_iface.set_tracker_type("GuiTracker")
                 }
             }
             MenuItem {
                 text: qsTr("Pupil tracking")
+                checkable: true
+                exclusiveGroup: trackingAlgorithmExclusiveGroup
                 onTriggered: {
                     py_iface.set_tracker_type("PupilGuiTracker")
                 }
             }
+            MenuSeparator { }
+            MenuItem {
+                text: qsTr("Custom algorithm")
+                onTriggered: {
+                }
+            }
         }
+    }
+    ExclusiveGroup {
+        id: trackingAlgorithmExclusiveGroup
     }
 
     Rectangle{
