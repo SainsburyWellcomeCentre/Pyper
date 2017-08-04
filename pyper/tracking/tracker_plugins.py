@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyper.video.video_frame import Frame
-from tracking import GuiTracker
+from pyper.tracking.tracking import GuiTracker
 
 
 class PupilGuiTracker(GuiTracker):
@@ -30,7 +30,7 @@ class PupilGuiTracker(GuiTracker):
         :rtype: video_frame.Frame
         """
         if PupilGuiTracker.WHITE_FRAME is None:
-            PupilGuiTracker.WHITE_FRAME = np.ones(frame.shape, dtype=np.uint8) * 255
+            PupilGuiTracker.WHITE_FRAME = np.full(frame.shape, 255, dtype=np.uint8)
 
         if self.normalise:
             frame = frame.normalise(self.bg_avg_avg)

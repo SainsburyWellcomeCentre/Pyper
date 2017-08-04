@@ -20,13 +20,15 @@ from OpenGL import GL # Hack necessary to get qtQuick working
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject, QUrl
+from PyQt5.QtGui import QIcon
 
-from pyper.gui.gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface
+from pyper.gui.gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface, \
+    EditorIface
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
 
 from pyper.exceptions.exceptions import PyperGUIError
 
-DEBUG = False
+DEBUG = True
 
 
 class Logger(QObject):
@@ -75,6 +77,9 @@ if __name__ == '__main__':
         win = appEngine.rootObjects()[0]
     except IndexError:
         raise PyperGUIError("Could not start the QT GUI")
+
+    ico = QIcon('./resources/icons/pyper.png')
+    win.setIcon(ico)
     
     if not DEBUG:
         logger = Logger(context, win, "log")
@@ -88,12 +93,14 @@ if __name__ == '__main__':
     recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider",
                              analysis_image_provider, analysis_image_provider2)
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
+    editor = EditorIface(app, context, win)
     
     context.setContextProperty('py_iface', params)
     context.setContextProperty('py_viewer', viewer)
     context.setContextProperty('py_tracker', tracker)
     context.setContextProperty('py_recorder', recorder)
     context.setContextProperty('py_calibration', calibrater)
+    context.setContextProperty('py_editor', editor)
     
     win.show()
     try:

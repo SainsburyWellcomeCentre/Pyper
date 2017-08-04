@@ -3,6 +3,8 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
+import QtQml.Models 2.2
+
 
 ApplicationWindow {
     id: main
@@ -11,6 +13,8 @@ ApplicationWindow {
     height: 700
 
     menuBar: MenuBar {
+        id: pyperTopMenuBar
+
         Menu {
             title: qsTr("File")
             MenuItem {
@@ -43,28 +47,25 @@ ApplicationWindow {
         Menu {
             id: trackingAlgorithmMenu
             title: qsTr("Tracking Method")
+            AlgorithmMenuItem { id: algo1; checked:true; text: "Open field"; className: "GuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
+            AlgorithmMenuItem { id: algo2; text: "Pupil tracking"; className: "PupilGuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
+            MenuSeparator { }
             MenuItem {
-                text: qsTr("Open field")
-                checkable: true
-                exclusiveGroup: trackingAlgorithmExclusiveGroup
+                text: qsTr("Add custom")
                 onTriggered: {
-                    py_iface.set_tracker_type("GuiTracker")
-                }
-            }
-            MenuItem {
-                text: qsTr("Pupil tracking")
-                checkable: true
-                exclusiveGroup: trackingAlgorithmExclusiveGroup
-                onTriggered: {
-                    py_iface.set_tracker_type("PupilGuiTracker")
+                    var codeWindow = Qt.createComponent("CodeWindow.qml");
+                    if(codeWindow.status === Component.Ready) {
+                        var win = codeWindow.createObject(main);
+                        win.algorithmsMenu = trackingAlgorithmMenu
+                        win.algorithmsExclusiveGroup = trackingAlgorithmExclusiveGroup
+                        win.pythonObject = py_iface
+                        win.show();
+                    } else {
+                        console.log("Code Window error, Status:", codeWindow.status, codeWindow.errorString());
+                    }
                 }
             }
             MenuSeparator { }
-            MenuItem {
-                text: qsTr("Custom algorithm")
-                onTriggered: {
-                }
-            }
         }
     }
     ExclusiveGroup {
