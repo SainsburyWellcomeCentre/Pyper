@@ -1,5 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
 
 Rectangle {
     id: rectangle1
@@ -36,29 +37,32 @@ Rectangle {
         }
     }
 
-    CustomButton {
-        id: pathBtn
-        width: 40
-        height: width
+    Row {
+        id: loadControls
         anchors.left: calibrateImage.left
-        anchors.bottom: calibrateImage.top
-        anchors.bottomMargin: 10
+        anchors.leftMargin: 30
+        spacing: 5
+        CustomButton {
+            id: pathBtn
+            width: 40
+            height: width
+            anchors.top: parent.top
+            anchors.topMargin: 10
 
-        iconSource: "../../resources/icons/document-open.png"
+            iconSource: "../../resources/icons/document-open.png"
 
-        tooltip: "Select folder with the calibration images"
-        onClicked: {
-            pathTextField.text = py_calibration.get_folder_path();
-            loadBtn.enabled = true;
+            tooltip: "Select folder with the calibration images"
+            onClicked: {
+                pathTextField.text = py_calibration.get_folder_path();
+                loadBtn.enabled = true;
+            }
         }
-    }
-    TextField{
-        id: pathTextField
-        width: 400
-        anchors.left: pathBtn.right
-        anchors.leftMargin: 5
-        anchors.verticalCenter: pathBtn.verticalCenter
-        text: "..."
+        TextField{
+            id: pathTextField
+            width: 400
+            anchors.verticalCenter: pathBtn.verticalCenter
+            text: "..."
+        }
     }
 
     Rectangle{
@@ -131,11 +135,17 @@ Rectangle {
     }
     Video {
         id: calibrateImage
-        x: 152
+        x: 150
         y: 60
-        objectName: "calibrationDisplay"
+        anchors.margins: 10
+        anchors.left: vidControls.right
+        anchors.right: parent.right
+        anchors.top: loadControls.bottom
+        anchors.topMargin: 20
+        anchors.bottom: parent.bottom
         width: 640
         height: 480
+        objectName: "calibrationDisplay"
 
         source: "image://calibrationprovider/img"
     }

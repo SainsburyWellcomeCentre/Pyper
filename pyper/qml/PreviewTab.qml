@@ -61,9 +61,15 @@ Rectangle {
 
     Video {
         id: previewImage
+        objectName: "preview"
         x: 152
         y: 60
-        objectName: "preview"
+
+        anchors.margins: 10
+        anchors.left: vidControl.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         width: 640
         height: 480
 
@@ -77,7 +83,7 @@ Rectangle {
             py_viewer.move(stepSize)
         }
         Roi{
-            anchors.fill: parent
+            anchors.fill: parent.previewImage
             onReleased: {
                 py_tracker.set_roi(roiX, roiY, roiWidth)
             }

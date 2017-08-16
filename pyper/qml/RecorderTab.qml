@@ -99,58 +99,74 @@ Rectangle {
         }
     }
 
-    CustomButton {
-        id: pathBtn
-        width: 40
-        height: width
+    Row {
+        id: pathLayout
+
+        anchors.margins: 10
+        anchors.top: parent.top
         anchors.left: recordImage.left
-        anchors.bottom: recordImage.top
-        anchors.bottomMargin: 10
+        spacing: 5
 
-        iconSource: "../../resources/icons/document-save-as.png"
+        CustomButton {
+            id: pathBtn
+            width: 40
+            height: width
 
-        tooltip: "Select video destination (before recording)"
-        onClicked: {
-            pathTextField.text = py_iface.set_save_path("");
-            if (py_recorder.cam_detected()){
-                recordBtn.enabled = true;
-            } else {
-                errorScreen.flash(3000);
+            iconSource: "../../resources/icons/document-save-as.png"
+
+            tooltip: "Select video destination (before recording)"
+            onClicked: {
+                pathTextField.text = py_iface.set_save_path("");
+                if (py_recorder.cam_detected()){
+                    recordBtn.enabled = true;
+                } else {
+                    errorScreen.flash(3000);
+                }
+            }
+        }
+        TextField{
+            id: pathTextField
+            width: 400
+            anchors.verticalCenter: pathBtn.verticalCenter
+            text: "..."
+
+            onTextChanged: {
+                py_iface.set_save_path(text);
+                if (py_recorder.cam_detected()){
+                    recordBtn.enabled = true;
+                } else {
+                    errorScreen.flash(3000);
+                }
             }
         }
     }
-    TextField{
-        id: pathTextField
-        width: 400
-        anchors.left: pathBtn.right
-        anchors.leftMargin: 5
-        anchors.verticalCenter: pathBtn.verticalCenter
-        text: "..."
 
-        onTextChanged: {
-            py_iface.set_save_path(text);
-            if (py_recorder.cam_detected()){
-                recordBtn.enabled = true;
-            } else {
-                errorScreen.flash(3000);
-            }
-        }
-    }
 
     Video {
         id: recordImage
+        objectName: "recording"
+
         x: 152
         y: 60
-        objectName: "recording"
+        anchors.margins: 10
+        anchors.left: controls.right
+        anchors.right: parent.right
+        anchors.top: pathLayout.bottom
+        anchors.bottom: parent.bottom
         width: 640
         height: 480
 
         source: "image://recorderprovider/img"
 
+        onWidthChanged: {roi.width = img.width; }
+        onHeightChanged: {roi.height = img.height; }
+
         CircleRoi {
             id: roi
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
             isActive: roiButton.isDown
+
             onReleased: {
                 if (isDrawn) {
                     if (isActive){

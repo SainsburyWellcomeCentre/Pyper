@@ -135,18 +135,36 @@ Rectangle {
 
     Video {
         id: trackerDisplay
+        objectName: "trackerDisplay"
         x: 152
         y: 60
-        objectName: "trackerDisplay"
+
+        anchors.margins: 10
+        anchors.left: controls.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         width: 640
         height: 480
 
         source: "image://trackerprovider/img"
 
+        onWidthChanged: {
+            mouseRoi.width = img.width;
+            restrictionRoi.width = img.width;
+        }
+        onHeightChanged: {
+            mouseRoi.height = img.height;
+            restrictionRoi.height = img.height;
+        }
+
         CircleRoi {
             id: mouseRoi
-            anchors.fill: parent
+
+            anchors.top: parent.top
+            anchors.left: parent.left
             isActive: roiButton.isDown
+
             onReleased: {
                 if (isDrawn) {
                     if (isActive){
@@ -160,7 +178,9 @@ Rectangle {
         }
         RectangleRoi {
             id: restrictionRoi
-            anchors.fill: parent
+
+            anchors.top: parent.top
+            anchors.left: parent.left
             isActive: restrictionRoiButton.isDown
             onReleased: {
                 if (isDrawn) {
