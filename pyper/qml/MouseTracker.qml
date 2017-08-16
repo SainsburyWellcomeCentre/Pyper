@@ -5,6 +5,9 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
 
+import "popup_messages"
+import "basic_types"
+
 
 ApplicationWindow {
     id: main
@@ -104,7 +107,7 @@ ApplicationWindow {
 
             text: "Welcome"
             tooltip: "Switch to welcome mode"
-            iconSource: "../../resources/icons/welcome.png"
+            iconSource: "../../../resources/icons/welcome.png"
             onClicked: tabs.currentIndex = 0
         }
 
@@ -120,7 +123,7 @@ ApplicationWindow {
 
             text: "Preview"
             tooltip: "Switch to preview mode"
-            iconSource: "../../resources/icons/preview.png"
+            iconSource: "../../../resources/icons/preview.png"
             onClicked: { parent.checkPathLoaded(1) }
         }
         CustomToolButton{
@@ -135,7 +138,7 @@ ApplicationWindow {
 
             text: "Track"
             tooltip: "Switch to tracking mode"
-            iconSource: "../../resources/icons/track.png"
+            iconSource: "../../../resources/icons/track.png"
 
             onClicked: { parent.checkPathLoaded(2) }
         }
@@ -151,7 +154,7 @@ ApplicationWindow {
 
             text: "Record"
             tooltip: "Switch to recording mode"
-            iconSource: "../../resources/icons/camera.png"
+            iconSource: "../../../resources/icons/camera.png"
 
             onClicked: { tabs.currentIndex = 3 }
         }
@@ -167,7 +170,7 @@ ApplicationWindow {
 
             text: "Calibration"
             tooltip: "Switch to camera calibration mode"
-            iconSource: "../../resources/icons/calibration.png"
+            iconSource: "../../../resources/icons/calibration.png"
 
             onClicked: { tabs.currentIndex = 4 }
         }
@@ -183,7 +186,7 @@ ApplicationWindow {
 
             text: "Analyse"
             tooltip: "Switch to analysis mode"
-            iconSource: "../../resources/icons/analyse.png"
+            iconSource: "../../../resources/icons/analyse.png"
 
             onClicked: { tabs.currentIndex = 5 }
         }

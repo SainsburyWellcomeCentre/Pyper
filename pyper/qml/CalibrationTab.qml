@@ -2,6 +2,10 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 
+import "popup_messages"
+import "basic_types"
+import "video"
+
 Rectangle {
     id: rectangle1
     color: "#3B3B3B"
@@ -49,7 +53,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 10
 
-            iconSource: "../../resources/icons/document-open.png"
+            iconSource: "../../../resources/icons/document-open.png"
 
             tooltip: "Select folder with the calibration images"
             onClicked: {
@@ -227,7 +231,7 @@ Rectangle {
                     width: 25
                     height: width
 
-                    iconSource: "../../resources/icons/document-save-as.png"
+                    iconSource: "../../../resources/icons/document-save-as.png"
 
                     tooltip: "Select the destination of the camera matrix"
                     onClicked: {

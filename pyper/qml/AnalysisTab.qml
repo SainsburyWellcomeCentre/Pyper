@@ -1,6 +1,9 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "popup_messages"
+import "basic_types"
+
 Rectangle {
     id: background
     color: "#3B3B3B"

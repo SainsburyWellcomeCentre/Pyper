@@ -1,6 +1,11 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "popup_messages"
+import "basic_types"
+import "video"
+import "roi"
+
 Rectangle {
     color: "#3B3B3B"
     anchors.fill: parent
@@ -81,8 +86,8 @@ Rectangle {
                 width: 45
                 height: width
 
-                iconSource: "../../resources/icons/play.png"
-                pressedSource: "../../resources/icons/play_pressed.png"
+                iconSource: "../../../resources/icons/play.png"
+                pressedSource: "../../../resources/icons/play_pressed.png"
                 tooltip: "Start tracking"
 
                 onPressed:{
@@ -105,8 +110,8 @@ Rectangle {
                 width: startTrackBtn.width
                 height: width
 
-                iconSource: "../../resources/icons/stop.png"
-                pressedSource: "../../resources/icons/stop_pressed.png"
+                iconSource: "../../../resources/icons/stop.png"
+                pressedSource: "../../../resources/icons/stop_pressed.png"
                 tooltip: "Stop tracking"
 
                 onClicked: py_tracker.stop()
@@ -443,8 +448,8 @@ Rectangle {
         width: startTrackBtn.width
         height: width
 
-        iconSource: "../../resources/icons/roi.png"
-        pressedSource: "../../resources/icons/roi_pressed.png"
+        iconSource: "../../../resources/icons/roi.png"
+        pressedSource: "../../../resources/icons/roi_pressed.png"
         tooltip: "Draw ROI"
 
         onPressed: {}
@@ -482,8 +487,8 @@ Rectangle {
         width: startTrackBtn.width
         height: width
 
-        iconSource: "../../resources/icons/roi.png"
-        pressedSource: "../../resources/icons/roi_pressed.png"
+        iconSource: "../../../resources/icons/roi.png"
+        pressedSource: "../../../resources/icons/roi_pressed.png"
         tooltip: "Draw tracking area ROI"
 
         onPressed: {}

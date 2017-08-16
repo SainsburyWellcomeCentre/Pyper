@@ -1,6 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../basic_types"
+
 Item{
     id: controls
     width: 120
@@ -57,8 +59,8 @@ Item{
                 rows: 3
                 spacing: 3
                 CustomButton {
-                    iconSource: "../../resources/icons/play.png"
-                    pressedSource: "../../resources/icons/play_pressed.png"
+                    iconSource: "../../../resources/icons/play.png"
+                    pressedSource: "../../../resources/icons/play_pressed.png"
                     enabled: parent.enabled
                     tooltip: "Starts the video playback"
                     width: parent.width/2 - parent.spacing/2
@@ -66,8 +68,8 @@ Item{
                     onClicked: { controls.playClicked() }
                 }
                 CustomButton {
-                    iconSource: "../../resources/icons/pause.png"
-                    pressedSource: "../../resources/icons/pause_pressed.png"
+                    iconSource: "../../../resources/icons/pause.png"
+                    pressedSource: "../../../resources/icons/pause_pressed.png"
                     tooltip: "Pause playback"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -75,8 +77,8 @@ Item{
                     onClicked: { controls.pauseClicked() }
                 }
                 CustomButton {
-                    iconSource: "../../resources/icons/backward.png"
-                    pressedSource: "../../resources/icons/backward_pressed.png"
+                    iconSource: "../../../resources/icons/backward.png"
+                    pressedSource: "../../../resources/icons/backward_pressed.png"
                     tooltip: "Fast rewind"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -84,8 +86,8 @@ Item{
                     onClicked: { controls.backwardClicked(slider.value) }
                 }
                 CustomButton {
-                    iconSource: "../../resources/icons/forward.png"
-                    pressedSource: "../../resources/icons/forward_pressed.png"
+                    iconSource: "../../../resources/icons/forward.png"
+                    pressedSource: "../../../resources/icons/forward_pressed.png"
                     tooltip: "Fast forward"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -93,8 +95,8 @@ Item{
                     onClicked: { controls.forwardClicked(slider.value) }
                 }
                 CustomButton {
-                    iconSource: "../../resources/icons/jump_backward.png"
-                    pressedSource: "../../resources/icons/jump_backward_pressed.png"
+                    iconSource: "../../../resources/icons/jump_backward.png"
+                    pressedSource: "../../../resources/icons/jump_backward_pressed.png"
                     tooltip: "Go to start"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -102,8 +104,8 @@ Item{
                     onClicked: { controls.startClicked() }
                 }
                 CustomButton {
-                    iconSource: "../../resources/icons/jump_forward.png"
-                    pressedSource: "../../resources/icons/jump_forward_pressed.png"
+                    iconSource: "../../../resources/icons/jump_forward.png"
+                    pressedSource: "../../../resources/icons/jump_forward_pressed.png"
                     tooltip: "Go to end"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
