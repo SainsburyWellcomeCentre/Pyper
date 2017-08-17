@@ -22,43 +22,46 @@ Rectangle {
         style: Text.Raised
         font.family: "Verdana"
     }
-    BoolLabel {
-        id: recordingLabel
-        width: 210
+    Row {
+        id: referenceLayout
+        anchors.margins: 5
+        anchors.left: parent.left
         anchors.top: mainLabel.bottom
         anchors.topMargin: 20
-        anchors.left: trackingLabel.right
-        anchors.leftMargin: 20
-        label: "Recording"
-        fontSize: 12
-        onCheckedChanged: {
-            if (checked){
-                trackingLabel.checked = false;
-            }
-        }
-    }
-    BoolLabel {
-        id: trackingLabel
-        x: 5
         height: 30
-        anchors.top: mainLabel.bottom
-        anchors.topMargin: 20
-        width: 210
-        label: "Tracking"
-        fontSize: 12
-        Component.onCompleted: { checked = true;}
-        onCheckedChanged: {
-            if (checked){
-                recordingLabel.checked = false;
+        BoolLabel {
+            id: trackingLabel
+            height: parent.height
+            width: 210
+            label: "Tracking"
+            fontSize: 12
+            Component.onCompleted: { checked = true;}
+            onCheckedChanged: {
+                if (checked){
+                    recordingLabel.checked = false;
+                }
+            }
+        }
+        BoolLabel {
+            id: recordingLabel
+            height: parent.height
+            width: 210
+            label: "Recording"
+            fontSize: 12
+            onCheckedChanged: {
+                if (checked){
+                    trackingLabel.checked = false;
+                }
             }
         }
     }
-    Grid{
+    Grid {
         id: trackingControlsGrid
         spacing: 10
-        anchors.top: trackingLabel.bottom
+        anchors.top: referenceLayout.bottom
         anchors.topMargin: 20
-        anchors.horizontalCenter: trackingLabel.horizontalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 10
         columns: 2
         rows: 2
         CustomLabeledButton{
@@ -114,8 +117,8 @@ Rectangle {
     }
     PositionsView {
         id: positionsView
-        anchors.top: trackingControlsGrid.bottom
         anchors.topMargin: 10
+        anchors.top: trackingControlsGrid.bottom
         anchors.horizontalCenter: trackingControlsGrid.horizontalCenter
         function getRow(iface, idx){
             if (iface === "tracker"){
@@ -125,54 +128,65 @@ Rectangle {
             }
         }
     }
-    Image {
-        id: analysisImage
+    Column{
+        width: 512
+        height: 512
         x: 235
         y: 85
-        width: 512
-        height: 256
-        source: "image://analysisprovider/img";
-        signal rightClicked()
+        anchors.margins: 10
+        anchors.top: referenceLayout.bottom
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.left: positionsView.right
+        Image {
+            id: analysisImage
 
-        onRightClicked:{
-            if (trackingLabel.checked){
-                py_tracker.save_angles_fig();
-            } else if (recordingLabel.checked){
-                py_recorder.save_angles_fig();
+            width: parent.width
+            height: parent.height/2
+
+            source: "image://analysisprovider/img";
+            signal rightClicked()
+
+            onRightClicked:{
+                if (trackingLabel.checked){
+                    py_tracker.save_angles_fig();
+                } else if (recordingLabel.checked){
+                    py_recorder.save_angles_fig();
+                }
             }
-        }
-        function reload() {
-            var oldSource = source;
-            source = "";
-            source = oldSource;
-        }
-        sourceSize.width: width
-        sourceSize.height: height
-        cache: false
-        MouseArea{
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: {
-                if (mouse.button == Qt.RightButton){
-                    parent.rightClicked()
+            function reload() {
+                var oldSource = source;
+                source = "";
+                source = oldSource;
+            }
+            sourceSize.width: width
+            sourceSize.height: height
+            cache: false
+            MouseArea{
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: {
+                    if (mouse.button == Qt.RightButton){
+                        parent.rightClicked()
+                    }
                 }
             }
         }
-    }
-    Image {
-        id: analysisImage2
-        x: 235
-        y: 333
-        width: 512
-        height: 256
-        source: "image://analysisprovider2/img";
-        function reload() {
-            var oldSource = source;
-            source = "";
-            source = oldSource;
+        Image {
+            id: analysisImage2
+
+            width: parent.width
+            height: parent.height/2
+
+            source: "image://analysisprovider2/img";
+            function reload() {
+                var oldSource = source;
+                source = "";
+                source = oldSource;
+            }
+            sourceSize.height: height
+            sourceSize.width: width
+            cache: false
         }
-        sourceSize.height: height
-        sourceSize.width: width
-        cache: false
     }
 }
