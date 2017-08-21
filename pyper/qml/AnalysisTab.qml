@@ -11,8 +11,9 @@ Rectangle {
 
     Label{
         id: mainLabel
-        x: 85
-        y: 0
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+
         text: "Mouse coordinates"
         styleColor: "#222222"
         color: "white"
@@ -55,89 +56,104 @@ Rectangle {
             }
         }
     }
-    Grid {
-        id: trackingControlsGrid
-        spacing: 10
-        anchors.top: referenceLayout.bottom
-        anchors.topMargin: 20
-        anchors.left: parent.left
+    Column {
+        id: controlsLayout
+
         anchors.leftMargin: 10
-        columns: 2
-        rows: 2
-        CustomLabeledButton{
-            width: 80
-            height: 30
-            label: "Save"
-            onClicked: {
-                if (trackingLabel.checked){
-                    py_tracker.save(py_iface.get_path())
-                } else if (recordingLabel.checked){
-                    py_recorder.save(py_iface.get_dest_path())
+        anchors.left:parent.left
+        anchors.topMargin: 20
+        anchors.top: referenceLayout.bottom
+        anchors.bottom: parent.bottom
+
+        spacing: 10
+
+        Grid {
+            id: trackingControlsGrid
+            anchors.left: parent.left
+
+            columns: 2
+            rows: 2
+            spacing: 10
+            CustomLabeledButton{
+                width: 80
+                height: 30
+                label: "Update"
+                onClicked: {
+                    if (trackingLabel.checked){
+                        positionsView.getData("tracker")
+                    } else if (recordingLabel.checked){
+                        positionsView.getData("recorder")
+                    }
+                }
+            }
+            CustomLabeledButton{
+                width: 80
+                height: 30
+                label: "Save"
+                onClicked: {
+                    if (trackingLabel.checked){
+                        py_tracker.save(py_iface.get_path())
+                    } else if (recordingLabel.checked){
+                        py_recorder.save(py_iface.get_dest_path())
+                    }
+                }
+            }
+            CustomLabeledButton{
+                width: 80
+                height: 30
+                label: "Angles"
+                onClicked: {
+                    if (trackingLabel.checked){
+                        py_tracker.analyse_angles();
+                    } else if (recordingLabel.checked){
+                        py_recorder.analyse_angles();
+                    }
+                    analysisImage.reload();
+                }
+            }
+            CustomLabeledButton{
+                width: 80
+                height: 30
+                label: "Distances"
+                onClicked: {
+                    if (trackingLabel.checked){
+                        py_tracker.analyse_distances();
+                    } else if (recordingLabel.checked){
+                        py_recorder.analyse_distances();
+                    }
+                    analysisImage2.reload();
                 }
             }
         }
-        CustomLabeledButton{
-            width: 80
-            height: 30
-            label: "Update"
-            onClicked: {
-                if (trackingLabel.checked){
-                    positionsView.getData("tracker")
-                } else if (recordingLabel.checked){
-                    positionsView.getData("recorder")
+        PositionsView {
+            id: positionsView
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            height: imageLayout.height - trackingControlsGrid.height - parent.spacing - 10  // x for parent.margin
+
+            function getRow(iface, idx){
+                if (iface === "tracker"){
+                    return py_tracker.get_row(idx);
+                } else if (iface === "recorder"){
+                    return py_recorder.get_row(idx);
                 }
-            }
-        }
-        CustomLabeledButton{
-            width: 80
-            height: 30
-            label: "Angles"
-            onClicked: {
-                if (trackingLabel.checked){
-                    py_tracker.analyse_angles();
-                } else if (recordingLabel.checked){
-                    py_recorder.analyse_angles();
-                }
-                analysisImage.reload();
-            }
-        }
-        CustomLabeledButton{
-            width: 80
-            height: 30
-            label: "Distances"
-            onClicked: {
-                if (trackingLabel.checked){
-                    py_tracker.analyse_distances();
-                } else if (recordingLabel.checked){
-                    py_recorder.analyse_distances();
-                }
-                analysisImage2.reload();
-            }
-        }
-    }
-    PositionsView {
-        id: positionsView
-        anchors.topMargin: 10
-        anchors.top: trackingControlsGrid.bottom
-        anchors.horizontalCenter: trackingControlsGrid.horizontalCenter
-        function getRow(iface, idx){
-            if (iface === "tracker"){
-                return py_tracker.get_row(idx);
-            } else if (iface === "recorder"){
-                return py_recorder.get_row(idx);
             }
         }
     }
     Column{
-        width: 512
+        id: imageLayout
+
+        width: 512  // default width and height seem necessary for CvImageProvider
         height: 512
-        x: 235
-        y: 85
+
         anchors.margins: 10
         anchors.top: referenceLayout.bottom
-        anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.left: positionsView.right
+        anchors.left: controlsLayout.right
+        anchors.right: parent.right
+
         Image {
             id: analysisImage
 
