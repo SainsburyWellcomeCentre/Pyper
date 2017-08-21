@@ -47,8 +47,8 @@ Rectangle {
 
     Text {
         id: vidTitle
-        anchors.bottom: previewImage.top
-        anchors.bottomMargin: 20
+        anchors.top: parent.top
+        anchors.topMargin: 10
         anchors.horizontalCenter: previewImage.horizontalCenter
 
         color: "#ffffff"
@@ -73,7 +73,7 @@ Rectangle {
         anchors.margins: 10
         anchors.left: vidControl.right
         anchors.right: parent.right
-        anchors.top: parent.top
+        anchors.top: vidTitle.bottom
         anchors.bottom: parent.bottom
         width: 640
         height: 480

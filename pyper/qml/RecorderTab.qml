@@ -163,13 +163,21 @@ Rectangle {
 
         source: "image://recorderprovider/img"
 
-        onWidthChanged: {roi.width = img.width; }
-        onHeightChanged: {roi.height = img.height; }
+        onWidthChanged: {
+            roi.width = img.width;
+            restrictionRoi.width = img.width;
+        }
+        onHeightChanged: {
+            roi.height = img.height;
+            restrictionRoi.height = img.height;
+        }
 
         CircleRoi {
             id: roi
+
             anchors.top: parent.top
             anchors.left: parent.left
+
             isActive: roiButton.isDown
 
             onReleased: {
@@ -178,6 +186,25 @@ Rectangle {
                         py_recorder.set_roi(width, height, roiX, roiY, roiWidth);
                     } else {
                         py_recorder.remove_roi();
+                        eraseRoi();
+                    }
+                }
+            }
+        }
+        RectangleRoi {
+            id: restrictionRoi
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
+            isActive: restrictionRoiButton.isDown
+
+            onReleased: {
+                if (isDrawn) {
+                    if (isActive) {
+                        py_recorder.set_tracking_region_roi(width, height, roiX, roiY, roiWidth, roiHeight)
+                    } else {
+                        py_recorder.remove_tracking_region_roi();
                         eraseRoi();
                     }
                 }
@@ -411,48 +438,86 @@ Rectangle {
 
     ComboBox {
         id: comboBox1
+        anchors.margins: 10
         anchors.top: boolSetterContainer.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: boolSetterContainer.Center
+        anchors.left: controls.left
+        anchors.leftMargin: 0
         model: ["Raw", "Diff"]
         onCurrentTextChanged:{
             py_recorder.set_frame_type(currentText)
         }
     }
-    CustomButton {
-        id: roiButton
-
-        property bool isDown
-        isDown: false
-        property string oldSource
-        oldSource: iconSource
-
+    Row {
+        anchors.margins: 10
         anchors.top: comboBox1.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: comboBox1.horizontalCenter
+        anchors.left: controls.left
+        anchors.leftMargin: 0
+        CustomButton {
+            id: roiButton
+            width: recordBtn.width
+            height: width
 
-        width: recordBtn.width
-        height: width
+            property bool isDown
+            isDown: false
+            property string oldSource
+            oldSource: iconSource
 
-        iconSource: "../../../resources/icons/roi.png"
-        pressedSource: "../../../resources/icons/roi_pressed.png"
-        tooltip: "Draw ROI"
+            iconSource: "../../../resources/icons/roi.png"
+            pressedSource: "../../../resources/icons/roi_pressed.png"
+            tooltip: "Draw ROI"
 
-        onPressed: {}
-        onReleased: {}
+            onPressed: {}
+            onReleased: {}
 
-        onClicked: {
-            if (isDown){
-                py_iface.restore_cursor();
-                iconSource = oldSource;
-                isDown = false;
-                infoScreen.visible = false;
-            } else {
-                py_iface.chg_cursor();
-                oldSource = iconSource;
-                iconSource = pressedSource;
-                isDown = true;
-                infoScreen.visible = true;
+            onClicked: {
+                if (isDown){
+                    py_iface.restore_cursor();
+                    iconSource = oldSource;
+                    isDown = false;
+                    infoScreen.visible = false;
+                } else {
+                    py_iface.chg_cursor();
+                    oldSource = iconSource;
+                    iconSource = pressedSource;
+                    isDown = true;
+                    infoScreen.visible = true;
+                    roi.z = 10;
+                    restrictionRoi.z = 9;
+                }
+            }
+        }
+        CustomButton {
+            id: restrictionRoiButton
+            width: roiButton.width
+            height: width
+
+            property bool isDown
+            isDown: false
+            property string oldSource
+            oldSource: iconSource
+
+            iconSource: "../../../resources/icons/roi.png"
+            pressedSource: "../../../resources/icons/roi_pressed.png"
+            tooltip: "Draw tracking area ROI"
+
+            onPressed: {}
+            onReleased: {}
+
+            onClicked: {
+                if (isDown) { // already active -> revert
+                    py_iface.restore_cursor();
+                    iconSource = oldSource;
+                    isDown = false;
+                    infoScreen.visible = false;
+                } else { // activate
+                    py_iface.chg_cursor();
+                    oldSource = iconSource;
+                    iconSource = pressedSource;
+                    isDown = true;
+                    infoScreen.visible = true;
+                    restrictionRoi.z = 10;
+                    roi.z = 9;
+                }
             }
         }
     }

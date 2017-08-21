@@ -2,10 +2,13 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 Roi {
+    id: roiParent  // FIXME: find better name
     property alias roiX: roi.x
     property alias roiY: roi.y
     property alias roiWidth: roi.width
     property alias roiHeight: roi.height
+
+    property color drawingColor: 'Red'
 
     function setRoiPosition(xPosition, yPosition) {
         roi.startPosX = xPosition;
@@ -14,7 +17,7 @@ Roi {
         roi.y = yPosition;
     }
 
-    function expandRoi(xPosition, yPosition) {
+    function resizeRoi(xPosition, yPosition) {
         roi.width = xPosition - roi.startPosX;
         roi.height = yPosition - roi.startPosY;
         roi.x = roi.startPosX;
@@ -29,7 +32,7 @@ Roi {
 
         visible: false
         color: "transparent"
-        border.color: "red"
+        border.color: roiParent.drawingColor
         border.width: 3
 
         property real startPosX

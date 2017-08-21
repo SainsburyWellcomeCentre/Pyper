@@ -22,7 +22,7 @@ Roi {
         roi.y = startPosY;
     }
 
-    function expandRoi(xPosition, yPosition){
+    function resizeRoi(xPosition, yPosition){
         roi.width = _getVector(xPosition, yPosition);
         roi.x = roi.startPosX;
         roi.y = roi.startPosY;

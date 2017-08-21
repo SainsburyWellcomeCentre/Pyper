@@ -29,7 +29,7 @@ from pyper.tracking.tracking import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Circle, Rectangle
+from pyper.contours.roi import Circle, Rectangle, Ellipse
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
@@ -422,14 +422,40 @@ class TrackerIface(BaseInterface):
         self.timer.stop()
         self.tracker._stream.stop_recording(msg)
 
-    def __getScalingFactors(self, width, height):
-        streamWidth, streamHeight = self.tracker._stream.size  # flipped for openCV
-        horizontalScalingFactor = streamWidth / width
-        verticalScalingFactor = streamHeight / height
-        return horizontalScalingFactor, verticalScalingFactor
+    def __get_scaling_factors(self, width, height):
+        stream_width, stream_height = self.tracker._stream.size  # flipped for openCV
+        horizontal_scaling_factor = stream_width / width
+        vertical_scaling_factor = stream_height / height
+        return horizontal_scaling_factor, vertical_scaling_factor
+
+    # @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)  # CIRCLE ROI
+    # def set_roi(self, width, height, x, y, roi_width, roi_height):
+    #     """
+    #     Sets the ROI (in which to check for the specimen) from the one drawn in QT
+    #     Scaling is applied to match the (resolution difference) between the representation
+    #     of the frames in the GUI (on which the user draws the ROI) and the internal representation
+    #     used to compute the position of the specimen.
+    #
+    #     :param width: The width of the image representation in the GUI
+    #     :param height: The height of the image representation in the GUI
+    #     :param x: The center of the roi in the first dimension
+    #     :param y: The center of the roi in the second dimension
+    #     :param roi_width: The width of the ROI
+    #     :param roi_height: The height of the ROI
+    #     """
+    #     if hasattr(self, 'tracker'):
+    #         horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
+    #
+    #         radius = diameter / 2.0
+    #         scaled_x = (x + radius) * horizontal_scaling_factor
+    #         scaled_y = (y + radius) * vertical_scaling_factor
+    #         scaled_width = width * horizontal_scaling_factor
+    #         scaled_height = height * horizontal_scaling_factor
+    #
+    #         self.roi = Circle((scaled_x, scaled_y), scaled_radius)
         
-    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
-    def set_roi(self, width, height, x, y, diameter):
+    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
+    def set_roi(self, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         """
         Sets the ROI (in which to check for the specimen) from the one drawn in QT
         Scaling is applied to match the (resolution difference) between the representation 
@@ -440,22 +466,33 @@ class TrackerIface(BaseInterface):
         :param height: The height of the image representation in the GUI
         :param x: The center of the roi in the first dimension
         :param y: The center of the roi in the second dimension
-        :param diameter: The diameter of the ROI
+        :param roi_width: The width of the ROI
+        :param roi_height: The height of the ROI
         """
         if hasattr(self, 'tracker'):
-            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
-            
-            radius = diameter / 2.0
-            scaled_x = (x + radius) * horizontal_scaling_factor
-            scaled_y = (y + radius) * vertical_scaling_factor
-            scaled_radius = radius * horizontal_scaling_factor
-            
-            self.roi = Circle((scaled_x, scaled_y), scaled_radius)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
+
+            scaled_x = (roi_x + roi_width/2) * horizontal_scaling_factor
+            scaled_y = (roi_y + roi_height/2) * vertical_scaling_factor
+            scaled_width = roi_width * horizontal_scaling_factor
+            scaled_height = roi_height * horizontal_scaling_factor
+            print(scaled_x, scaled_y, scaled_width, scaled_height)
+            self.roi = Ellipse(scaled_x, scaled_y, scaled_width, scaled_height)
 
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_tracking_region_roi(self, width, height, roi_x, roi_y, roi_width, roi_height):
+        """
+        Rectangular ROI
+        :param width:
+        :param height:
+        :param roi_x:
+        :param roi_y:
+        :param roi_width:
+        :param roi_height:
+        :return:
+        """
         if hasattr(self, 'tracker'):
-            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
             scaled_x = roi_x * horizontal_scaling_factor
             scaled_x -= 1
             scaled_y = roi_y * vertical_scaling_factor

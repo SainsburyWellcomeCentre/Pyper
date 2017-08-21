@@ -29,18 +29,6 @@ Rectangle {
         visible: false
         anchors.centerIn: trackerDisplay
     }
-    InfoScreen{
-        id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 100
-        height: 75
-
-        text: "Roi mode"
-        visible: false
-        z: 1
-    }
     ErrorScreen{
         id: videoErrorScreen
         objectName: "videoLoadingErrorScreen"
@@ -95,7 +83,7 @@ Rectangle {
                 }
                 onClicked: {
                     if (mouseRoi.isDrawn){
-                        py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth);
+                        py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth, mouseRoi.roiHeight);
                     }
                     py_tracker.start()
                 }
@@ -121,8 +109,8 @@ Rectangle {
 
     Text {
         id: vidTitle
-        anchors.bottom: trackerDisplay.top
-        anchors.bottomMargin: 20
+        anchors.top: parent.top
+        anchors.topMargin: 10
         anchors.horizontalCenter: trackerDisplay.horizontalCenter
 
         color: "#ffffff"
@@ -147,7 +135,7 @@ Rectangle {
         anchors.margins: 10
         anchors.left: controls.right
         anchors.right: parent.right
-        anchors.top: parent.top
+        anchors.top: vidTitle.bottom
         anchors.bottom: parent.bottom
         width: 640
         height: 480
@@ -163,17 +151,19 @@ Rectangle {
             restrictionRoi.height = img.height;
         }
 
-        CircleRoi {
+        EllipseRoi {
             id: mouseRoi
 
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: roiButton.isDown
+            isActive: roiManager.mouseRoiActive
+
+            drawingColor: roiManager.trackingRoiColor
 
             onReleased: {
                 if (isDrawn) {
                     if (isActive){
-                        py_tracker.set_roi(width, height, roiX, roiY, roiWidth);
+                        py_tracker.set_roi(width, height, roiX, roiY, roiWidth, roiHeight);
                     } else {
                         py_tracker.remove_roi();
                         eraseRoi();
@@ -186,7 +176,10 @@ Rectangle {
 
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: restrictionRoiButton.isDown
+            isActive: roiManager.restrictionRoiActive
+
+            drawingColor: roiManager.restrictionRoiColor
+
             onReleased: {
                 if (isDrawn) {
                     if (isActive) {
@@ -433,82 +426,29 @@ Rectangle {
             py_tracker.set_frame_type(currentText)
         }
     }
+
     CustomButton {
-        id: roiButton
+        id: roiManagerBtn
 
-        property bool isDown
-        isDown: false
-        property string oldSource
-        oldSource: iconSource
+        width: 50
+        height: width
 
+        anchors.margins: 10
         anchors.top: comboBox1.bottom
-        anchors.topMargin: 10
         anchors.horizontalCenter: comboBox1.horizontalCenter
 
-        width: startTrackBtn.width
-        height: width
-
         iconSource: "../../../resources/icons/roi.png"
-        pressedSource: "../../../resources/icons/roi_pressed.png"
-        tooltip: "Draw ROI"
 
-        onPressed: {}
-        onReleased: {}
-
+        tooltip: "Open ROI manager"
         onClicked: {
-            if (isDown) { // already active -> revert
-                py_iface.restore_cursor();
-                iconSource = oldSource;
-                isDown = false;
-                infoScreen.visible = false;
-            } else {  // activate
-                py_iface.chg_cursor();
-                oldSource = iconSource;
-                iconSource = pressedSource;
-                isDown = true;
-                infoScreen.visible = true;
-                mouseRoi.z = 10;
-                restrictionRoi.z = 9;
-            }
+            roiManager.visible = !roiManager.visible;
         }
     }
-    CustomButton {
-        id: restrictionRoiButton
-
-        property bool isDown
-        isDown: false
-        property string oldSource
-        oldSource: iconSource
-
-        anchors.top: comboBox1.bottom
-        anchors.topMargin: 10
-        anchors.left: roiButton.right
-
-        width: startTrackBtn.width
-        height: width
-
-        iconSource: "../../../resources/icons/roi.png"
-        pressedSource: "../../../resources/icons/roi_pressed.png"
-        tooltip: "Draw tracking area ROI"
-
-        onPressed: {}
-        onReleased: {}
-
-        onClicked: {
-            if (isDown) { // already active -> revert
-                py_iface.restore_cursor();
-                iconSource = oldSource;
-                isDown = false;
-                infoScreen.visible = false;
-            } else { // activate
-                py_iface.chg_cursor();
-                oldSource = iconSource;
-                iconSource = pressedSource;
-                isDown = true;
-                infoScreen.visible = true;
-                restrictionRoi.z = 10;
-                mouseRoi.z = 9;
-            }
-        }
+    RoiManager {
+        id: roiManager
+        pythonObject: py_iface
+        mouseRoi: mouseRoi
+        restrictionRoi: restrictionRoi
+        visible: false
     }
 }
