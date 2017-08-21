@@ -7,6 +7,7 @@ import QtQml.Models 2.2
 
 import "popup_messages"
 import "basic_types"
+import "help"
 
 
 ApplicationWindow {
@@ -69,6 +70,37 @@ ApplicationWindow {
                 }
             }
             MenuSeparator { }
+        }
+        Menu {
+            title: qsTr("Help")
+            MenuItem {
+                text: qsTr("Program documentation")
+                onTriggered: {
+                    helpWindow.url = "http://pyper.readthedocs.io/en/latest/";
+                    helpWindow.visible = true;
+                }
+            }
+
+            MenuItem {
+                text: qsTr("Help on current tab")
+                onTriggered: {
+                    var currentTab = tabs.getTab(tabs.currentIndex).title;
+                    if (currentTab === "Welcome") {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/";
+                    } else if (currentTab === "Preview") {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#preview";
+                    } else if (currentTab === "Track") {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#tracking";
+                    } else if (currentTab === "Record") {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#recording";
+//                    } else if (currentTab === "Calibration") {
+//                    helpWindow.url = "";
+                    } else if (currentTab === "Analyse") {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#analysis";
+                    }
+                    helpWindow.visible = true;
+                }
+            }
         }
     }
     ExclusiveGroup {
@@ -292,5 +324,8 @@ ApplicationWindow {
             selectionColor: "steelblue"
             selectedTextColor: "cyan"
         }
+    }
+    HelpWindow {
+        id: helpWindow
     }
 }
