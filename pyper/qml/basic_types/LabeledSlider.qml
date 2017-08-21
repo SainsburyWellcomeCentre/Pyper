@@ -2,33 +2,74 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 Item{
+    id: root
+
     width: 80
     height: 40
     property alias value: slider.value
     property alias text: sliderLabel.text
+    property bool showValue: true
 
-    Label {
-        id: sliderLabel
-        horizontalAlignment: Text.AlignHCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        height: parent.height/2 - 5
+    onShowValueChanged: {
+        if (showValue) {
+            valueLabel.width = valueLabel.contentWidth;
+        } else {
+            valueLabel.width = 0;
+        }
 
-        text: "Scroll speed"
-        font.pointSize: 10
-        wrapMode: Text.WordWrap
+        valueLabel.visible = showValue;
     }
-    Slider {
-        id: slider
-        width: parent.width
-        height: parent.height/2 - 5
-        anchors.top: sliderLabel.bottom
-        anchors.topMargin: 10
 
-        tickmarksEnabled: true
-        value: 1
-        stepSize: 1
-        minimumValue: 1
-        maximumValue: 100
+    CustomColumn {
+        anchors.fill: parent
+
+        spacing: 5
+        Label {
+            id: sliderLabel
+
+            height: contentHeight
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            text: "Scroll speed"
+            horizontalAlignment: Text.AlignHCenter
+            font.pointSize: 10
+            color: 'white'
+            wrapMode: Text.WordWrap
+        }
+        Row {
+            height: sliderLabel.height
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+
+            spacing: 5
+            Slider {
+                id: slider
+
+                width: parent.width - valueLabel.width - parent.spacing
+
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                tickmarksEnabled: true
+                value: 1
+                stepSize: 1
+                minimumValue: 1
+                maximumValue: 100
+            }
+            Label {
+                id: valueLabel
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                text: slider.value
+                width: contentWidth
+
+                horizontalAlignment: Text.AlignHCenter
+                font.pointSize: 10
+                color: 'white'
+            }
+        }
     }
 }
