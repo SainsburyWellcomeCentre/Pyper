@@ -18,14 +18,9 @@ Item{
     signal startClicked()
     signal endClicked()
 
-    Rectangle{
+    Frame {
         anchors.fill: parent
-
         enabled: parent.enabled
-        color: theme.frameBackground
-        radius: 9
-        border.width: 3
-        border.color: theme.frameBorder
 
         Column{
             width: parent.width - 2*10

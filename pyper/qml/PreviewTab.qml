@@ -152,23 +152,13 @@ Rectangle {
             onStartClicked: { py_viewer.seek_to(-1) }
             onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames()) }
         }
-        Rectangle{
+        Frame {
             id: frameControls
             objectName: "viewerFrameControls"
             height: col.height + 20
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-
             enabled: false
-            function reload(){
-                col.reload()
-            }
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
+            function reload(){ col.reload() }
 
             CustomColumn {
                 id: col

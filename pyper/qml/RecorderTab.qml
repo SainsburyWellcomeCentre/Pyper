@@ -53,17 +53,9 @@ Rectangle {
 
         spacing: 10
 
-        Rectangle {
+        Frame {
             id: controls
             height: row1.height + 20
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             Row {
                 id: row1
@@ -114,17 +106,9 @@ Rectangle {
                 }
             }
         }
-        Rectangle{
+        Frame {
             id: frameSetterContainer
             height: col.height + 20
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){
                 col.reload()
@@ -168,17 +152,9 @@ Rectangle {
                 }
             }
         }
-        Rectangle{
+        Frame {
             id: referenceTreatmentSettings
             height: col2.height + 20
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){ col2.reload() }
 
@@ -203,17 +179,9 @@ Rectangle {
                 }
             }
         }
-        Rectangle{
+        Frame {
             id: detectionParamsSetterContainer
             height: col3.height + 20
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){ col3.reload() }
 
@@ -254,17 +222,9 @@ Rectangle {
                 }
             }
         }
-        Rectangle{
+        Frame {
             id: boolSetterContainer
             height: col4.height + 20
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){ col4.reload() }
 

@@ -98,17 +98,9 @@ Rectangle {
                 matrixControls.enabled = true;
             }
         }
-        Rectangle{
+        Frame {
             id: chessBoardGeometry
             height: col1.height + 15
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){ col1.reload() }
 
@@ -155,17 +147,10 @@ Rectangle {
             onEndClicked: { py_calibration.seek_to(py_calibration.get_n_frames()) }
         }
 
-        Rectangle{
+        Frame {
             id: displayControls
             height: col2.height + 15
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
             enabled: false
 
             function reload(){ col2.reload() }
@@ -191,19 +176,11 @@ Rectangle {
                 }
             }
         }
-        Rectangle{
+        Frame {
             id: matrixControls
             height: col3.height + 15
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-
             enabled: false
-
-            color: theme.frameBackground
-            radius: 9
-            border.width: 3
-            border.color: theme.frameBorder
 
             function reload(){ col3.reload() }
 
