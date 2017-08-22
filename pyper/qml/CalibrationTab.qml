@@ -123,7 +123,7 @@ Rectangle {
                     label: "Rows"
                     tooltip: "Number of rows in pattern"
                     value: py_calibration.get_n_rows()
-                    onValueChanged: { py_calibration.set_n_rows(value); }
+                    onEdited: { py_calibration.set_n_rows(value); }
                     function reload() {value = py_calibration.get_n_rows() }
                 }
                 IntLabel{
@@ -131,7 +131,7 @@ Rectangle {
                     label: "Columns"
                     tooltip: "Number of columns in pattern"
                     value: py_calibration.get_n_columns()
-                    onValueChanged: { py_calibration.set_n_columns(value); }
+                    onEdited: { py_calibration.set_n_columns(value); }
                     function reload() {value = py_calibration.get_n_columns() }
                 }
             }

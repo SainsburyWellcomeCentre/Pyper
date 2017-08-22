@@ -283,7 +283,7 @@ Rectangle {
                     label: "n"
                     tooltip: "Number of frames for background"
                     value: py_iface.get_n_bg_frames()
-                    onValueChanged: { py_iface.set_n_bg_frames(value); }
+                    onEdited: { py_iface.set_n_bg_frames(value); }
                     function reload() {value = py_iface.get_n_bg_frames() }
                 }
                 IntLabel{
@@ -291,7 +291,7 @@ Rectangle {
                     label: "Sds"
                     tooltip: "Number of standard deviations above average"
                     value: py_iface.get_n_sds()
-                    onValueChanged: { py_iface.set_n_sds(value); }
+                    onEdited: { py_iface.set_n_sds(value); }
                     function reload() {value = py_iface.get_n_sds() }
                 }
             }
@@ -318,7 +318,7 @@ Rectangle {
                     label: "Thrsh"
                     tooltip: "Detection threshold"
                     value: py_iface.get_detection_threshold()
-                    onValueChanged: { py_iface.set_detection_threshold(value); }
+                    onEdited: { py_iface.set_detection_threshold(value); }
                     function reload() {value = py_iface.get_detection_threshold() }
                 }
                 IntLabel {
@@ -326,7 +326,7 @@ Rectangle {
                     label: "Min"
                     tooltip: "Minimum object area"
                     value: py_iface.get_min_area()
-                    onValueChanged: { py_iface.set_min_area(value); }
+                    onEdited: { py_iface.set_min_area(value); }
                     function reload() { py_iface.get_min_area() }
                 }
                 IntLabel {
@@ -334,7 +334,7 @@ Rectangle {
                     label: "Max"
                     tooltip: "Maximum object area"
                     value: py_iface.get_max_area()
-                    onValueChanged: { py_iface.set_max_area(value); }
+                    onEdited: { py_iface.set_max_area(value); }
                     function reload() { py_iface.get_max_area() }
                 }
                 IntLabel{
@@ -342,7 +342,7 @@ Rectangle {
                     label: "Mvmt"
                     tooltip: "Maximum displacement (between frames) threshold"
                     value: py_iface.get_max_movement()
-                    onValueChanged: { py_iface.set_max_movement(value); }
+                    onEdited: { py_iface.set_max_movement(value); }
                     function reload() { py_iface.get_max_movement() }
                 }
             }
