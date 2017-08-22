@@ -3,10 +3,11 @@ import QtQuick.Controls 1.2
 
 import "popup_messages"
 import "basic_types"
+import "style"
 
 Rectangle {
     id: background
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     Label{
@@ -15,13 +16,13 @@ Rectangle {
         anchors.top: parent.top
 
         text: "Mouse coordinates"
-        styleColor: "#222222"
-        color: "white"
+        styleColor: theme.darkBackground
+        color: theme.text
         textFormat: Text.AutoText
         font.pointSize: 16
         font.bold: true
         style: Text.Raised
-        font.family: "Verdana"
+        font.family: theme.defaultFont
     }
     Row {
         id: referenceLayout

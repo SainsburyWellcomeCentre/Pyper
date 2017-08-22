@@ -1,6 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../style"
+
 Item {
     implicitHeight: 25
     implicitWidth: 110
@@ -9,7 +11,6 @@ Item {
     property alias tooltip: btn.tooltip
     property alias text: textField.text
     property alias readOnly: textField.readOnly
-//    property alias validator: textField.validator
 
     signal clicked
 
@@ -32,10 +33,9 @@ Item {
             height: parent.height
             enabled: parent.enabled
 
-            color: "white"
+            color: theme.text
             horizontalAlignment: Text.AlignHCenter
             readOnly: true
-//            validator: IntValidator{}
         }
     }
 }

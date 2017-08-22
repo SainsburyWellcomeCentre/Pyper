@@ -23,14 +23,6 @@ Item {
     Column {
         anchors.fill: parent
         spacing: 5
-//        width: parent.width
-//        height: parent.height
-//        Layout.minimumWidth: 640
-//        Layout.minimumHeight: 480
-//        Layout.preferredWidth: 640
-//        Layout.preferredHeight: 480
-//        Layout.maximumWidth: 1280
-//        Layout.maximumHeight: 1024
         Image {
             id: previewImage
             width: parent.width

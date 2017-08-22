@@ -1,6 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../style"
+
 Roi {
     property alias roiX: roi.x
     property alias roiY: roi.y
@@ -37,7 +39,7 @@ Roi {
 
         visible: false
         color: "transparent"
-        border.color: "yellow"
+        border.color: theme.roiDefault
         border.width: 3
 
         property real startPosX

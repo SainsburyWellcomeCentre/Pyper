@@ -3,10 +3,11 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 
 import "popup_messages"
+import "style"
 
 Rectangle {
     id: background
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     InfoScreen{
@@ -25,13 +26,13 @@ Rectangle {
         x: 60
         y: 100
         text: "Welcome to Pyper"
-        color: "white"
-        styleColor: "#222222"
+        color: theme.text
+        styleColor: theme.background
         textFormat: Text.AutoText
         font.pointSize: 16
         font.bold: true
         style: Text.Raised
-        font.family: "Verdana"
+        font.family: theme.defaultFont
     }
 
     TextArea {
@@ -42,15 +43,13 @@ Rectangle {
         height: 142
 
         text: qsTr("Please select an existing video using the file menu or proceed to record or calibration")
-        font.family: "Verdana"
+        font.family: theme.defaultFont
         readOnly: true
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: 18
         style: TextAreaStyle{
-            backgroundColor: "#666666"
-            textColor: "white"
-            selectionColor: "steelblue"
-            selectedTextColor: "cyan"
+            backgroundColor: theme.textBackground
+            textColor: theme.text
         }
     }
 }

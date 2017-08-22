@@ -1,6 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../style"
+
 Item{
     id: root
 
@@ -34,7 +36,7 @@ Item{
             text: "Scroll speed"
             horizontalAlignment: Text.AlignHCenter
             font.pointSize: 10
-            color: 'white'
+            color: theme.text
             wrapMode: Text.WordWrap
         }
         Row {
@@ -68,7 +70,7 @@ Item{
 
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 10
-                color: 'white'
+                color: theme.text
             }
         }
     }

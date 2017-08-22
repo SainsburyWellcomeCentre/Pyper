@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../style"
 
 Item {
     width: 145
@@ -12,7 +13,7 @@ Item {
     Label {
         id: labelObj
         height: parent.height
-        color: "#ffffff"
+        color: theme.text
         text: "Label"
         anchors.left: textField.right
         anchors.leftMargin: 10
@@ -23,7 +24,7 @@ Item {
         height: parent.height
         readOnly: true
         placeholderText: "Field"
-        textColor: "#ffffff"
+        textColor: theme.text
     }
     ToolTip{
         id: tooltip

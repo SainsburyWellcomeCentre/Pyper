@@ -5,10 +5,11 @@ import QtQuick.Layouts 1.1
 import "popup_messages"
 import "basic_types"
 import "video"
+import "style"
 
 Rectangle {
     id: rectangle1
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     SplashScreen{
@@ -104,10 +105,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){ col1.reload() }
 
@@ -161,10 +162,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
             enabled: false
 
             function reload(){ col2.reload() }
@@ -199,10 +200,10 @@ Rectangle {
 
             enabled: false
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){ col3.reload() }
 

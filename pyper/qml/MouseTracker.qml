@@ -8,6 +8,7 @@ import QtQml.Models 2.2
 import "popup_messages"
 import "basic_types"
 import "help"
+import "style"
 
 
 ApplicationWindow {
@@ -225,7 +226,7 @@ ApplicationWindow {
     }
     Rectangle{
         id: mainUi
-        color: "#3B3B3B"
+        color: theme.background
         width: parent.width - mainMenuBar.width
         x: mainMenuBar.width
         height: parent.height - log.height
@@ -319,10 +320,10 @@ ApplicationWindow {
         anchors.left:mainMenuBar.right
         anchors.top: mainUi.bottom
         style: TextAreaStyle{
-            backgroundColor: "#666666"
-            textColor: "white"
-            selectionColor: "steelblue"
-            selectedTextColor: "cyan"
+            backgroundColor: theme.textBackground
+            textColor: theme.text
+            selectionColor: theme.terminalSelection
+            selectedTextColor: theme.terminalSelectedText
         }
     }
     HelpWindow {

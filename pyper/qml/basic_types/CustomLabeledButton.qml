@@ -2,6 +2,8 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Private 1.0
 
+import "../style"
+
 Rectangle{
     width: 70
     height: 30
@@ -9,9 +11,9 @@ Rectangle{
     antialiasing: true
 
     property color gradientStart
-    gradientStart: "white"
+    gradientStart: theme.labeledButtonGradientStart
     property color gradientStop
-    gradientStop: "black"
+    gradientStop: theme.labeledButtonGradientEnd
     gradient: Gradient {
                 GradientStop { position: 0.0; color: gradientStart }
                 GradientStop { position: 1.0; color: gradientStop}
@@ -42,11 +44,11 @@ Rectangle{
 
         font.pixelSize: parent.height * 0.5
         style: Text.Sunken
-        color: "white"
+        color: theme.text
         text: parent.label
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        styleColor: "black"
+        styleColor: "black"  // FIXME:
     }
 
     MouseArea{

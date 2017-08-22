@@ -2,6 +2,8 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 
+import "../style"
+
 Item {
     id: root
     height: 25
@@ -40,10 +42,10 @@ Item {
                     anchors.fill: parent
                     implicitWidth: 80
                     implicitHeight: 20
-                    color: 'Gray'
+                    color: theme.spinBoxBackground
                     radius: 2
                 }
-                textColor: 'white'
+                textColor: theme.text
             }
             onEditingFinished: {
                 root.edited();

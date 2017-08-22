@@ -5,10 +5,11 @@ import "popup_messages"
 import "basic_types"
 import "video"
 import "roi"
+import "style"
 
 Rectangle {
     id: rectangle1
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     onVisibleChanged: reload()
@@ -59,10 +60,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             Row {
                 id: row1
@@ -120,10 +121,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){
                 col.reload()
@@ -174,10 +175,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){ col2.reload() }
 
@@ -209,10 +210,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){ col3.reload() }
 
@@ -260,10 +261,10 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             function reload(){ col4.reload() }
 

@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+import "../style"
 
 Label {
     id: labelWTooltip
@@ -9,7 +10,7 @@ Label {
     property alias help: tooltip.tooltip
     property alias fontSize: labelWTooltip.font.pointSize
 
-    color: "white"
+    color: theme.text
     text: "Label"
 //        antialiasing: true
     ToolTip{

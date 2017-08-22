@@ -5,9 +5,10 @@ import "popup_messages"
 import "basic_types"
 import "video"
 import "roi"
+import "style"
 
 Rectangle {
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     property bool loaded: false
@@ -51,7 +52,7 @@ Rectangle {
         anchors.topMargin: 10
         anchors.horizontalCenter: previewImage.horizontalCenter
 
-        color: "#ffffff"
+        color: theme.text
         text: py_iface.get_file_name()
         function reload() {
             text = py_iface.get_file_name();
@@ -164,10 +165,10 @@ Rectangle {
                 col.reload()
             }
 
-            color: "#4c4c4c"
+            color: theme.frameBackground
             radius: 9
             border.width: 3
-            border.color: "#7d7d7d"
+            border.color: theme.frameBorder
 
             CustomColumn {
                 id: col

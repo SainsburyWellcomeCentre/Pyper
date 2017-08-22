@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 import "../basic_types"
+import "../style"
 
 Item{
     id: controls
@@ -21,10 +22,10 @@ Item{
         anchors.fill: parent
 
         enabled: parent.enabled
-        color: "#4c4c4c"
+        color: theme.frameBackground
         radius: 9
         border.width: 3
-        border.color: "#7d7d7d"
+        border.color: theme.frameBorder
 
         Column{
             width: parent.width - 2*10
