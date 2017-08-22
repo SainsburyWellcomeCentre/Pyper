@@ -128,101 +128,95 @@ ApplicationWindow {
            anchors.fill: parent
            source: "../../resources/images/menu_bar.png"
         }
+        Column {
+            spacing: 15
+            anchors.fill: parent
+            CustomToolButton{
+                id: welcomeTabBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
 
-        CustomToolButton{
-            id: welcomeTabBtn
-            x: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
+                active: welcomeTab.visible
 
-            active: welcomeTab.visible
+                text: "Welcome"
+                tooltip: "Switch to welcome mode"
+                iconSource: "../../../resources/icons/welcome.png"
+                onClicked: tabs.currentIndex = 0
+            }
 
-            text: "Welcome"
-            tooltip: "Switch to welcome mode"
-            iconSource: "../../../resources/icons/welcome.png"
-            onClicked: tabs.currentIndex = 0
+            CustomToolButton{
+                id: previewTabBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: previewTab.visible
+
+                text: "Preview"
+                tooltip: "Switch to preview mode"
+                iconSource: "../../../resources/icons/preview.png"
+                onClicked: { mainMenuBar.checkPathLoaded(1) }
+            }
+            CustomToolButton{
+                id: trackTabBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: trackTab.visible
+
+                text: "Track"
+                tooltip: "Switch to tracking mode"
+                iconSource: "../../../resources/icons/track.png"
+
+                onClicked: { mainMenuBar.checkPathLoaded(2) }
+            }
+            CustomToolButton{
+                id: recordTabBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: recordTab.visible
+
+                text: "Record"
+                tooltip: "Switch to recording mode"
+                iconSource: "../../../resources/icons/camera.png"
+
+                onClicked: { tabs.currentIndex = 3 }
+            }
+            CustomToolButton{
+                id: calibrationBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: calibrationTab.visible
+
+                text: "Calibration"
+                tooltip: "Switch to camera calibration mode"
+                iconSource: "../../../resources/icons/calibration.png"
+
+                onClicked: { tabs.currentIndex = 4 }
+            }
+            CustomToolButton{
+                id: analysisBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: analysisTab.visible
+
+                text: "Analyse"
+                tooltip: "Switch to analysis mode"
+                iconSource: "../../../resources/icons/analyse.png"
+
+                onClicked: { tabs.currentIndex = 5 }
+            }
         }
 
-        CustomToolButton{
-            id: previewTabBtn
-            anchors.top: welcomeTabBtn.bottom
-            anchors.topMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
 
-            active: previewTab.visible
-
-            text: "Preview"
-            tooltip: "Switch to preview mode"
-            iconSource: "../../../resources/icons/preview.png"
-            onClicked: { parent.checkPathLoaded(1) }
-        }
-        CustomToolButton{
-            id: trackTabBtn
-            anchors.top: previewTabBtn.bottom
-            anchors.topMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
-
-            active: trackTab.visible
-
-            text: "Track"
-            tooltip: "Switch to tracking mode"
-            iconSource: "../../../resources/icons/track.png"
-
-            onClicked: { parent.checkPathLoaded(2) }
-        }
-        CustomToolButton{
-            id: recordTabBtn
-            anchors.top: trackTabBtn.bottom
-            anchors.topMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
-
-            active: recordTab.visible
-
-            text: "Record"
-            tooltip: "Switch to recording mode"
-            iconSource: "../../../resources/icons/camera.png"
-
-            onClicked: { tabs.currentIndex = 3 }
-        }
-        CustomToolButton{
-            id: calibrationBtn
-            anchors.top: recordTabBtn.bottom
-            anchors.topMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
-
-            active: calibrationTab.visible
-
-            text: "Calibration"
-            tooltip: "Switch to camera calibration mode"
-            iconSource: "../../../resources/icons/calibration.png"
-
-            onClicked: { tabs.currentIndex = 4 }
-        }
-        CustomToolButton{
-            id: analysisBtn
-            anchors.top: calibrationBtn.bottom
-            anchors.topMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
-            height: width * 1.25
-
-            active: analysisTab.visible
-
-            text: "Analyse"
-            tooltip: "Switch to analysis mode"
-            iconSource: "../../../resources/icons/analyse.png"
-
-            onClicked: { tabs.currentIndex = 5 }
-        }
     }
     Rectangle{
         id: mainUi
