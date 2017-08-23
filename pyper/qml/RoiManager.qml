@@ -11,19 +11,10 @@ import "roi"
 import "popup_messages"
 
 ApplicationWindow {
-    id: roiWin
+    id: root
     width: 210
     height: 500
     title: "ROI Manager"
-
-    // FIXME: onClosed exit ROI mode, pythonObject.restore_cursor()
-    onClosing: {
-        pythonObject.restore_cursor();
-        infoScreen.visible = false;
-        roiShapeWin.visible = false;
-        callbackRoi.checked = false;
-        restrictionRoi.checked = false;
-    }
 
     property variant pythonObject
     property variant mouseRoi // FIXME
@@ -33,9 +24,17 @@ ApplicationWindow {
     property alias restrictionRoiActive: restrictionRoi.roiActive // FIXME:
 
     property alias trackingRoiColor: callbackRoi.drawingColor
-    trackingRoiColor: 'Yellow'  // Default
     property alias restrictionRoiColor: restrictionRoi.drawingColor
-    restrictionRoiColor: 'Red'  // Default does not seem to work maybe because of roiCologDialog default
+
+    property bool drawingMode: false
+
+    onClosing: {
+        pythonObject.restore_cursor();
+        infoScreen.visible = false;
+        roiShapeWin.visible = false;
+        callbackRoi.checked = false;
+        restrictionRoi.checked = false;
+    }
 
     ApplicationWindow {
         id: roiShapeWin
@@ -104,10 +103,12 @@ ApplicationWindow {
                 } else if (restrictionRoi.checked) {
                     restrictionRoi.drawingColor = roiColorDialog.color;
                 }  // FIXME: add freehand
-
                 visible = false;
             }
-            Component.onCompleted: visible = false
+            Component.onCompleted: {
+                restrictionRoi.drawingColor = 'red';
+                visible = false;
+            }
         }
 
         ExclusiveGroup {
@@ -125,60 +126,58 @@ ApplicationWindow {
                 id: callbackRoi
                 name: "Callback ROI"
 
-                pythonObject: roiWin.pythonObject
-                infoScreen: infoScreen
+                pythonObject: root.pythonObject
+                parentWindow: root
                 roiColorDialog: roiColorDialog
                 exclusiveGroup: currentRoiExclusiveGroup
                 checked: true
 
                 onPressed: {
-                    roiWin.mouseRoi.z = 10;  // FIXME:
-                    roiWin.restrictionRoi.z = 9;
+                    root.mouseRoi.z = 10;  // FIXME:
+                    root.restrictionRoi.z = 9;
                 }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
-                    roiShapeWin.y = roiWin.y + coordsInWin.y;
-                    roiShapeWin.x = roiWin.x + coordsInWin.x;
+                    roiShapeWin.y = root.y + coordsInWin.y;
+                    roiShapeWin.x = root.x + coordsInWin.x;
                     roiShapeWin.visible = true;
                 }
-    //            property alias roiActive: roiActive.checked
             }
             RoiControls {
                 id: restrictionRoi
                 name: "Restriction ROI"
 
-                pythonObject: roiWin.pythonObject
-                infoScreen: infoScreen
+                pythonObject: root.pythonObject
+                parentWindow: root
                 roiColorDialog: roiColorDialog
                 exclusiveGroup: currentRoiExclusiveGroup
                 checked: false
 
                 drawingType: 'rectangle'
                 onPressed: {
-                    roiWin.mouseRoi.z = 9;  // FIXME:
-                    roiWin.restrictionRoi.z = 10;
+                    root.mouseRoi.z = 9;  // FIXME:
+                    root.restrictionRoi.z = 10;
                 }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
-                    roiShapeWin.y = roiWin.y + coordsInWin.y;
-                    roiShapeWin.x = roiWin.x + coordsInWin.x;
+                    roiShapeWin.y = root.y + coordsInWin.y;
+                    roiShapeWin.x = root.x + coordsInWin.x;
                     roiShapeWin.visible = true;
                 }
-    //            property alias roiActive: roiActive.checked
             }
 
         }
     }
     InfoScreen{
         id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
         width: 100
         height: 75
 
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
         text: "Roi mode"
-        visible: false
+        visible: root.drawingMode
         z: 1
     }
 }

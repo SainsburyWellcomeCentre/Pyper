@@ -22,8 +22,9 @@ Rectangle {
     property string name
 
     property variant pythonObject
-    property variant infoScreen
     property variant roiColorDialog
+
+    property variant parentWindow
 
     property alias drawingColor: roi.drawingColor
     property alias drawingType: roi.drawingType
@@ -152,12 +153,9 @@ Rectangle {
                         isDown = true;
                         roiLayout.pressed();
                     }
-                    roiLayout.infoScreen.visible = isDown;
+                    roiLayout.parentWindow.drawingMode = isDown;
                 }
             }
         }
     }
-    
-//    HorizontalSpacer {
-//    }
 }

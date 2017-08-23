@@ -160,6 +160,8 @@ Rectangle {
 
             drawingColor: roiManager.trackingRoiColor
 
+            drawingMode: roiManager.drawingMode
+
             onReleased: {
                 if (isDrawn) {
                     if (isActive){
@@ -179,6 +181,8 @@ Rectangle {
             isActive: roiManager.restrictionRoiActive
 
             drawingColor: roiManager.restrictionRoiColor
+
+            drawingMode: roiManager.drawingMode
 
             onReleased: {
                 if (isDrawn) {
