@@ -4,11 +4,13 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
+import QtGraphicalEffects 1.0
 
 import "popup_messages"
 import "basic_types"
 import "help"
 import "style"
+import "config"
 
 
 ApplicationWindow {
@@ -112,6 +114,21 @@ ApplicationWindow {
         id: mainMenuBar
         width: 70
         height: parent.height
+        RadialGradient {
+            anchors.fill: parent
+            verticalRadius: parent.height * 2
+            horizontalRadius: parent.width
+            gradient: Gradient {
+                GradientStop {
+                    position: 0.0;
+                    color: theme.background;
+                }
+                GradientStop {
+                    position: 0.5;
+                    color: theme.frameBorder;
+                }
+            }
+        }
 
         Timer {
             id: timer
@@ -124,10 +141,11 @@ ApplicationWindow {
             }
         }
 
-        Image{
-           anchors.fill: parent
-           source: "../../resources/images/menu_bar.png"
-        }
+//        Image{
+//           anchors.fill: parent
+//           source: "../../resources/images/menu_bar.png"
+////           source: iconHandler.getPath("menu_bar.png")
+//        }
         Column {
             spacing: 15
             anchors.fill: parent

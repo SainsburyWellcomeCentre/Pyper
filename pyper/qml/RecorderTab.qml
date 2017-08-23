@@ -6,6 +6,7 @@ import "basic_types"
 import "video"
 import "roi"
 import "style"
+import "config"
 
 Rectangle {
     id: rectangle1
@@ -69,7 +70,7 @@ Rectangle {
                     height: width
 
                     tooltip: "Starts video recording"
-                    iconSource: "../../../resources/icons/record.png"
+                    iconSource: iconPath.getPath("record.png")
 
                     enabled: false
                     onClicked:{
@@ -92,7 +93,7 @@ Rectangle {
                     height: width
 
                     tooltip: "Stops video recording"
-                    iconSource: "../../../resources/icons/stop.png"
+                    iconSource: iconPath.getPath("stop.png")
 
                     enabled: false
                     onClicked:{
@@ -124,8 +125,8 @@ Rectangle {
             width: recordBtn.width
             height: width
 
-            iconSource: "../../../resources/icons/roi.png"
-            pressedSource: "../../../resources/icons/roi_pressed.png"
+            iconSource: iconPath.getPath("roi.png")
+            pressedSource: iconPath.getPath("roi_pressed.png")
             tooltip:
                 "Draw ROI
 When pressed, this will open the ROI manager."
@@ -163,7 +164,7 @@ When pressed, this will open the ROI manager."
             width: 40
             height: width
 
-            iconSource: "../../../resources/icons/document-save-as.png"
+            iconSource: iconPath.getPath("document-save-as.png")
 
             tooltip: "Select video destination (before recording)"
             onClicked: {

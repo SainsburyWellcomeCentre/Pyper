@@ -6,6 +6,7 @@ import "basic_types"
 import "video"
 import "roi"
 import "style"
+import "config"
 
 Rectangle {
     color: theme.background
@@ -163,8 +164,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: "../../../resources/icons/play.png"
-                    pressedSource: "../../../resources/icons/play_pressed.png"
+                    iconSource: iconHandler.getPath("play.png")
+                    pressedSource: iconHandler.getPath("play_pressed.png")
                     tooltip: "Start tracking"
 
                     onPressed:{
@@ -187,8 +188,8 @@ Rectangle {
                     width: startTrackBtn.width
                     height: width
 
-                    iconSource: "../../../resources/icons/stop.png"
-                    pressedSource: "../../../resources/icons/stop_pressed.png"
+                    iconSource: iconHandler.getPath("stop.png")
+                    pressedSource: iconHandler.getPath("stop_pressed.png")
                     tooltip: "Stop tracking"
 
                     onClicked: py_tracker.stop()
@@ -219,8 +220,8 @@ Rectangle {
                 width: startTrackBtn.width
                 height: width
 
-                iconSource: "../../../resources/icons/roi.png"
-                pressedSource: "../../../resources/icons/roi_pressed.png"
+                iconSource: iconHandler.getPath("roi.png")
+                pressedSource: iconHandler.getPath("roi_pressed.png")
                 tooltip: "Draw ROI"
 
                 onPressed: {}
@@ -254,8 +255,8 @@ Rectangle {
                 width: startTrackBtn.width
                 height: width
 
-                iconSource: "../../../resources/icons/roi.png"
-                pressedSource: "../../../resources/icons/roi_pressed.png"
+                iconSource: iconHandler.getPath("roi.png")
+                pressedSource: iconHandler.getPath("roi_pressed.png")
                 tooltip: "Draw tracking area ROI"
 
                 onPressed: {}
