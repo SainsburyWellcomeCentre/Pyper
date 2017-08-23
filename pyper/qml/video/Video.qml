@@ -3,9 +3,12 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Private 1.0 // For Tooltip
 
 import "../basic_types"
+import "../style"
 
 
 Item {
+    id: root
+
     property alias source: previewImage.source
     property alias value: progressBar.value
     property alias maximumValue: progressBar.maximumValue
@@ -39,52 +42,67 @@ Item {
                 source = oldSource;
             }
         }
-        ProgressBar {
-            id: progressBar
-            x: previewImage.x
-
-            width: previewImage.width
+        Row {
             height: 20
-            minimumValue: 0
+            anchors.left: previewImage.left
+            anchors.right: previewImage.right
+            ProgressBar {
+                id: progressBar
 
-            enabled: parent.parent.enabled
+                width: previewImage.width - pBarLabel.width
+                minimumValue: 0
 
-            signal pressed(real xPosition, real yPosition)
-            signal released(real xPosition, real yPosition)
-            signal clicked(real xPosition, real yPosition)
-            signal positionChanged(real xPosition, real yPosition)
-            signal exited()
-            signal wheel(point angleDelta)
+                enabled: root.enabled
 
-            onPressed: parent.parent.progressPressed(behavior.mouseX, behavior.mouseY)
-            onReleased: parent.parent.progressReleased(behavior.mouseX, behavior.mouseY)
-            onClicked: {
-                var hoveredFrame = Math.round((maximumValue - minimumValue) * (behavior.mouseX/width));
-                parent.parent.progressClicked(hoveredFrame)
+                signal pressed(real xPosition, real yPosition)
+                signal released(real xPosition, real yPosition)
+                signal clicked(real xPosition, real yPosition)
+                signal positionChanged(real xPosition, real yPosition)
+                signal exited()
+                signal wheel(point angleDelta)
+
+                onPressed: root.progressPressed(behavior.mouseX, behavior.mouseY)
+                onReleased: root.progressReleased(behavior.mouseX, behavior.mouseY)
+                onClicked: {
+                    var hoveredFrame = Math.round((maximumValue - minimumValue) * (behavior.mouseX/width));
+                    root.progressClicked(hoveredFrame)
+                }
+                onPositionChanged: {
+                    var hoveredFrame = Math.round((maximumValue - minimumValue) * (behavior.mouseX/width));
+                    Tooltip.showText(behavior, Qt.point(behavior.mouseX, behavior.mouseY), hoveredFrame);
+                }
+                onExited: {
+                    Tooltip.hideText();
+                }
+                onWheel: {
+                    root.progressWheel(angleDelta.y)
+                }
+
+                MouseArea{
+                    id: behavior
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    enabled: parent.enabled
+
+                    onPressed: parent.pressed(mouse.x, mouse.y)
+                    onReleased: parent.released(mouse.x, mouse.y)
+                    onClicked: parent.clicked(mouse.x, mouse.y)
+                    onPositionChanged: parent.positionChanged(mouse.x, mouse.y)
+                    onExited: parent.exited()
+                    onWheel: parent.wheel(wheel.angleDelta)
+                }
             }
-            onPositionChanged: {
-                var hoveredFrame = Math.round((maximumValue - minimumValue) * (behavior.mouseX/width));
-                Tooltip.showText(behavior, Qt.point(behavior.mouseX, behavior.mouseY), hoveredFrame);
-            }
-            onExited: {
-                Tooltip.hideText();
-            }
-            onWheel: {
-                parent.parent.progressWheel(angleDelta.y)
-            }
-
-            MouseArea{
-                id: behavior
-                anchors.fill: parent
-                hoverEnabled: true
-                enabled: parent.enabled
-
-                onPressed: parent.pressed(mouse.x, mouse.y)
-                onReleased: parent.released(mouse.x, mouse.y)
-                onClicked: parent.clicked(mouse.x, mouse.y)
-                onPositionChanged: parent.positionChanged(mouse.x, mouse.y)
-                onExited: parent.exited()
-                onWheel: parent.wheel(wheel.angleDelta)
+            Label {
+                id: pBarLabel
+                width: contentWidth + 10
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                text: progressBar.value
+                font.family: theme.defaultFont
+                color: theme.text
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.pointSize: 10
             }
         }
     }
