@@ -61,9 +61,9 @@ ApplicationWindow {
                     var codeWindow = Qt.createComponent("CodeWindow.qml");
                     if(codeWindow.status === Component.Ready) {
                         var win = codeWindow.createObject(main);
-                        win.algorithmsMenu = trackingAlgorithmMenu
-                        win.algorithmsExclusiveGroup = trackingAlgorithmExclusiveGroup
-                        win.pythonObject = py_iface
+                        win.algorithmsMenu = trackingAlgorithmMenu;
+                        win.algorithmsExclusiveGroup = trackingAlgorithmExclusiveGroup;
+                        win.pythonObject = py_iface;
                         win.show();
                     } else {
                         console.log("Code Window error, Status:", codeWindow.status, codeWindow.errorString());
