@@ -4,7 +4,6 @@ import QtQuick.Controls.Styles 1.1
 import QtQuick.Controls.Private 1.0
 
 Label {
-
     property string tooltip: "No help yet"
 
     MouseArea {

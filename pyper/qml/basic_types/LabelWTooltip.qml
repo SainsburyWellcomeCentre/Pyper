@@ -12,10 +12,9 @@ Label {
 
     color: theme.text
     text: "Label"
-//        antialiasing: true
     ToolTip{
         id: tooltip
-        tooltip: "No help yet"
+        tooltip: ""
         anchors.fill: parent
     }
 }

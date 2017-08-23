@@ -126,7 +126,9 @@ Rectangle {
 
             iconSource: "../../../resources/icons/roi.png"
             pressedSource: "../../../resources/icons/roi_pressed.png"
-            tooltip: "Draw ROI"
+            tooltip:
+                "Draw ROI
+When pressed, this will open the ROI manager."
 
             onPressed: {}
             onReleased: {}
