@@ -23,6 +23,9 @@ Item {
         }
     }
 
+    function setRoiPosition(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
+    function resizeRoi(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
+
     function drawRoi() {
         roi.visible = true;
         isDrawn = true;
