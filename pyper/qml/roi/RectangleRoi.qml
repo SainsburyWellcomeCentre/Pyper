@@ -2,7 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 Roi {
-    id: roiParent  // FIXME: find better name
+    id: root
     property alias roiX: roi.x
     property alias roiY: roi.y
     property alias roiWidth: roi.width
@@ -32,7 +32,7 @@ Roi {
 
         visible: false
         color: "transparent"
-        border.color: roiParent.drawingColor
+        border.color: root.drawingColor
         border.width: 3
 
         property real startPosX

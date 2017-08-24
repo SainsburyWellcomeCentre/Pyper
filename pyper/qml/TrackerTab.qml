@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQml 2.0
 import QtQuick.Controls 1.2
 
 import "popup_messages"
@@ -140,60 +141,38 @@ Rectangle {
         width: 640
         height: 480
 
-        source: "image://trackerprovider/img"
+        source: "image://trackerprovider/img"        
 
-        onWidthChanged: {
-            mouseRoi.width = img.width;
-            restrictionRoi.width = img.width;
-        }
-        onHeightChanged: {
-            mouseRoi.height = img.height;
-            restrictionRoi.height = img.height;
-        }
-
-        EllipseRoi {
+        RoiFactory {
             id: mouseRoi
 
+            width: parent.imgWidth
+            height: parent.imgHeight
+
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: roiManager.mouseRoiActive
 
+            source: "roi/EllipseRoi.qml"
+
+            roiActive: roiManager.trackingRoiActive
             drawingColor: roiManager.trackingRoiColor
-
             drawingMode: roiManager.drawingMode
-
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive){
-                        py_tracker.set_roi(width, height, roiX, roiY, roiWidth, roiHeight);
-                    } else {
-                        py_tracker.remove_roi();
-                        eraseRoi();
-                    }
-                }
-            }
         }
-        RectangleRoi {
+
+        RoiFactory {
             id: restrictionRoi
 
+            width: parent.imgWidth
+            height: parent.imgHeight
+
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: roiManager.restrictionRoiActive
 
+            source: "roi/RectangleRoi.qml"
+
+            roiActive: roiManager.restrictionRoiActive
             drawingColor: roiManager.restrictionRoiColor
-
             drawingMode: roiManager.drawingMode
-
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive) {
-                        py_tracker.set_tracking_region_roi(width, height, roiX, roiY, roiWidth, roiHeight)
-                    } else {
-                        py_tracker.remove_tracking_region_roi();
-                        eraseRoi();
-                    }
-                }
-            }
         }
     }
     Rectangle{
@@ -451,8 +430,34 @@ Rectangle {
     RoiManager {
         id: roiManager
         pythonObject: py_iface
-        mouseRoi: mouseRoi
-        restrictionRoi: restrictionRoi
         visible: false
+        function setRoiOnTop(topRoi, bottomRoi) {  // FIOXME: unnecessary with enabled changed
+            bottomRoi.z = 9;
+            topRoi.z = 10;
+            // FIXME: enabled should be sufficient
+        }
+
+        onDrawCallback: {
+            setRoiOnTop(mouseRoi, restrictionRoi);
+        }
+        onDrawRestriction: {
+            setRoiOnTop(restrictionRoi, mouseRoi);
+        }
+
+        function changeRoiClass(roi, roiShape) {
+            if (roiShape === "ellipse") {
+                roi.source = "roi/EllipseRoi.qml";
+            } else if (roiShape === 'rectangle') {
+                roi.source = "roi/RectangleRoi.qml"
+            } else {
+                console.log("Unrecognised drawing mode: " + roiShape);
+            }
+        }
+        onTrackingRoiShapeChanged: {
+            changeRoiClass(mouseRoi, trackingRoiShape);
+        }
+        onRestrictionRoiShapeChanged: {
+            changeRoiClass(restrictionRoi, restrictionRoiShape);
+        }
     }
 }

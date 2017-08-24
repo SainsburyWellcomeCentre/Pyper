@@ -2,7 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 Roi {
-    id: roiParent  // FIXME: find better names
+    id: root
     property alias roiX: roi.x
     property alias roiY: roi.y
     property alias roiWidth: roi.width
@@ -43,7 +43,7 @@ Roi {
 
         onVisibleChanged: {
             if (visible) {
-                canvas.drawingColor = roiParent.drawingColor;
+                canvas.drawingColor = root.drawingColor;
             } else {
                 canvas.drawingColor = 'transparent';
                 canvas.clearCanvas();
@@ -68,7 +68,11 @@ Roi {
         }
         function clearCanvas() {
             var ctx = getContext("2d");
-            ctx.reset();
+            try {
+                ctx.reset();
+            } catch (err) {
+                //
+            }
         }
     }
 }

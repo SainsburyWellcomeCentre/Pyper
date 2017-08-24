@@ -17,16 +17,19 @@ ApplicationWindow {
     title: "ROI Manager"
 
     property variant pythonObject
-    property variant mouseRoi // FIXME
-    property variant restrictionRoi  // FIXME: clash (and only for x/z)
 
-    property alias mouseRoiActive: callbackRoi.roiActive
-    property alias restrictionRoiActive: restrictionRoi.roiActive // FIXME:
-
+    // FIXME: Do dictionnary
+    property alias trackingRoiActive: callbackRoi.roiActive
+    property alias restrictionRoiActive: restrictionRoi.roiActive
     property alias trackingRoiColor: callbackRoi.drawingColor
     property alias restrictionRoiColor: restrictionRoi.drawingColor
+    property alias trackingRoiShape: callbackRoi.drawingType
+    property alias restrictionRoiShape: restrictionRoi.drawingType
 
     property bool drawingMode: false
+
+    signal drawCallback()
+    signal drawRestriction()
 
     onClosing: {
         pythonObject.restore_cursor();
@@ -45,7 +48,7 @@ ApplicationWindow {
         property string shape: "ellipse"
 
         onShapeChanged: {
-            if (callbackRoi.checked) {  // FIXME: work with current instead
+            if (callbackRoi.checked) {
                 callbackRoi.drawingType = shape;
             } else if (restrictionRoi.checked) {
                 restrictionRoi.drawingType = shape;
@@ -57,7 +60,7 @@ ApplicationWindow {
             CustomButton {
                 width: 50
                 height: width
-                iconSource: "../../../resources/icons/ellipse.png"  // FIXME: resize
+                iconSource: "../../../resources/icons/ellipse.png"
                 onClicked: {
                     roiShapeWin.shape = 'ellipse';
                     roiShapeWin.close();
@@ -66,7 +69,7 @@ ApplicationWindow {
             CustomButton {
                 width: 50
                 height: width
-                iconSource: "../../../resources/icons/rectangle.png"  // FIXME: resize
+                iconSource: "../../../resources/icons/rectangle.png"
                 onClicked: {
                     roiShapeWin.shape = 'rectangle';
                     roiShapeWin.close();
@@ -75,7 +78,7 @@ ApplicationWindow {
             CustomButton {
                 width: 50
                 height: width
-                iconSource: "../../../resources/icons/freehand.png"  // FIXME: resize
+                iconSource: "../../../resources/icons/freehand.png"
                 onClicked: {
                     roiShapeWin.shape = 'freehand';
                     roiShapeWin.close();
@@ -133,8 +136,7 @@ ApplicationWindow {
                 checked: true
 
                 onPressed: {
-                    root.mouseRoi.z = 10;  // FIXME:
-                    root.restrictionRoi.z = 9;
+                    root.drawCallback();
                 }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
@@ -155,8 +157,7 @@ ApplicationWindow {
 
                 drawingType: 'rectangle'
                 onPressed: {
-                    root.mouseRoi.z = 9;  // FIXME:
-                    root.restrictionRoi.z = 10;
+                    root.drawRestriction();
                 }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
