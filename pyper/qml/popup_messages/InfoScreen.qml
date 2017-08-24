@@ -2,6 +2,8 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
 
+import "../style"
+
 
 Rectangle{
     property alias text: label.text
@@ -15,8 +17,8 @@ Rectangle{
     width: 200
     height: 100
     radius: 10
-    color: "lightgreen"
-    border.color: "green"
+    color: theme.infoScreenFrameBackground
+    border.color: theme.infoScreenFrameBorder
     border.width: 2
 
     function flash(duration) {
@@ -40,7 +42,7 @@ Rectangle{
         anchors.centerIn: parent
 
         font.pixelSize: 15
-        color: "white"
+        color: theme.text
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         font.bold: true

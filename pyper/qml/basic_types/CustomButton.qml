@@ -18,7 +18,7 @@ CustomLabeledButton{
         iconSource = toolButtonIcon.oldSource;
     }
 
-    color: "#00000000"
+    color: "transparent"
     label: ""
 
     Image {

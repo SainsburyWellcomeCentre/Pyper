@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 import "../basic_types"
+import "../style"
 
 Item{
     id: controls
@@ -17,41 +18,29 @@ Item{
     signal startClicked()
     signal endClicked()
 
-    Rectangle{
+    Frame {
         anchors.fill: parent
-
         enabled: parent.enabled
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
 
-        Rectangle{
+        Column{
             width: parent.width - 2*10
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-
             height: parent.height - 2*10
-            anchors.top: parent.top
-            anchors.topMargin: 10
 
-            color: "transparent"
+            anchors.margins: 10
+            anchors.left: parent.left
+            anchors.top: parent.top
 
             enabled: parent.enabled
 
-            LabeledSlider{
-                id: slider
-                x: grid.x
-                anchors.top: grid.bottom
-                anchors.topMargin: 10
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: parent.height * 0.3
-            }
+            spacing: 10
+
             Grid {
                 id: grid
                 width: parent.width
                 height: parent.height * 0.7
+
+                anchors.left: parent.left
+                anchors.right: parent.right
 
                 enabled: parent.enabled
 
@@ -112,6 +101,13 @@ Item{
                     height: parent.height/3
                     onClicked: { controls.endClicked() }
                 }
+            }
+            LabeledSlider{
+                id: slider
+                height: parent.height * 0.3
+
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
         }
     }

@@ -5,19 +5,17 @@ import "popup_messages"
 import "basic_types"
 import "video"
 import "roi"
+import "style"
 
 Rectangle {
     id: rectangle1
-    color: "#3B3B3B"
+    color: theme.background
     anchors.fill: parent
 
     onVisibleChanged: reload()
 
     function reload(){
-        frameSetterContainer.reload();
-        referenceTreatmentSettings.reload();
-        detectionParamsSetterContainer.reload();
-        boolSetterContainer.reload();
+        trackingControls.reload();
     }
 
     ErrorScreen{
@@ -42,63 +40,111 @@ Rectangle {
         z: 1
     }
 
-    Rectangle {
-        id: controls
-        x: 5
-        y: 10
-        width: 120
-        height: row1.height + 20
+    Column {
+        id: controlsLayout
+        width: 140
 
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
+        anchors.margins: 5
+        anchors.top: parent.top
+        anchors.left: parent.left
 
-        Row{
-            id: row1
+        spacing: 10
 
-            anchors.centerIn: controls
-            width: (children[0].width * 2) + spacing
-            height: children[0].height
-            spacing: 10
+        Frame {
+            id: controls
+            height: row1.height + 20
 
-            CustomButton {
-                id: recordBtn
-                x: 20
-                width: 45
-                height: width
+            Row {
+                id: row1
 
-                tooltip: "Starts video recording"
-                iconSource: "../../../resources/icons/record.png"
+                anchors.centerIn: parent
+                width: (children[0].width * 2) + spacing
+                height: children[0].height
+                spacing: 10
 
-                enabled: false
-                onClicked:{
-                    if (py_recorder.cam_detected()){
-                        if (roi.isDrawn){
-                            py_recorder.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
+                CustomButton {
+                    id: recordBtn
+                    x: 20
+                    width: 45
+                    height: width
+
+                    tooltip: "Starts video recording"
+                    iconSource: "../../../resources/icons/record.png"
+
+                    enabled: false
+                    onClicked:{
+                        if (py_recorder.cam_detected()){
+                            if (roi.isDrawn){
+                                py_recorder.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
+                            }
+                            if (py_recorder.start()) {
+                                enabled = false;
+                                stopBtn.enabled = true;
+                            }
+                        } else {
+                            errorScreen.flash(3000);
                         }
-                        if (py_recorder.start()) {
-                            enabled = false;
-                            stopBtn.enabled = true;
-                        }
-                    } else {
-                        errorScreen.flash(3000);
+                    }
+                }
+                CustomButton {
+                    id: stopBtn
+                    width: recordBtn.width
+                    height: width
+
+                    tooltip: "Stops video recording"
+                    iconSource: "../../../resources/icons/stop.png"
+
+                    enabled: false
+                    onClicked:{
+                        py_recorder.stop()
+                        recordBtn.enabled = true;
+                        enabled = false;
                     }
                 }
             }
-            CustomButton {
-                id: stopBtn
-                width: recordBtn.width
-                height: width
+        }
+        TrackingControls {
+            id: trackingControls
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: parent.spacing
 
-                tooltip: "Stops video recording"
-                iconSource: "../../../resources/icons/stop.png"
+            py_interface: py_iface
+            parent_py_obj: py_recorder
+        }
 
-                enabled: false
-                onClicked:{
-                    py_recorder.stop()
-                    recordBtn.enabled = true;
-                    enabled = false;
+        CustomButton {
+            id: roiButton
+
+            property bool isDown
+            isDown: false
+            property string oldSource
+            oldSource: iconSource
+
+            width: recordBtn.width
+            height: width
+
+            iconSource: "../../../resources/icons/roi.png"
+            pressedSource: "../../../resources/icons/roi_pressed.png"
+            tooltip:
+                "Draw ROI
+When pressed, this will open the ROI manager."
+
+            onPressed: {}
+            onReleased: {}
+
+            onClicked: {
+                if (isDown){
+                    py_iface.restore_cursor();
+                    iconSource = oldSource;
+                    isDown = false;
+                    infoScreen.visible = false;
+                } else {
+                    py_iface.chg_cursor();
+                    oldSource = iconSource;
+                    iconSource = pressedSource;
+                    isDown = true;
+                    infoScreen.visible = true;
                 }
             }
         }
@@ -145,16 +191,12 @@ Rectangle {
             }
         }
     }
-
-
     Video {
         id: recordImage
         objectName: "recording"
 
-        x: 152
-        y: 60
         anchors.margins: 10
-        anchors.left: controls.right
+        anchors.left: controlsLayout.right
         anchors.right: parent.right
         anchors.top: pathLayout.bottom
         anchors.bottom: parent.bottom
@@ -188,335 +230,6 @@ Rectangle {
                         py_recorder.remove_roi();
                         eraseRoi();
                     }
-                }
-            }
-        }
-        RectangleRoi {
-            id: restrictionRoi
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-
-            isActive: restrictionRoiButton.isDown
-
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive) {
-                        py_recorder.set_tracking_region_roi(width, height, roiX, roiY, roiWidth, roiHeight)
-                    } else {
-                        py_recorder.remove_tracking_region_roi();
-                        eraseRoi();
-                    }
-                }
-            }
-        }
-    }
-
-    Rectangle{
-        id: frameSetterContainer
-        width: 120
-        height: col.height + 20
-        anchors.top: controls.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: controls.horizontalCenter
-
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
-
-        function reload(){
-            col.reload()
-        }
-
-        CustomColumn {
-            id: col
-
-            IntLabel {
-                width: parent.width
-                label: "Ref"
-                tooltip: "Select the reference frame"
-                readOnly: false
-                text: py_iface.get_bg_frame_idx()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_bg_frame_idx(text);
-                        reload();
-                    }
-                }
-                function reload(){ text = py_iface.get_bg_frame_idx() }
-            }
-            IntLabel {
-                width: parent.width
-                label: "Start"
-                tooltip: "Select the first data frame"
-                readOnly: false
-                text: py_iface.get_start_frame_idx()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_start_frame_idx(text);
-                        reload();
-                    }
-                }
-                function reload(){ text = py_iface.get_start_frame_idx() }
-            }
-            IntLabel {
-                width: parent.width
-                label: "End"
-                tooltip: "Select the last data frame"
-                readOnly: false
-                text: py_iface.get_end_frame_idx()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_end_frame_idx(text);
-                        reload();
-                    }
-                }
-                function reload(){ text = py_iface.get_end_frame_idx() }
-            }
-        }
-    }
-    Rectangle{
-        id: referenceTreatmentSettings
-        width: 120
-        height: col2.height + 20
-        anchors.top: frameSetterContainer.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: frameSetterContainer.horizontalCenter
-
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
-
-        function reload(){ col2.reload() }
-
-        CustomColumn {
-            id: col2
-
-            IntLabel{
-                width: parent.width
-                label: "n"
-                tooltip: "Number of frames for background"
-                readOnly: false
-                text: py_iface.get_n_bg_frames()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_n_bg_frames(text);
-                    }
-                }
-                function reload() {text = py_iface.get_n_bg_frames() }
-            }
-            IntLabel{
-                width: parent.width
-                label: "Sds"
-                tooltip: "Number of standard deviations above average"
-                readOnly: false
-                text: py_iface.get_n_sds()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_n_sds(text);
-                    }
-                }
-                function reload() {text = py_iface.get_n_sds() }
-            }
-        }
-    }
-    Rectangle{
-        id: detectionParamsSetterContainer
-        width: 120
-        height: col3.height + 20
-        anchors.top: referenceTreatmentSettings.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: referenceTreatmentSettings.horizontalCenter
-
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
-
-        function reload(){ col3.reload() }
-
-        CustomColumn {
-            id: col3
-
-            IntLabel {
-                width: parent.width
-                label: "Thrsh"
-                tooltip: "Detection threshold"
-                readOnly: false
-                text: py_iface.get_detection_threshold()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_detection_threshold(text);
-                    }
-                }
-                function reload() {text = py_iface.get_detection_threshold() }
-            }
-            IntLabel {
-                width: parent.width
-                label: "Min"
-                tooltip: "Minimum object area"
-                readOnly: false
-                text: py_iface.get_min_area()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_min_area(text);
-                    }
-                }
-                function reload() { py_iface.get_min_area() }
-            }
-            IntLabel {
-                width: parent.width
-                label: "Max"
-                tooltip: "Maximum object area"
-                readOnly: false
-                text: py_iface.get_max_area()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_max_area(text);
-                    }
-                }
-                function reload() { py_iface.get_max_area() }
-            }
-            IntLabel{
-                width: parent.width
-                label: "Mvmt"
-                tooltip: "Maximum displacement (between frames) threshold"
-                readOnly: false
-                text: py_iface.get_max_movement()
-                onTextChanged: {
-                    if (validateInt()) {
-                        py_iface.set_max_movement(text);
-                    }
-                }
-                function reload() { py_iface.get_max_movement() }
-            }
-        }
-    }
-    Rectangle{
-        id: boolSetterContainer
-        width: 120
-        height: col4.height + 20
-        anchors.top: detectionParamsSetterContainer.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: detectionParamsSetterContainer.horizontalCenter
-
-        color: "#4c4c4c"
-        radius: 9
-        border.width: 3
-        border.color: "#7d7d7d"
-
-        function reload(){ col4.reload() }
-
-        CustomColumn {
-            id: col4
-
-            BoolLabel {
-                label: "Clear"
-                tooltip: "Clear objects touching the borders of the image"
-                checked: py_iface.get_clear_borders()
-                onClicked: py_iface.set_clear_borders(checked)
-                function reload() { checked = py_iface.get_clear_borders() }
-            }
-            BoolLabel {
-                label: "Norm."
-                tooltip: "Normalise frames intensity"
-                checked: py_iface.get_normalise()
-                onClicked: py_iface.set_normalise(checked)
-                function reload() { checked = py_iface.get_normalise() }
-            }
-            BoolLabel{
-                label: "Extract"
-                tooltip: "Extract the arena as an ROI"
-                checked: py_iface.get_extract_arena()
-                onClicked: py_iface.set_extract_arena(checked)
-                function reload() { checked = py_iface.get_extract_arena() }
-            }
-        }
-    }
-
-    ComboBox {
-        id: comboBox1
-        anchors.margins: 10
-        anchors.top: boolSetterContainer.bottom
-        anchors.left: controls.left
-        anchors.leftMargin: 0
-        model: ["Raw", "Diff"]
-        onCurrentTextChanged:{
-            py_recorder.set_frame_type(currentText)
-        }
-    }
-    Row {
-        anchors.margins: 10
-        anchors.top: comboBox1.bottom
-        anchors.left: controls.left
-        anchors.leftMargin: 0
-        CustomButton {
-            id: roiButton
-            width: recordBtn.width
-            height: width
-
-            property bool isDown
-            isDown: false
-            property string oldSource
-            oldSource: iconSource
-
-            iconSource: "../../../resources/icons/roi.png"
-            pressedSource: "../../../resources/icons/roi_pressed.png"
-            tooltip: "Draw ROI"
-
-            onPressed: {}
-            onReleased: {}
-
-            onClicked: {
-                if (isDown){
-                    py_iface.restore_cursor();
-                    iconSource = oldSource;
-                    isDown = false;
-                    infoScreen.visible = false;
-                } else {
-                    py_iface.chg_cursor();
-                    oldSource = iconSource;
-                    iconSource = pressedSource;
-                    isDown = true;
-                    infoScreen.visible = true;
-                    roi.z = 10;
-                    restrictionRoi.z = 9;
-                }
-            }
-        }
-        CustomButton {
-            id: restrictionRoiButton
-            width: roiButton.width
-            height: width
-
-            property bool isDown
-            isDown: false
-            property string oldSource
-            oldSource: iconSource
-
-            iconSource: "../../../resources/icons/roi.png"
-            pressedSource: "../../../resources/icons/roi_pressed.png"
-            tooltip: "Draw tracking area ROI"
-
-            onPressed: {}
-            onReleased: {}
-
-            onClicked: {
-                if (isDown) { // already active -> revert
-                    py_iface.restore_cursor();
-                    iconSource = oldSource;
-                    isDown = false;
-                    infoScreen.visible = false;
-                } else { // activate
-                    py_iface.chg_cursor();
-                    oldSource = iconSource;
-                    iconSource = pressedSource;
-                    isDown = true;
-                    infoScreen.visible = true;
-                    restrictionRoi.z = 10;
-                    roi.z = 9;
                 }
             }
         }

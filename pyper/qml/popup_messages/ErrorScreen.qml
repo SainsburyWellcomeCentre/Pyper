@@ -2,10 +2,11 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
 
+import "../style"
 
 InfoScreen{
-    color: "pink"
-    border.color: "red"
+    color: theme.errorScreenFrameBackground
+    border.color: theme.errorScreenFrameBorder
 
     labelWidth: width - errorIcon.width - 30
     labelAnchors.left: errorIcon.right

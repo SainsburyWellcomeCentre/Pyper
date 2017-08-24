@@ -24,10 +24,11 @@ TableView{
                 break;
             } else {
                 mod.append({"frameId": parseInt(result[0]),
-                           "x": parseFloat(result[1]),
-                           "y": parseFloat(result[2]),
-                           "centerDist": parseFloat(result[3]),
-                           "borderDist": parseFloat(result[4])});
+                            "x": parseFloat(result[1]),
+                            "y": parseFloat(result[2]),
+                            "centerDist": parseFloat(result[3]),
+                            "borderDist": parseFloat(result[4])}
+                           );
                 idx += 1;
             }
         }

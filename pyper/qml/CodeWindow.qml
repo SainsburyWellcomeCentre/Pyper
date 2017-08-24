@@ -5,6 +5,8 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
+import "style"
+
 ApplicationWindow {
     width: 600
     height: 500
@@ -68,13 +70,13 @@ ApplicationWindow {
         anchors.right: parent.right
         height: parent.height - 20
         width: parent.width
-        color: "lightGrey"
+        color: theme.codeBackground
 
         TextArea {
             id: document
             anchors.fill: parent
             text: py_editor.load_plugin_template();
-            textColor: 'white';
+            textColor: theme.codeTextColor;
         }
     }
 }

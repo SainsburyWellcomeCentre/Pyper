@@ -2,6 +2,9 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Private 1.0
 
+import "../style"
+
+// Used for the tab buttons
 Rectangle {
     width: 60
     height: 70
@@ -17,7 +20,7 @@ Rectangle {
     signal pressed(real xPosition, real yPosition)
     signal released(real xPosition, real yPosition)
 
-    textColor: "white"
+    textColor: theme.text
     color: "transparent"
 
     onActiveChanged: setColor()
@@ -25,14 +28,14 @@ Rectangle {
 
     function setColor(){
         if (hovered){
-            color = "#999999"
-            textColor = "white"
+            color = theme.toolButtonHoveredBackground
+            textColor = theme.toolButtonText
         } else if (active) {
-            color = "#DBDBDB"
-            textColor = "black"
+            color = theme.toolButtonActiveBackground
+            textColor = theme.toolButtonNegativeText
         } else {
             color = "transparent"
-            textColor = "white"
+            textColor = theme.toolButtonText
         }
     }
 
