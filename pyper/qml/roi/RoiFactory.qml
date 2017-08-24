@@ -15,6 +15,8 @@ Item {
     property bool drawingMode: false
     property string drawingColor: "Yellow"
 
+    property variant tracker_py_iface
+
     Loader {
         id: roi
 
@@ -33,11 +35,11 @@ Item {
         target: roi.item
 
         onReleased: {
-            if (target.isDrawn) {  // FIXME: part that changes + need pythonObject
+            if (target.isDrawn) {  // FIXME: part that changes
                 if (target.isActive) {
-                    py_tracker.set_tracking_region_roi(target.width, target.height, target.roiX, target.roiY, target.roiWidth, target.roiHeight)
+                    tracker_py_iface.set_tracking_region_roi(target.width, target.height, target.roiX, target.roiY, target.roiWidth, target.roiHeight)
                 } else {
-                    py_tracker.remove_tracking_region_roi();
+                    tracker_py_iface.remove_tracking_region_roi();
                     target.eraseRoi();
                 }
             }

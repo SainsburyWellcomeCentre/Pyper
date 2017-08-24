@@ -27,18 +27,6 @@ Rectangle {
         z: 1
         anchors.centerIn: parent
     }
-    InfoScreen{
-        id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 100
-        height: 75
-
-        text: "Roi mode"
-        visible: false
-        z: 1
-    }
 
     Column {
         id: controlsLayout
@@ -64,7 +52,7 @@ Rectangle {
 
                 CustomButton {
                     id: recordBtn
-                    x: 20
+                    x: 20  // FIXME: put anchor
                     width: 45
                     height: width
 
@@ -72,7 +60,7 @@ Rectangle {
                     iconSource: "../../../resources/icons/record.png"
 
                     enabled: false
-                    onClicked:{
+                    onClicked: {  // FIXME: should have both ROIs and probably embed in factory
                         if (py_recorder.cam_detected()){
                             if (roi.isDrawn){
                                 py_recorder.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
@@ -114,38 +102,49 @@ Rectangle {
         }
 
         CustomButton {
-            id: roiButton
+            id: roiManagerBtn
 
-            property bool isDown
-            isDown: false
-            property string oldSource
-            oldSource: iconSource
-
-            width: recordBtn.width
+            width: 50
             height: width
 
+            anchors.horizontalCenter: parent.horizontalCenter
+
             iconSource: "../../../resources/icons/roi.png"
-            pressedSource: "../../../resources/icons/roi_pressed.png"
-            tooltip:
-                "Draw ROI
-When pressed, this will open the ROI manager."
+//            pressedSource: "../../../resources/icons/roi_pressed.png"
+//            property string oldSource: iconSource
+//            property bool isDown: false
 
-            onPressed: {}
-            onReleased: {}
-
+            tooltip: "Open ROI manager"
             onClicked: {
-                if (isDown){
-                    py_iface.restore_cursor();
-                    iconSource = oldSource;
-                    isDown = false;
-                    infoScreen.visible = false;
+                roiManager.visible = !roiManager.visible;
+            }
+        }
+        RoiManager {
+            id: roiManager
+            pythonObject: py_iface
+            visible: false
+
+            onDrawCallback: {
+                setRoiOnTop(trackingRoi, restrictionRoi);
+            }
+            onDrawRestriction: {
+                setRoiOnTop(restrictionRoi, trackingRoi);
+            }
+
+            function changeRoiClass(roi, roiShape) {
+                if (roiShape === "ellipse") {
+                    roi.source = "roi/EllipseRoi.qml";
+                } else if (roiShape === 'rectangle') {
+                    roi.source = "roi/RectangleRoi.qml"
                 } else {
-                    py_iface.chg_cursor();
-                    oldSource = iconSource;
-                    iconSource = pressedSource;
-                    isDown = true;
-                    infoScreen.visible = true;
+                    console.log("Unrecognised drawing mode: " + roiShape);
                 }
+            }
+            onTrackingRoiShapeChanged: {
+                changeRoiClass(trackingRoi, trackingRoiShape);
+            }
+            onRestrictionRoiShapeChanged: {
+                changeRoiClass(restrictionRoi, restrictionRoiShape);
             }
         }
     }
@@ -195,43 +194,51 @@ When pressed, this will open the ROI manager."
         id: recordImage
         objectName: "recording"
 
+        width: 640
+        height: 480
+
         anchors.margins: 10
         anchors.left: controlsLayout.right
         anchors.right: parent.right
         anchors.top: pathLayout.bottom
         anchors.bottom: parent.bottom
-        width: 640
-        height: 480
 
         source: "image://recorderprovider/img"
 
-        onWidthChanged: {
-            roi.width = img.width;
-            restrictionRoi.width = img.width;
-        }
-        onHeightChanged: {
-            roi.height = img.height;
-            restrictionRoi.height = img.height;
-        }
 
-        CircleRoi {
-            id: roi
+        RoiFactory {
+            id: trackingRoi
+
+            width: parent.imgWidth
+            height: parent.imgHeight
 
             anchors.top: parent.top
             anchors.left: parent.left
 
-            isActive: roiButton.isDown
+            source: "roi/EllipseRoi.qml"
 
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive){
-                        py_recorder.set_roi(width, height, roiX, roiY, roiWidth);
-                    } else {
-                        py_recorder.remove_roi();
-                        eraseRoi();
-                    }
-                }
-            }
+            roiActive: roiManager.trackingRoiActive
+            drawingColor: roiManager.trackingRoiColor
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_recorder
+        }
+        RoiFactory {
+            id: restrictionRoi
+
+            width: parent.imgWidth
+            height: parent.imgHeight
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
+            source: "roi/RectangleRoi.qml"
+
+            roiActive: roiManager.restrictionRoiActive
+            drawingColor: roiManager.restrictionRoiColor
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_recorder
         }
     }
 }

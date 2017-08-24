@@ -31,6 +31,12 @@ ApplicationWindow {
     signal drawCallback()
     signal drawRestriction()
 
+    function setRoiOnTop(topRoi, bottomRoi) {  // FIXME: unnecessary with enabled changed
+        bottomRoi.z = 9;
+        topRoi.z = 10;
+        // FIXME: enabled should be sufficient
+    }
+
     onClosing: {
         pythonObject.restore_cursor();
         infoScreen.visible = false;

@@ -28,18 +28,6 @@ Rectangle {
         visible: false
         anchors.centerIn: trackerDisplay
     }
-    InfoScreen{
-        id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 100
-        height: 75
-
-        text: "Roi mode"
-        visible: false
-        z: 1
-    }
     ErrorScreen{
         id: videoErrorScreen
         objectName: "videoLoadingErrorScreen"
@@ -81,13 +69,14 @@ Rectangle {
         id: trackerDisplay
         objectName: "trackerDisplay"
 
+        width: 640
+        height: 480
+
         anchors.margins: 10
         anchors.left: controlsColumn.right
         anchors.right: parent.right
         anchors.top: vidTitle.bottom
         anchors.bottom: parent.bottom
-        width: 640
-        height: 480
 
         source: "image://trackerprovider/img"
 
@@ -105,6 +94,8 @@ Rectangle {
             roiActive: roiManager.trackingRoiActive
             drawingColor: roiManager.trackingRoiColor
             drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
         }
 
         RoiFactory {
@@ -121,6 +112,8 @@ Rectangle {
             roiActive: roiManager.restrictionRoiActive
             drawingColor: roiManager.restrictionRoiColor
             drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
         }
     }
 
@@ -195,34 +188,27 @@ Rectangle {
 
             visualisationOptions: ["Raw", "Diff", "Mask"]
         }
-    }
+        CustomButton {
+            id: roiManagerBtn
 
-    CustomButton {
-        id: roiManagerBtn
+            width: 50
+            height: width
 
-        width: 50
-        height: width
+            anchors.horizontalCenter: parent.horizontalCenter
 
-        anchors.margins: 10
-        anchors.top: comboBox1.bottom
-        anchors.horizontalCenter: comboBox1.horizontalCenter
+            iconSource: "../../../resources/icons/roi.png"
 
-        iconSource: "../../../resources/icons/roi.png"
-
-        tooltip: "Open ROI manager"
-        onClicked: {
-            roiManager.visible = !roiManager.visible;
+            tooltip: "Open ROI manager"
+            onClicked: {
+                roiManager.visible = !roiManager.visible;
+            }
         }
     }
+
     RoiManager {
         id: roiManager
         pythonObject: py_iface
         visible: false
-        function setRoiOnTop(topRoi, bottomRoi) {  // FIOXME: unnecessary with enabled changed
-            bottomRoi.z = 9;
-            topRoi.z = 10;
-            // FIXME: enabled should be sufficient
-        }
 
         onDrawCallback: {
             setRoiOnTop(mouseRoi, restrictionRoi);
