@@ -17,6 +17,8 @@ Frame {
 
     property string name
 
+    property int idx
+
     property variant pythonObject
     property variant roiColorDialog
 
@@ -28,6 +30,8 @@ Frame {
     property alias roiActive: roiActive.checked
     property alias shapeBtn: shapeBtn
 
+    property var sourceRoi
+
     signal pressed()
     signal shapeRequest()
     property bool checked: false
@@ -35,7 +39,24 @@ Frame {
     property ExclusiveGroup exclusiveGroup: null
 
     onDrawingTypeChanged: {
-        shapeBtn.iconSource = "../../../resources/icons/" + drawingType + ".png"
+        shapeBtn.iconSource = "../../../resources/icons/" + drawingType + ".png";
+        changeRoiClass(sourceRoi, drawingType);
+    }
+    onDrawingColorChanged: {
+        sourceRoi.drawingColor = drawingColor;
+    }
+    onRoiActiveChanged: {
+        sourceRoi.roiActive = roiActive;
+    }
+
+    function changeRoiClass(roi, roiShape) {
+        if (roiShape === "ellipse") {
+            roi.source = "EllipseRoi.qml";
+        } else if (roiShape === 'rectangle') {
+            roi.source = "RectangleRoi.qml"
+        } else {
+            console.log("Unrecognised drawing mode: " + roiShape);
+        }
     }
 
     onExclusiveGroupChanged: {

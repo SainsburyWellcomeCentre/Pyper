@@ -91,8 +91,6 @@ Rectangle {
 
             source: "roi/EllipseRoi.qml"
 
-            roiActive: roiManager.trackingRoiActive
-            drawingColor: roiManager.trackingRoiColor
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_tracker
@@ -109,8 +107,21 @@ Rectangle {
 
             source: "roi/RectangleRoi.qml"
 
-            roiActive: roiManager.restrictionRoiActive
-            drawingColor: roiManager.restrictionRoiColor
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
+        }
+        RoiFactory {
+            id: measurementRoi
+
+            width: parent.imgWidth
+            height: parent.imgHeight
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
+            source: "roi/RectangleRoi.qml"
+
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_tracker
@@ -212,33 +223,10 @@ Rectangle {
         pythonObject: py_iface
         visible: false
 
-        onDrawCallback: {
-            setRoiOnTop(mouseRoi, restrictionRoi);
-        }
-        onDrawRestriction: {
-            setRoiOnTop(restrictionRoi, mouseRoi);
-        }
-        onDrawRois: {
-            roisList[0].z = 10;
-            for (var i=1; i < roisList.size(); i++) {
-                roisList[i].z = 10 - i;
-            }
-        }
-
-        function changeRoiClass(roi, roiShape) {
-            if (roiShape === "ellipse") {
-                roi.source = "roi/EllipseRoi.qml";
-            } else if (roiShape === 'rectangle') {
-                roi.source = "roi/RectangleRoi.qml"
-            } else {
-                console.log("Unrecognised drawing mode: " + roiShape);
-            }
-        }
-        onTrackingRoiShapeChanged: {
-            changeRoiClass(mouseRoi, trackingRoiShape);
-        }
-        onRestrictionRoiShapeChanged: {
-            changeRoiClass(restrictionRoi, restrictionRoiShape);
-        }
+        roisControlsModelsList: [
+            RoiControlsModel { sourceRoi: mouseRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
+            RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
+        ]
     }
 }

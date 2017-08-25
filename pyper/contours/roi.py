@@ -143,5 +143,3 @@ class Ellipse(Roi):
         points = np.array(zip(xs, ys), dtype=np.float32)
         return points
 
-
-

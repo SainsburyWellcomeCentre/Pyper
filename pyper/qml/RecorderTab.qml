@@ -124,12 +124,12 @@ Rectangle {
             pythonObject: py_iface
             visible: false
 
-            onDrawCallback: {
-                setRoiOnTop(trackingRoi, restrictionRoi);
-            }
-            onDrawRestriction: {
-                setRoiOnTop(restrictionRoi, trackingRoi);
-            }
+//            onDrawCallback: {
+//                setRoiOnTop(trackingRoi, restrictionRoi);
+//            }
+//            onDrawRestriction: {
+//                setRoiOnTop(restrictionRoi, trackingRoi);
+//            }
 
             function changeRoiClass(roi, roiShape) {
                 if (roiShape === "ellipse") {
@@ -140,12 +140,12 @@ Rectangle {
                     console.log("Unrecognised drawing mode: " + roiShape);
                 }
             }
-            onTrackingRoiShapeChanged: {
-                changeRoiClass(trackingRoi, trackingRoiShape);
-            }
-            onRestrictionRoiShapeChanged: {
-                changeRoiClass(restrictionRoi, restrictionRoiShape);
-            }
+//            onTrackingRoiShapeChanged: {
+//                changeRoiClass(trackingRoi, trackingRoiShape);
+//            }
+//            onRestrictionRoiShapeChanged: {
+//                changeRoiClass(restrictionRoi, restrictionRoiShape);
+//            }
         }
     }
 
