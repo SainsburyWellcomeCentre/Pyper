@@ -31,6 +31,7 @@ ApplicationWindow {
 
     signal drawCallback()
     signal drawRestriction()
+    signal drawRois(var roisList)
 
     function setRoiOnTop(topRoi, bottomRoi) {  // FIXME: unnecessary with enabled changed
         bottomRoi.z = 9;
@@ -167,7 +168,23 @@ ApplicationWindow {
                     roiShapeWin.popup(coordsInWin);
                 }
             }
+            RoiControls {
+                id: measurementRoi
+                name: "Measurement ROI"
 
+                pythonObject: root.pythonObject
+                parentWindow: root
+                roiColorDialog: roiColorDialog
+                exclusiveGroup: currentRoiExclusiveGroup
+                checked: false
+
+                drawingType: 'rectangle'
+                onPressed: { root.drawRois(measurementRoi, callbackRoi, restrictionRoi); }
+                onShapeRequest: {
+                    var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
+                    roiShapeWin.popup(coordsInWin);
+                }
+            }
         }
     }
     InfoScreen{

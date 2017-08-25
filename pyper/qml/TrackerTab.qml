@@ -218,6 +218,12 @@ Rectangle {
         onDrawRestriction: {
             setRoiOnTop(restrictionRoi, mouseRoi);
         }
+        onDrawRois: {
+            roisList[0].z = 10;
+            for (var i=1; i < roisList.size(); i++) {
+                roisList[i].z = 10 - i;
+            }
+        }
 
         function changeRoiClass(roi, roiShape) {
             if (roiShape === "ellipse") {
