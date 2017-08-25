@@ -19,7 +19,7 @@ Item {
     }
     onDragged: {
         if (isActive) {
-            resizeRoi(xPosition, yPosition)
+            resizeRoi(xPosition, yPosition);
         }
     }
 

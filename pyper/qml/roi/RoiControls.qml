@@ -7,18 +7,14 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 
 import "../basic_types"
+import "../style"
 
-Rectangle {
+Frame {
     id: roiLayout
-    anchors.margins: 5
-    anchors.left: parent.left
-    anchors.right: parent.right
     height: roiLayoutColumn.height + anchors.margins *2
-//    anchors.fill: parent
-    color: "#4c4c4c"
-    radius: 9
-    border.width: 3
-    border.color: "#7d7d7d"
+
+    anchors.margins: 5
+
     property string name
 
     property variant pythonObject
@@ -77,7 +73,7 @@ Rectangle {
 
             property int btnsWidth: 50
 
-            property color drawingColor: 'Yellow'
+            property color drawingColor: theme.roiDefault
             onDrawingColorChanged: {
                 colorBtn.paint();
             }

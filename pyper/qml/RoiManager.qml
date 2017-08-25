@@ -9,6 +9,7 @@ import QtQuick.Dialogs 1.2
 import "basic_types"
 import "roi"
 import "popup_messages"
+import "style"
 
 ApplicationWindow {
     id: root
@@ -50,45 +51,47 @@ ApplicationWindow {
 
         flags: Qt.FramelessWindowHint
         color: "transparent"
+        visible: false
 
-        property string shape: "ellipse"
-
-        onShapeChanged: {
+        function getCurrentRoi() {
             if (callbackRoi.checked) {
-                callbackRoi.drawingType = shape;
+                return callbackRoi;
             } else if (restrictionRoi.checked) {
-                restrictionRoi.drawingType = shape;
+                return restrictionRoi;
             }
         }
 
-        visible: false
+        signal shapeSelected(string newShape)
+        onShapeSelected: {
+            var currentRoi = getCurrentRoi();
+            currentRoi.drawingType = newShape;
+            close();
+        }
+
+        function popup(btnCoordsInWin) {
+            x = root.x + btnCoordsInWin.x;
+            y = root.y + btnCoordsInWin.y;
+            visible = true;
+        }
+
         Column {
             CustomButton {
                 width: 50
                 height: width
                 iconSource: "../../../resources/icons/ellipse.png"
-                onClicked: {
-                    roiShapeWin.shape = 'ellipse';
-                    roiShapeWin.close();
-                }
+                onClicked: { roiShapeWin.shapeSelected('ellipse'); }
             }
             CustomButton {
                 width: 50
                 height: width
                 iconSource: "../../../resources/icons/rectangle.png"
-                onClicked: {
-                    roiShapeWin.shape = 'rectangle';
-                    roiShapeWin.close();
-                }
+                onClicked: { roiShapeWin.shapeSelected('rectangle'); }
             }
             CustomButton {
                 width: 50
                 height: width
                 iconSource: "../../../resources/icons/freehand.png"
-                onClicked: {
-                    roiShapeWin.shape = 'freehand';
-                    roiShapeWin.close();
-                }
+                onClicked: { roiShapeWin.shapeSelected('freehand'); }
             }
         }
 
@@ -97,13 +100,13 @@ ApplicationWindow {
     Rectangle {
         id: controls
         anchors.fill: parent
-        color: "#3B3B3B"
+        color: theme.background
 
         ColorDialog {
             id: roiColorDialog
             title: "Please pick ROI color"
 
-            color: 'Yellow'
+            color: theme.roiDefault
             showAlphaChannel: false
 
             onAccepted: {
@@ -141,14 +144,10 @@ ApplicationWindow {
                 exclusiveGroup: currentRoiExclusiveGroup
                 checked: true
 
-                onPressed: {
-                    root.drawCallback();
-                }
+                onPressed: { root.drawCallback(); }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
-                    roiShapeWin.y = root.y + coordsInWin.y;
-                    roiShapeWin.x = root.x + coordsInWin.x;
-                    roiShapeWin.visible = true;
+                    roiShapeWin.popup(coordsInWin);
                 }
             }
             RoiControls {
@@ -162,14 +161,10 @@ ApplicationWindow {
                 checked: false
 
                 drawingType: 'rectangle'
-                onPressed: {
-                    root.drawRestriction();
-                }
+                onPressed: { root.drawRestriction(); }
                 onShapeRequest: {
                     var coordsInWin = shapeBtn.mapToItem(controls, 0, 0);
-                    roiShapeWin.y = root.y + coordsInWin.y;
-                    roiShapeWin.x = root.x + coordsInWin.x;
-                    roiShapeWin.visible = true;
+                    roiShapeWin.popup(coordsInWin);
                 }
             }
 
