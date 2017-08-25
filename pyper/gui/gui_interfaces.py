@@ -462,13 +462,15 @@ class TrackerIface(BaseInterface):
         of the frames in the GUI (on which the user draws the ROI) and the internal representation
         used to compute the position of the specimen.
         
-        :param width: The width of the image representation in the GUI
-        :param height: The height of the image representation in the GUI
-        :param x: The center of the roi in the first dimension
-        :param y: The center of the roi in the second dimension
+        :param img_width: The width of the image representation in the GUI
+        :param img_height: The height of the image representation in the GUI
+        :param roi_x: The center of the roi in the first dimension
+        :param roi_y: The center of the roi in the second dimension
         :param roi_width: The width of the ROI
         :param roi_height: The height of the ROI
         """
+        print("setting the ROI to ({:.0f}, {:.0f}) width: {:.0f}, height: {:.0f}"
+              .format(roi_x, roi_y, roi_width, roi_height))
         if hasattr(self, 'tracker'):
             horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
 
@@ -476,7 +478,8 @@ class TrackerIface(BaseInterface):
             scaled_y = (roi_y + roi_height/2) * vertical_scaling_factor
             scaled_width = roi_width * horizontal_scaling_factor
             scaled_height = roi_height * horizontal_scaling_factor
-            print(scaled_x, scaled_y, scaled_width, scaled_height)
+            print("Roi after scaling: ({:.0f}, {:.0f}) width: {:.0f}, height: {:.0f}"
+                  .format(scaled_x, scaled_y, scaled_width, scaled_height))
             self.roi = Ellipse(scaled_x, scaled_y, scaled_width, scaled_height)
 
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)

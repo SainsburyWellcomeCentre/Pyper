@@ -153,8 +153,10 @@ Rectangle {
                         splash.visible = true;
                     }
                     onClicked: {
-                        if (mouseRoi.isDrawn){
-                            py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth);
+//                        if (mouseRoi.isDrawn){
+                        if (mouseRoi.roiActive){
+                            mouseRoi.set_tracker_py_iface_roi();
+//                            py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth, mouseRoi.roiHeight);  // TODO: make roi generate list of arguments
                         }
                         py_tracker.start()
                     }
