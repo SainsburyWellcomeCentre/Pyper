@@ -15,6 +15,11 @@ Item {
     property bool drawingMode: false
     property string drawingColor: "Yellow"
 
+    property real roiX: 0
+    property real roiY: 0
+    property real roiWidth: 0
+    property real roiHeight: 0
+
     property variant tracker_py_iface
 
     function set_tracker_py_iface_roi() {
@@ -50,6 +55,11 @@ Item {
                     tracker_py_iface.remove_tracking_region_roi();
                     target.eraseRoi();
                 }
+                root.roiX = target.roiX;
+                root.roiY = target.roiY;
+                root.roiWidth = target.roiWidth;
+                root.roiHeight = target.roiHeight;
+                console.log(root.roiX, root.roiY, root.roiWidth, root.roiHeight);
             }
         }
     }

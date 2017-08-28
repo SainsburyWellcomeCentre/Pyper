@@ -27,7 +27,7 @@ Column {
         CustomColumn {
             id: col
 
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Ref"
                 tooltip: "Select the reference frame"
@@ -38,7 +38,7 @@ Column {
                 }
                 function reload(){ value = root.py_interface.get_bg_frame_idx() }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Start"
                 tooltip: "Select the first data frame"
@@ -49,7 +49,7 @@ Column {
                 }
                 function reload(){ value = root.py_interface.get_start_frame_idx() }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "End"
                 tooltip: "Select the last data frame"
@@ -71,7 +71,7 @@ Column {
         CustomColumn {
             id: col2
 
-            IntLabel{
+            IntInput {
                 width: parent.width
                 label: "n"
                 tooltip: "Number of frames for background"
@@ -79,7 +79,7 @@ Column {
                 onEdited: { root.py_interface.set_n_bg_frames(value); }
                 function reload() {value = root.py_interface.get_n_bg_frames() }
             }
-            IntLabel{
+            IntInput {
                 width: parent.width
                 label: "Sds"
                 tooltip: "Number of standard deviations above average"
@@ -98,7 +98,7 @@ Column {
         CustomColumn {
             id: col3
 
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Thrsh"
                 tooltip: "Detection threshold"
@@ -106,7 +106,7 @@ Column {
                 onEdited: { root.py_interface.set_detection_threshold(value); }
                 function reload() {value = root.py_interface.get_detection_threshold() }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Min"
                 tooltip: "Minimum object area"
@@ -114,7 +114,7 @@ Column {
                 onEdited: { root.py_interface.set_min_area(value); }
                 function reload() { root.py_interface.get_min_area() }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Max"
                 tooltip: "Maximum object area"
@@ -122,7 +122,7 @@ Column {
                 onEdited: { root.py_interface.set_max_area(value); }
                 function reload() { root.py_interface.get_max_area() }
             }
-            IntLabel{
+            IntInput {
                 width: parent.width
                 label: "Mvmt"
                 tooltip: "Maximum displacement (between frames) threshold"

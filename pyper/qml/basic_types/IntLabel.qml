@@ -7,49 +7,29 @@ import "../style"
 Item {
     id: root
     height: 25
-    width: 130
+    width: label.width + spinBox.width
 
     property alias label: label.text
     property alias tooltip: label.help
 
-    property alias value: spinBox.value
-    property alias minimumValue: spinBox.minimumValue
-    property alias maximumValue: spinBox.maximumValue
-    property alias stepSize: spinBox.stepSize
-    property alias suffix: spinBox.suffix
-
-    signal edited()
+    property alias value: spinBox.text
 
     Row {
         anchors.fill: parent
-        spacing: width - (label.width + spinBox.width)
+        spacing: 5
 
         LabelWTooltip {
             id: label
-//            width: (parent.width -5) /2
             width: contentWidth + 5
             height: parent.height
             text: "Label"
         }
-        SpinBox {
+        Label {
             id: spinBox
-            minimumValue: -1
-            maximumValue: 1000000
-            stepSize: 1
-            value: 0
-            style: SpinBoxStyle {
-                background: Rectangle {
-                    anchors.fill: parent
-                    implicitWidth: 80
-                    implicitHeight: 20
-                    color: theme.spinBoxBackground
-                    radius: 2
-                }
-                textColor: theme.text
-            }
-            onEditingFinished: {
-                root.edited();
-            }
+            width: contentWidth + 5
+            height: parent.height
+            text: "0"
+            color: theme.text
         }
     }
 }

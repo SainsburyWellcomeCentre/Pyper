@@ -174,5 +174,30 @@ Frame {
                 }
             }
         }
+        Grid {
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            columns: 2
+            rows: 2
+
+            spacing: 5
+            IntLabel {
+                label: "x:"
+                value: sourceRoi.roiX
+            }
+            IntLabel {
+                label: "y:"
+                value: sourceRoi.roiX
+            }
+            IntLabel {
+                label: "width:"
+                value: sourceRoi.roiWidth
+            }
+            IntLabel {
+                label: "height:"
+                value: sourceRoi.roiHeight
+            }
+        }
     }
 }
