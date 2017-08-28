@@ -131,9 +131,10 @@ Rectangle {
     Column {
         id: controlsColumn
         width: 140
+
         anchors.margins: 5
-        anchors.left: parent.left
         anchors.top: parent.top
+        anchors.left: parent.left
         // TODO: use SplitView
 
         spacing: 10
@@ -142,7 +143,7 @@ Rectangle {
             id: controls
             height: row1.height + 20
 
-            Row{
+            Row {
                 id: row1
 
                 anchors.centerIn: controls
@@ -182,9 +183,9 @@ Rectangle {
                     width: startTrackBtn.width
                     height: width
 
+                    tooltip: "Stop tracking"
                     iconSource: "../../../resources/icons/stop.png"
                     pressedSource: "../../../resources/icons/stop_pressed.png"
-                    tooltip: "Stop tracking"
 
                     onClicked: py_tracker.stop()
                 }
