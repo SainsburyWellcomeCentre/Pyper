@@ -61,6 +61,9 @@ class BaseInterface(QObject):
         self.display_name = display_name
         self.provider_name = provider_name
         self.params = params
+
+        self.stream = None
+        self.n_frames = 0
         
         self.timer = QTimer(self)
         self.timer_speed = timer_speed

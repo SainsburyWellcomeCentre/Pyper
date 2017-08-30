@@ -201,8 +201,8 @@ Rectangle {
             anchors.right: parent.right
             spacing: parent.spacing
 
-            py_interface: py_iface
-            parent_py_obj: py_tracker
+            py_params_iface: py_iface
+            py_tracking_iface: py_tracker
 
             visualisationOptions: ["Raw", "Diff", "Mask"]
         }
