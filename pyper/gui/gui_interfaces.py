@@ -330,6 +330,7 @@ class TrackerIface(BaseInterface):
         self.positions = []
         self.roi = None
         self.tracking_region_roi = None
+        self.tracker = None
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
@@ -468,8 +469,6 @@ class TrackerIface(BaseInterface):
             raise NotImplementedError("Unknown ROI shape: {}".format(source_type))  # FIXME: change exception type
         scaled_width = roi_width * horizontal_scaling_factor
         scaled_height = roi_height * horizontal_scaling_factor
-        # print("Roi after scaling: ({:.0f}, {:.0f}) width: {:.0f}, height: {:.0f}"
-        #       .format(scaled_x, scaled_y, scaled_width, scaled_height))
         return scaled_x, scaled_y, scaled_width, scaled_height
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
@@ -492,8 +491,7 @@ class TrackerIface(BaseInterface):
 
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
-        if hasattr(self, 'tracker'):
-            print(roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
+        if self.tracker is not None:
             scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
                                                             roi_x, roi_y, roi_width, roi_height)
             if 'rectangle' in source_type.lower():
@@ -521,12 +519,11 @@ class TrackerIface(BaseInterface):
 
     @pyqtSlot(QVariant, QVariant)
     def set_roi_from_points(self, roi_type, points):
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             exp = re.compile('\d+')
             points = points.split("),")
             points = [map(float, exp.findall(p)) for p in points]
             roi = FreehandRoi(points)
-            print(roi, points)
             self.__assign_roi(roi_type, roi)
 
     @pyqtSlot(QVariant)
@@ -575,7 +572,7 @@ class TrackerIface(BaseInterface):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             fig, ax = plt.subplots()
             angles = video_analysis.get_angles(self.positions)
             video_analysis.plot_angles(angles, self.get_sampling_freq())
@@ -586,7 +583,7 @@ class TrackerIface(BaseInterface):
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             fig, ax = plt.subplots()
             distances = video_analysis.pos_to_distances(self.positions)
             video_analysis.plot_distances(distances, self.get_sampling_freq())
@@ -597,7 +594,7 @@ class TrackerIface(BaseInterface):
         """
         Save the graph as a png or jpeg image
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             diag = QFileDialog()
             dest_path = diag.getSaveFileName(parent=diag,
                                              caption='Save file',
