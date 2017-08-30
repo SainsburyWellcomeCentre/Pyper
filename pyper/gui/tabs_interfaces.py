@@ -415,9 +415,7 @@ class TrackerIface(BaseInterface):
         if self.tracker is None:
             return
         self._reset_measures()
-        
         self.set_tracker_params()
-            
         self.timer.start(self.timer_speed)
 
     @pyqtSlot()

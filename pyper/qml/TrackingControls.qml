@@ -32,10 +32,13 @@ Column {
             id: col
 
             IntLabel {
+                id: refFrameInput
                 width: parent.width
                 label: "Ref"
                 tooltip: "Select the reference frame"
                 value: root.py_params_iface.get_bg_frame_idx()
+                minimumValue: 0
+                maximumValue: startFrameInput.value - nBgFramesInput.value
                 onEdited: {
                     root.py_params_iface.set_bg_frame_idx(value);
                     reload();
@@ -46,10 +49,12 @@ Column {
                 }
             }
             IntLabel {
+                id: startFrameInput
                 width: parent.width
                 label: "Start"
                 tooltip: "Select the first data frame"
                 value: root.py_params_iface.get_start_frame_idx()
+                minimumValue: refFrameInput.value + nBgFramesInput.value
                 onEdited: {
                     root.py_params_iface.set_start_frame_idx(value);
                     reload();
@@ -64,6 +69,8 @@ Column {
                 label: "End"
                 tooltip: "Select the last data frame"
                 value: root.py_params_iface.get_end_frame_idx()
+//                minimumValue: startFrameInput.value
+                minimumValue: -1  // means to the end
                 onEdited: {
                     root.py_params_iface.set_end_frame_idx(value);
                     reload();
@@ -85,6 +92,7 @@ Column {
             id: col2
 
             IntLabel{
+                id: nBgFramesInput
                 width: parent.width
                 label: "n"
                 tooltip: "Number of frames for background"
@@ -103,6 +111,7 @@ Column {
                 label: "Sds"
                 tooltip: "Number of standard deviations above average"
                 value: root.py_params_iface.get_n_sds()
+                minimumValue: 1
                 onEdited: {
                     root.py_params_iface.set_n_sds(value);
                     root.updateTracker();
@@ -128,6 +137,8 @@ Column {
                 label: "Thrsh"
                 tooltip: "Detection threshold"
                 value: root.py_params_iface.get_detection_threshold()
+                minimumValue: 1
+                maximumValue: 255
                 onEdited: {
                     root.py_params_iface.set_detection_threshold(value);
                     root.updateTracker();
@@ -142,6 +153,7 @@ Column {
                 label: "Min"
                 tooltip: "Minimum object area"
                 value: root.py_params_iface.get_min_area()
+                minimumValue: 1
                 onEdited: {
                     root.py_params_iface.set_min_area(value);
                     root.updateTracker();
@@ -156,6 +168,7 @@ Column {
                 label: "Max"
                 tooltip: "Maximum object area"
                 value: root.py_params_iface.get_max_area()
+                minimumValue: 1
                 onEdited: {
                     root.py_params_iface.set_max_area(value);
                     root.updateTracker();
@@ -170,6 +183,7 @@ Column {
                 label: "Mvmt"
                 tooltip: "Maximum displacement (between frames) threshold"
                 value: root.py_params_iface.get_max_movement()
+                minimumValue: 1
                 onEdited: {
                     root.py_params_iface.set_max_movement(value);
                     root.updateTracker();

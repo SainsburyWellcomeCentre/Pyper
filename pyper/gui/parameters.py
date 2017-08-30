@@ -22,9 +22,13 @@ class ParamsIface(QObject):
         self.app = app  # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
         self.win = parent
         self.ctx = context
-        self._set_defaults()
+
+        self.src_path = ''
+        self.dest_path = ''
 
         self.calib = None
+
+        self._set_defaults()
 
     def _set_defaults(self):
         """
@@ -100,9 +104,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def set_detection_threshold(self, threshold):
-        thrsh = int(threshold)
-        if 0 < thrsh < 256:
-            self.detection_threshold = thrsh
+        self.detection_threshold = int(threshold)
 
     @pyqtSlot(result=QVariant)
     def get_min_area(self):
@@ -110,9 +112,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def set_min_area(self, area):
-        area = int(area)
-        if area > 0:
-            self.objects_min_area = area
+        self.objects_min_area = int(area)
 
     @pyqtSlot(result=QVariant)
     def get_max_area(self):
@@ -120,9 +120,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def set_max_area(self, area):
-        area = int(area)
-        if area > 0:
-            self.objects_max_area = area
+        self.objects_max_area = int(area)
 
     @pyqtSlot(result=QVariant)
     def get_max_movement(self):
@@ -130,27 +128,23 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def set_max_movement(self, movement):
-        mvmt = int(movement)
-        if mvmt > 0:
-            self.teleportation_threshold = mvmt
+        self.teleportation_threshold = int(movement)
 
     @pyqtSlot(result=QVariant)
     def get_n_sds(self):
         return self.n_sds
 
     @pyqtSlot(QVariant)
-    def set_n_sds(self, n):
-        n_sds = int(n)
-        if n_sds > 0:
-            self.n_sds = n_sds
+    def set_n_sds(self, n_sds):
+        self.n_sds = int(n_sds)
 
     # FRAME OPTIONS
     @pyqtSlot(QVariant)
     def set_bg_frame_idx(self, idx):
-        idx = int(idx)
-        idx = idx if idx >= 0 else 0
-        max_idx = self.start_frame_idx - self.n_bg_frames
-        self.bg_frame_idx = min(idx, max_idx)
+        self.bg_frame_idx = int(idx)
+        # idx = int(idx)
+        # max_idx = self.start_frame_idx - self.n_bg_frames
+        # self.bg_frame_idx = min(idx, max_idx)
 
     @pyqtSlot(result=QVariant)
     def get_bg_frame_idx(self):
@@ -166,9 +160,10 @@ class ParamsIface(QObject):
 
     @pyqtSlot(QVariant)
     def set_start_frame_idx(self, idx):
-        idx = int(idx)
-        min_idx = (self.bg_frame_idx + self.n_bg_frames)
-        self.start_frame_idx = max(min_idx, idx)
+        self.start_frame_idx = int(idx)
+        # idx = int(idx)
+        # min_idx = (self.bg_frame_idx + self.n_bg_frames)
+        # self.start_frame_idx = max(min_idx, idx)
 
     @pyqtSlot(result=QVariant)
     def get_start_frame_idx(self):
