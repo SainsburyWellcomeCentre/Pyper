@@ -306,13 +306,12 @@ class CalibrationIface(PlayerInterface):
         """
         frame_type = frame_type.lower()
         current_index = self.stream.current_frame_idx
-        if frame_type == "source":
-            imgs = self.calib.src_imgs
-        elif frame_type == "detected":
-            imgs = self.calib.detected_imgs
-        elif frame_type == "corrected":
-            imgs = self.calib.corrected_imgs
-        else:
+        frame_types = {"source": self.calib.src_imgs,
+                       "detected": self.calib.detected_imgs,
+                       "corrected": self.calib.corrected_imgs}
+        try:
+            imgs = frame_types[frame_type]
+        except KeyError:
             raise KeyError("Expected one of ['source', 'detected', 'corrected'], got {}".format(frame_type))
         self.stream = ImageListVideoStream(imgs)
         self._update_img_provider()
