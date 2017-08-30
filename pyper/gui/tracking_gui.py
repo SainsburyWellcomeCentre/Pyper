@@ -22,8 +22,9 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtGui import QIcon
 
-from pyper.gui.gui_interfaces import ParamsIface, ViewerIface, TrackerIface, RecorderIface, CalibrationIface, \
-    EditorIface
+from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface
+from pyper.gui.code_editor import EditorIface
+from pyper.gui.parameters import ParamsIface
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
 
 from pyper.exceptions.exceptions import PyperGUIError
