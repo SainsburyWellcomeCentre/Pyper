@@ -215,7 +215,10 @@ class CalibrationIface(PlayerInterface):
         
         self.n_columns = 9
         self.n_rows = 6
+        self.calib = CameraCalibration(self.n_columns, self.n_rows)
         self.matrix_type = 'normal'
+
+        self.src_folder = ""
         
         self._set_display()
         self._set_display()
@@ -225,7 +228,6 @@ class CalibrationIface(PlayerInterface):
         """
         Compute the camera matrix 
         """
-        self.calib = CameraCalibration(self.n_columns, self.n_rows)
         self.calib.calibrate(self.src_folder)
         self.params.calib = self.calib
         
@@ -334,6 +336,11 @@ class TrackerIface(BaseInterface):
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
+        self.tracker = None
+        self.current_frame_idx = 0
+        self.distances_from_arena = []
+        self.output_type = "Raw"
+
     @pyqtSlot(QVariant, result=QVariant)
     def get_row(self, idx):
         """
@@ -425,11 +432,11 @@ class TrackerIface(BaseInterface):
         self.timer.stop()
         self.tracker._stream.stop_recording(msg)
 
-    def __getScalingFactors(self, width, height):
-        streamWidth, streamHeight = self.tracker._stream.size  # flipped for openCV
-        horizontalScalingFactor = streamWidth / width
-        verticalScalingFactor = streamHeight / height
-        return horizontalScalingFactor, verticalScalingFactor
+    def __get_scaling_factors(self, width, height):
+        stream_width, stream_height = self.tracker._stream.size  # flipped for openCV
+        horizontal_scaling_factor = stream_width / width
+        vertical_scaling_factor = stream_height / height
+        return horizontal_scaling_factor, vertical_scaling_factor
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_roi(self, width, height, x, y, diameter):
@@ -446,7 +453,7 @@ class TrackerIface(BaseInterface):
         :param diameter: The diameter of the ROI
         """
         if hasattr(self, 'tracker'):
-            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
             
             radius = diameter / 2.0
             scaled_x = (x + radius) * horizontal_scaling_factor
@@ -458,7 +465,7 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_tracking_region_roi(self, width, height, roi_x, roi_y, roi_width, roi_height):
         if hasattr(self, 'tracker'):
-            horizontal_scaling_factor, vertical_scaling_factor = self.__getScalingFactors(width, height)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
             scaled_x = roi_x * horizontal_scaling_factor
             scaled_x -= 1
             scaled_y = roi_y * vertical_scaling_factor
@@ -571,7 +578,7 @@ class RecorderIface(TrackerIface):
     """
 
     @pyqtSlot()
-    def load(self):  # TODO: check if worth keeping
+    def load(self):
         pass
         
     @pyqtSlot(result=QVariant)
@@ -607,14 +614,14 @@ class RecorderIface(TrackerIface):
         extract_arena = self.params.extract_arena
 
         self.tracker = Tracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
-                                  threshold=threshold, min_area=min_area, max_area=max_area,
-                                  teleportation_threshold=teleportation_threshold,
-                                  bg_start=bg_start, track_from=track_from, track_to=track_to,
-                                  n_background_frames=n_background_frames, n_sds=n_sds,
-                                  clear_borders=clear_borders, normalise=normalise,
-                                  plot=True, fast=True, extract_arena=extract_arena,
-                                  camera_calibration=self.params.calib,
-                                  callback=None)
+                               threshold=threshold, min_area=min_area, max_area=max_area,
+                               teleportation_threshold=teleportation_threshold,
+                               bg_start=bg_start, track_from=track_from, track_to=track_to,
+                               n_background_frames=n_background_frames, n_sds=n_sds,
+                               clear_borders=clear_borders, normalise=normalise,
+                               plot=True, fast=True, extract_arena=extract_arena,
+                               camera_calibration=self.params.calib,
+                               callback=None)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
         self._update_img_provider()
