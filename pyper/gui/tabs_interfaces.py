@@ -83,8 +83,6 @@ class BaseInterface(QObject):
     def _set_display(self):
         """
         Gets the display from the qml code
-        
-        :param string display_name: The exact name of the display in the qml code
         """
         self.display = self.win.findChild(QObject, self.display_name)
 
@@ -126,7 +124,7 @@ class BaseInterface(QObject):
 
 class PlayerInterface(BaseInterface):
     """
-    This (abstract) class extends the BaseInterface to allow controlable videos (play, pause, forward...)
+    This (abstract) class extends the BaseInterface to allow controllable videos (play, pause, forward...)
     """
     @pyqtSlot()
     def play(self):
