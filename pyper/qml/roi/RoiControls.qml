@@ -53,7 +53,9 @@ Frame {
         if (roiShape === "ellipse") {
             roi.source = "EllipseRoi.qml";
         } else if (roiShape === 'rectangle') {
-            roi.source = "RectangleRoi.qml"
+            roi.source = "RectangleRoi.qml";
+        } else if (roiShape === 'freehand') {
+            roi.source = "FreehandRoi.qml";
         } else {
             console.log("Unrecognised drawing mode: " + roiShape);
         }

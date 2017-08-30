@@ -12,7 +12,7 @@ This module is used to check the position of the mouse relative to a region of i
 import numpy as np
 from math import radians, cos, sin, sqrt
 import cv2
-from cv2 import norm
+from cv2 import norm, moments
 
 
 class Roi(object):
@@ -142,4 +142,20 @@ class Ellipse(Roi):
         xs = np.hstack((xs, xs[::-1])) + self.centre[0]
         points = np.array(zip(xs, ys), dtype=np.float32)
         return points
+
+
+class FreehandRoi(Roi):
+    def __init__(self, points):
+        Roi.__init__(self)
+        points = np.array(points, dtype=np.int32)
+        self.points = np.expand_dims(points, axis=1)
+        self.__bounding_rect = cv2.boundingRect(self.points)
+        self.width, self.height = self.get_width_height()
+        self.centre = self.get_centre()
+
+    def get_width_height(self):
+        return self.__bounding_rect[2], self.__bounding_rect[3]
+
+    def get_centre(self):
+        return self.__bounding_rect[:2]
 

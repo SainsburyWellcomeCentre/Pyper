@@ -193,6 +193,7 @@ Rectangle {
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_recorder
+            roiType: 'tracking'
         }
         RoiFactory {
             id: restrictionRoi
@@ -208,6 +209,7 @@ Rectangle {
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_recorder
+            roiType: 'restriction'
         }
     }
 

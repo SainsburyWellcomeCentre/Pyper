@@ -14,7 +14,7 @@ import "style"
 ApplicationWindow {
     id: root
     width: 210
-    height: 500
+    height: 700
     title: "ROI Manager"
 
     property variant pythonObject

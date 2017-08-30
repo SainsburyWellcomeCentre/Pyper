@@ -22,12 +22,36 @@ Item {
 
     property variant tracker_py_iface
 
-    function set_tracker_py_iface_roi() {
-        tracker_py_iface.set_roi(roi.item.width, roi.item.height, roi.item.roiX, roi.item.roiY, roi.item.roiWidth, roi.item.roiHeight);
+    property string roiType
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
-    function set_tracker_py_iface_restriction_roi() {
-
+    function setPyIfaceRoi() {
+//        console.log("Setting ROI " + roiType + " to: " + source + ", size:  " + roi.item.width + ", " + roi.item.height);
+        var src = String(source);
+        if (endsWith(src, "EllipseRoi.qml") || endsWith(src, "RectangleRoi.qml")) {
+            tracker_py_iface.set_roi(roiType, source, roi.item.width, roi.item.height, roi.item.roiX, roi.item.roiY, roi.item.roiWidth, roi.item.roiHeight);
+        } else if (endsWith(src, "FreehandRoi.qml")) {
+//            tracker_py_iface.set_roi_from_points(roiType, roi.item.points);
+            tracker_py_iface.set_roi_from_points(roiType, pointsToString(roi.item.points));
+        } else {
+            console.log("Unrecognised source: " + source);
+        }
+    }
+    function unsetPyIfaceRoi() {
+        tracker_py_iface.remove_roi(roiType);
+        roi.item.eraseRoi();
+    }
+    function pointsToString(points) {
+        var pts = [];
+        var pt;
+        for (var i=0; i < points.length; i++) {
+            pt = points[i];
+            pts[i] = "(" + pt.x + "," + pt.y + ")"
+        }
+        return String(pts);
     }
 
     Loader {
@@ -50,16 +74,14 @@ Item {
         onReleased: {
             if (target.isDrawn) {
                 if (target.isActive) {
-                    tracker_py_iface.set_tracking_region_roi(target.width, target.height, target.roiX, target.roiY, target.roiWidth, target.roiHeight); // FIXME: part that changes
+                     setPyIfaceRoi();
                 } else {
-                    tracker_py_iface.remove_tracking_region_roi();
-                    target.eraseRoi();
+                    unsetPyIfaceRoi();
                 }
                 root.roiX = target.roiX;
                 root.roiY = target.roiY;
                 root.roiWidth = target.roiWidth;
                 root.roiHeight = target.roiHeight;
-                console.log(root.roiX, root.roiY, root.roiWidth, root.roiHeight);
             }
         }
     }

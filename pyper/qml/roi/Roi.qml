@@ -34,6 +34,7 @@ Item {
         roi.visible = false;
         isDrawn = false;
     }
+    function releasedCallback() { }
 
     MouseArea {
         id: behavior
@@ -41,7 +42,10 @@ Item {
 
         enabled: root.drawingMode
 
-        onReleased: { parent.released(mouse.x, mouse.y) }
+        onReleased: {
+            releasedCallback();
+            parent.released(mouse.x, mouse.y);
+        }
         onPressed: { parent.pressed(mouse.x, mouse.y) }
         onPositionChanged: { parent.dragged(mouse.x, mouse.y) }
     }

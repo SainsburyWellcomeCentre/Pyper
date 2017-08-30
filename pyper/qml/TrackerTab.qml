@@ -94,6 +94,7 @@ Rectangle {
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_tracker
+            roiType: 'tracking'
         }
 
         RoiFactory {
@@ -110,6 +111,7 @@ Rectangle {
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_tracker
+            roiType: 'restriction'
         }
         RoiFactory {
             id: measurementRoi
@@ -125,6 +127,7 @@ Rectangle {
             drawingMode: roiManager.drawingMode
 
             tracker_py_iface: py_tracker
+            roiType: 'measurement'
         }
     }
 
@@ -161,17 +164,8 @@ Rectangle {
                     pressedSource: "../../../resources/icons/play_pressed.png"
                     tooltip: "Start tracking"
 
-                    onPressed:{
-                        splash.visible = true;
-                    }
-                    onClicked: {
-//                        if (mouseRoi.isDrawn){
-                        if (mouseRoi.roiActive){
-                            mouseRoi.set_tracker_py_iface_roi();
-//                            py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth, mouseRoi.roiHeight);  // TODO: make roi generate list of arguments
-                        }
-                        py_tracker.start()
-                    }
+                    onPressed:{ splash.visible = true; }
+                    onClicked: { py_tracker.start() }
                     onReleased:{
                         py_tracker.load();
                         splash.visible = false;
