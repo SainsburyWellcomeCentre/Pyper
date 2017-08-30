@@ -402,7 +402,7 @@ class TrackerIface(BaseInterface):
             self.tracker.set_roi(self.roi)
             self.tracker.set_tracking_region_roi(self.tracking_region_roi)
 
-    def __reset_measures(self):
+    def _reset_measures(self):
         self.positions = []  # reset between runs
         self.distances_from_arena = []
 
@@ -413,7 +413,7 @@ class TrackerIface(BaseInterface):
         """
         if self.tracker is None:
             return
-        self.__reset_measures()
+        self._reset_measures()
         
         self.set_tracker_params()
             
@@ -599,9 +599,8 @@ class RecorderIface(TrackerIface):
         if vid_ext not in VIDEO_FORMATS:
             print('Unknow format: {}'.format(vid_ext))
             return False
-        
-        self.positions = []  # reset between runs
-        self.distances_from_arena = []
+
+        self._reset_measures()
         
         bg_start = self.params.bg_frame_idx
         n_background_frames = self.params.n_bg_frames
