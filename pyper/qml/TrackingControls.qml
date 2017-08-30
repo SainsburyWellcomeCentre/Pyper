@@ -16,6 +16,10 @@ Column {
         boolSetterContainer.reload();
     }
 
+    function updateTracker() {
+        py_tracking_iface.set_tracker_params();
+    }
+
     Frame {
         id: frameSetterContainer
         height: col.height + 20
@@ -36,7 +40,10 @@ Column {
                     root.py_params_iface.set_bg_frame_idx(value);
                     reload();
                 }
-                function reload(){ value = root.py_params_iface.get_bg_frame_idx() }
+                function reload(){
+                    value = root.py_params_iface.get_bg_frame_idx();
+                    root.updateTracker();
+                }
             }
             IntLabel {
                 width: parent.width
@@ -47,7 +54,10 @@ Column {
                     root.py_params_iface.set_start_frame_idx(value);
                     reload();
                 }
-                function reload(){ value = root.py_params_iface.get_start_frame_idx() }
+                function reload(){
+                    value = root.py_params_iface.get_start_frame_idx();
+                    root.updateTracker();
+                }
             }
             IntLabel {
                 width: parent.width
@@ -58,7 +68,10 @@ Column {
                     root.py_params_iface.set_end_frame_idx(value);
                     reload();
                 }
-                function reload(){ value = root.py_params_iface.get_end_frame_idx() }
+                function reload(){
+                    value = root.py_params_iface.get_end_frame_idx();
+                    root.updateTracker();
+                }
             }
         }
     }
@@ -76,16 +89,28 @@ Column {
                 label: "n"
                 tooltip: "Number of frames for background"
                 value: root.py_params_iface.get_n_bg_frames()
-                onEdited: { root.py_params_iface.set_n_bg_frames(value); }
-                function reload() {value = root.py_params_iface.get_n_bg_frames() }
+                onEdited: {
+                    root.py_params_iface.set_n_bg_frames(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    value = root.py_params_iface.get_n_bg_frames();
+                    root.updateTracker();
+                }
             }
             IntLabel{
                 width: parent.width
                 label: "Sds"
                 tooltip: "Number of standard deviations above average"
                 value: root.py_params_iface.get_n_sds()
-                onEdited: { root.py_params_iface.set_n_sds(value); }
-                function reload() {value = root.py_params_iface.get_n_sds() }
+                onEdited: {
+                    root.py_params_iface.set_n_sds(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    value = root.py_params_iface.get_n_sds();
+                    root.updateTracker();
+                }
             }
         }
     }
@@ -103,32 +128,56 @@ Column {
                 label: "Thrsh"
                 tooltip: "Detection threshold"
                 value: root.py_params_iface.get_detection_threshold()
-                onEdited: { root.py_params_iface.set_detection_threshold(value); }
-                function reload() {value = root.py_params_iface.get_detection_threshold() }
+                onEdited: {
+                    root.py_params_iface.set_detection_threshold(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    value = root.py_params_iface.get_detection_threshold();
+                    root.updateTracker();
+                }
             }
             IntLabel {
                 width: parent.width
                 label: "Min"
                 tooltip: "Minimum object area"
                 value: root.py_params_iface.get_min_area()
-                onEdited: { root.py_params_iface.set_min_area(value); }
-                function reload() { root.py_params_iface.get_min_area() }
+                onEdited: {
+                    root.py_params_iface.set_min_area(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    root.py_params_iface.get_min_area();
+                    root.updateTracker();
+                }
             }
             IntLabel {
                 width: parent.width
                 label: "Max"
                 tooltip: "Maximum object area"
                 value: root.py_params_iface.get_max_area()
-                onEdited: { root.py_params_iface.set_max_area(value); }
-                function reload() { root.py_params_iface.get_max_area() }
+                onEdited: {
+                    root.py_params_iface.set_max_area(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    root.py_params_iface.get_max_area();
+                    root.updateTracker();
+                }
             }
             IntLabel{
                 width: parent.width
                 label: "Mvmt"
                 tooltip: "Maximum displacement (between frames) threshold"
                 value: root.py_params_iface.get_max_movement()
-                onEdited: { root.py_params_iface.set_max_movement(value); }
-                function reload() { root.py_params_iface.get_max_movement() }
+                onEdited: {
+                    root.py_params_iface.set_max_movement(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    root.py_params_iface.get_max_movement();
+                    root.updateTracker();
+                }
             }
         }
     }
@@ -145,22 +194,40 @@ Column {
                 label: "Clear"
                 tooltip: "Clear objects touching the borders of the image"
                 checked: root.py_params_iface.get_clear_borders()
-                onClicked: root.py_params_iface.set_clear_borders(checked)
-                function reload() { checked = root.py_params_iface.get_clear_borders() }
+                onClicked: {
+                    root.py_params_iface.set_clear_borders(checked);
+                    root.updateTracker();
+                }
+                function reload() {
+                    checked = root.py_params_iface.get_clear_borders();
+                    root.updateTracker();
+                }
             }
             BoolLabel {
                 label: "Norm."
                 tooltip: "Normalise frames intensity"
                 checked: root.py_params_iface.get_normalise()
-                onClicked: root.py_params_iface.set_normalise(checked)
-                function reload() { checked = root.py_params_iface.get_normalise() }
+                onClicked: {
+                    root.py_params_iface.set_normalise(checked);
+                    root.updateTracker();
+                }
+                function reload() {
+                    checked = root.py_params_iface.get_normalise();
+                    root.updateTracker();
+                }
             }
             BoolLabel{
                 label: "Extract"
                 tooltip: "Extract the arena as an ROI"
                 checked: root.py_params_iface.get_extract_arena()
-                onClicked: root.py_params_iface.set_extract_arena(checked)
-                function reload() { checked = root.py_params_iface.get_extract_arena() }
+                onClicked: {
+                    root.py_params_iface.set_extract_arena(checked);
+                    root.updateTracker();
+                }
+                function reload() {
+                    checked = root.py_params_iface.get_extract_arena();
+                    root.updateTracker();
+                }
             }
         }
     }

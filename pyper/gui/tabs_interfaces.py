@@ -381,6 +381,7 @@ class TrackerIface(BaseInterface):
         self._set_display_max()
         self._update_img_provider()
 
+    @pyqtSlot()
     def set_tracker_params(self):
         if self.tracker is not None:
             self.tracker._stream.bg_start_frame = self.params.bg_frame_idx  # FIXME: params attributes case
