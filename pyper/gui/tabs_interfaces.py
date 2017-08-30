@@ -381,6 +381,31 @@ class TrackerIface(BaseInterface):
         self._set_display_max()
         self._update_img_provider()
 
+    def set_tracker_params(self):
+        if self.tracker is not None:
+            self.tracker._stream.bg_start_frame = self.params.bg_frame_idx  # FIXME: params attributes case
+            n_background_frames = self.params.n_bg_frames
+            self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
+            self.tracker.track_from = self.params.start_frame_idx
+            self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+
+            self.tracker.threshold = self.params.detection_threshold
+            self.tracker.min_area = self.params.objects_min_area
+            self.tracker.max_area = self.params.objects_max_area
+            self.tracker.teleportation_threshold = self.params.teleportation_threshold
+
+            self.tracker.n_sds = self.params.n_sds
+            self.tracker.clear_borders = self.params.clear_borders
+            self.tracker.normalise = self.params.normalise
+            self.tracker.extract_arena = self.params.extract_arena
+
+            self.tracker.set_roi(self.roi)
+            self.tracker.set_tracking_region_roi(self.tracking_region_roi)
+
+    def __reset_measures(self):
+        self.positions = []  # reset between runs
+        self.distances_from_arena = []
+
     @pyqtSlot()
     def start(self):
         """
@@ -388,28 +413,9 @@ class TrackerIface(BaseInterface):
         """
         if self.tracker is None:
             return
-
-        self.positions = []  # reset between runs
-        self.distances_from_arena = []
+        self.__reset_measures()
         
-        self.tracker._stream.bg_start_frame = self.params.bg_frame_idx  # FIXME: params attributes case
-        n_background_frames = self.params.n_bg_frames
-        self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
-        self.tracker.track_from = self.params.start_frame_idx
-        self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
-        
-        self.tracker.threshold = self.params.detection_threshold
-        self.tracker.min_area = self.params.objects_min_area
-        self.tracker.max_area = self.params.objects_max_area
-        self.tracker.teleportation_threshold = self.params.teleportation_threshold
-        
-        self.tracker.n_sds = self.params.n_sds
-        self.tracker.clear_borders = self.params.clear_borders
-        self.tracker.normalise = self.params.normalise
-        self.tracker.extract_arena = self.params.extract_arena
-        
-        self.tracker.set_roi(self.roi)
-        self.tracker.set_tracking_region_roi(self.tracking_region_roi)
+        self.set_tracker_params()
             
         self.timer.start(self.timer_speed)
 
@@ -449,7 +455,7 @@ class TrackerIface(BaseInterface):
         :param y: The center of the roi in the second dimension
         :param diameter: The diameter of the ROI
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
             
             radius = diameter / 2.0
@@ -458,10 +464,12 @@ class TrackerIface(BaseInterface):
             scaled_radius = radius * horizontal_scaling_factor
             
             self.roi = Circle((scaled_x, scaled_y), scaled_radius)
+        else:
+            print("No tracker object")
 
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_tracking_region_roi(self, width, height, roi_x, roi_y, roi_width, roi_height):
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
             scaled_x = roi_x * horizontal_scaling_factor
             scaled_x -= 1
@@ -523,7 +531,7 @@ class TrackerIface(BaseInterface):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             fig, ax = plt.subplots()
             angles = video_analysis.get_angles(self.positions)
             video_analysis.plot_angles(angles, self.get_sampling_freq())
@@ -534,7 +542,7 @@ class TrackerIface(BaseInterface):
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             fig, ax = plt.subplots()
             distances = video_analysis.pos_to_distances(self.positions)
             video_analysis.plot_distances(distances, self.get_sampling_freq())
@@ -545,7 +553,7 @@ class TrackerIface(BaseInterface):
         """
         Save the graph as a png or jpeg image
         """
-        if hasattr(self, 'tracker'):
+        if self.tracker is not None:
             diag = QFileDialog()
             dest_path = diag.getSaveFileName(parent=diag,
                                              caption='Save file',
