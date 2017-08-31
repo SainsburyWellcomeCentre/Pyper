@@ -11,11 +11,10 @@ import csv
 import shutil
 import tempfile
 
-from configobj import ConfigObj
-
 from pyper.tracking.tracking import Viewer, Tracker
 from pyper.contours.roi import Circle
 from pyper.analysis.video_analysis import *
+from pyper.config import conf
 
 
 def coords(string):
@@ -25,10 +24,7 @@ def coords(string):
         raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(string))
 
 # CLI
-configPath = os.path.expanduser(os.path.normcase('~/.motionTracking.conf'))
-config = ConfigObj(configPath, encoding="UTF8", indent_type='    ', unrepr=True,
-                   create_empty=True, write_empty_values=True)
-config.reload()
+config = conf.config
 
 parser = argparse.ArgumentParser(prog=sys.argv[0])
 
