@@ -47,6 +47,10 @@ ApplicationWindow {
                 }
             }
             MenuItem {
+                text: qsTr("Save config to defaults")
+                onTriggered: py_iface.write_defaults();
+            }
+            MenuItem {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
             }

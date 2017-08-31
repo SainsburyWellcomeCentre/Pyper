@@ -59,6 +59,13 @@ class ParamsIface(QObject):
         """
         sys.stdout = sys.__stdout__
 
+    @pyqtSlot()
+    def write_defaults(self):
+        """
+        Writes defaults to the config file
+        """
+        config.write()
+
     @pyqtSlot(str)
     def set_tracker_type(self, tracker_type):
         try:
@@ -79,6 +86,7 @@ class ParamsIface(QObject):
     @pyqtSlot(bool)
     def set_clear_borders(self, status):
         self.clear_borders = status
+        config['tracker']['checkboxes']['clear_borders'] = status
 
     @pyqtSlot(result=bool)
     def get_clear_borders(self):
@@ -87,6 +95,7 @@ class ParamsIface(QObject):
     @pyqtSlot(bool)
     def set_normalise(self, status):
         self.normalise = status
+        config['tracker']['checkboxes']['normalise'] = status
 
     @pyqtSlot(result=bool)
     def get_normalise(self):
@@ -95,6 +104,7 @@ class ParamsIface(QObject):
     @pyqtSlot(bool)
     def set_extract_arena(self, status):
         self.extract_arena = status
+        config['tracker']['checkboxes']['extract_arena'] = status
 
     @pyqtSlot(result=bool)
     def get_extract_arena(self):
@@ -108,6 +118,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_detection_threshold(self, threshold):
         self.detection_threshold = int(threshold)
+        config['tracker']['detection']['threshold'] = int(threshold)
 
     @pyqtSlot(result=QVariant)
     def get_min_area(self):
@@ -116,6 +127,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_min_area(self, area):
         self.objects_min_area = int(area)
+        config['tracker']['detection']['min_area'] = int(area)
 
     @pyqtSlot(result=QVariant)
     def get_max_area(self):
@@ -124,6 +136,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_max_area(self, area):
         self.objects_max_area = int(area)
+        config['tracker']['detection']['max_area'] = int(area)
 
     @pyqtSlot(result=QVariant)
     def get_max_movement(self):
@@ -132,6 +145,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_max_movement(self, movement):
         self.teleportation_threshold = int(movement)
+        config['tracker']['detection']['teleportation_threshold'] = int(movement)
 
     @pyqtSlot(result=QVariant)
     def get_n_sds(self):
@@ -140,14 +154,13 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_n_sds(self, n_sds):
         self.n_sds = int(n_sds)
+        config['tracker']['sd_mode']['n_sds'] = int(n_sds)
 
     # FRAME OPTIONS
     @pyqtSlot(QVariant)
     def set_bg_frame_idx(self, idx):
         self.bg_frame_idx = int(idx)
-        # idx = int(idx)
-        # max_idx = self.start_frame_idx - self.n_bg_frames
-        # self.bg_frame_idx = min(idx, max_idx)
+        config['tracker']['frames']['ref'] = int(idx)
 
     @pyqtSlot(result=QVariant)
     def get_bg_frame_idx(self):
@@ -156,6 +169,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_n_bg_frames(self, n):
         self.n_bg_frames = int(n)
+        config['tracker']['sd_mode']['n_bg_frames']= int(n)
 
     @pyqtSlot(result=QVariant)
     def get_n_bg_frames(self):
@@ -164,9 +178,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_start_frame_idx(self, idx):
         self.start_frame_idx = int(idx)
-        # idx = int(idx)
-        # min_idx = (self.bg_frame_idx + self.n_bg_frames)
-        # self.start_frame_idx = max(min_idx, idx)
+        config['tracker']['frames']['start'] = int(idx)
 
     @pyqtSlot(result=QVariant)
     def get_start_frame_idx(self):
@@ -181,6 +193,7 @@ class ParamsIface(QObject):
         else:
             idx = -1
         self.end_frame_idx = idx
+        config['tracker']['frames']['end'] = idx
 
     @pyqtSlot(result=QVariant)
     def get_end_frame_idx(self):
