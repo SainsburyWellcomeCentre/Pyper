@@ -32,9 +32,8 @@ Item {
 //        console.log("Setting ROI " + roiType + " to: " + source + ", size:  " + roi.item.width + ", " + roi.item.height);
         var src = String(source);
         if (endsWith(src, "EllipseRoi.qml") || endsWith(src, "RectangleRoi.qml")) {
-            tracker_py_iface.set_roi(roiType, source, roi.item.width, roi.item.height, roi.item.roiX, roi.item.roiY, roi.item.roiWidth, roi.item.roiHeight);
+            tracker_py_iface.set_roi(roiType, source, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
         } else if (endsWith(src, "FreehandRoi.qml")) {
-//            tracker_py_iface.set_roi_from_points(roiType, roi.item.points);
             tracker_py_iface.set_roi_from_points(roiType, pointsToString(roi.item.points));
         } else {
             console.log("Unrecognised source: " + source);
@@ -73,15 +72,15 @@ Item {
 
         onReleased: {
             if (target.isDrawn) {
+                root.roiX = target.roiX;
+                root.roiY = target.roiY;
+                root.roiWidth = target.roiWidth;
+                root.roiHeight = target.roiHeight;
                 if (target.isActive) {
                      setPyIfaceRoi();
                 } else {
                     unsetPyIfaceRoi();
                 }
-                root.roiX = target.roiX;
-                root.roiY = target.roiY;
-                root.roiWidth = target.roiWidth;
-                root.roiHeight = target.roiHeight;
             }
         }
     }
