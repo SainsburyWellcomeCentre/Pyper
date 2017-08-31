@@ -47,6 +47,7 @@ TRACKER_CLASSES = {
     'PupilGuiTracker': PupilGuiTracker
 }
 
+
 class BaseInterface(QObject):
     """
     Abstract interface
@@ -330,6 +331,7 @@ class TrackerIface(BaseInterface):
         self.positions = []
         self.roi = None
         self.tracking_region_roi = None
+        self.measure_roi = None
         self.tracker = None
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -343,8 +345,11 @@ class TrackerIface(BaseInterface):
         """
         idx = int(idx)
         if 0 <= idx < len(self.positions):
-            row = [idx] + list(self.positions[idx]) + list(self.distances_from_arena[idx])
-            return [str(e) for e in row]
+            row = [idx]
+            row.extend(self.positions[idx])
+            row.extend(self.distances_from_arena[idx])
+            row.append(self.tracker.measures[idx])
+            return map(str, row)
         else:
             return -1
 
@@ -406,6 +411,7 @@ class TrackerIface(BaseInterface):
         
         self.tracker.set_roi(self.roi)
         self.tracker.set_tracking_region_roi(self.tracking_region_roi)
+        self.tracker.set_measure_roi(self.measure_roi)
             
         self.timer.start(self.timer_speed)
 
@@ -470,6 +476,21 @@ class TrackerIface(BaseInterface):
         scaled_width = roi_width * horizontal_scaling_factor
         scaled_height = roi_height * horizontal_scaling_factor
         return scaled_x, scaled_y, scaled_width, scaled_height
+
+    def __qurl_to_str(self, url):
+        url = url.replace("PyQt5.QtCore.QUrl(u", "")
+        url = url.strip(")\\'")
+        return url
+
+    def __assign_roi(self, roi_type, roi):
+        if roi_type == 'tracking':
+            self.roi = roi
+        elif roi_type == 'restriction':
+            self.tracking_region_roi = roi
+        elif roi_type == 'measurement':
+            self.measure_roi = roi
+        else:
+            NotImplementedError("Unknown ROI type: {}".format(roi_type))
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
@@ -503,19 +524,6 @@ class TrackerIface(BaseInterface):
             self.__assign_roi(roi_type, roi)
         else:
             print("No tracker available")
-
-    def __qurl_to_str(self, url):
-        url = url.replace("PyQt5.QtCore.QUrl(u", "")
-        url = url.strip(")\\'")
-        return url
-
-    def __assign_roi(self, roi_type, roi):
-        if roi_type == 'tracking':
-            self.roi = roi
-        elif roi_type == 'restriction':
-            self.tracking_region_roi = roi
-        else:
-            NotImplementedError("Unknown ROI type: {}".format(roi_type))
 
     @pyqtSlot(QVariant, QVariant)
     def set_roi_from_points(self, roi_type, points):

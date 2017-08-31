@@ -27,7 +27,8 @@ TableView{
                             "x": parseFloat(result[1]),
                             "y": parseFloat(result[2]),
                             "centerDist": parseFloat(result[3]),
-                            "borderDist": parseFloat(result[4])}
+                            "borderDist": parseFloat(result[4]),
+                            "measure": parseFloat(result[5])}
                            );
                 idx += 1;
             }
@@ -37,11 +38,12 @@ TableView{
     model: ListModel {
         id: mod
         ListElement{ // Necessary to create model with one item at beginnning otherwise all empty (type)
-            frameId: 0
-            x: 0.0
+            frameId: 0  // uint
+            x: 0.0  // unsigned float
             y: 0.0
-            centerDist: -1.0
+            centerDist: -1.0  // signed float
             boderDist: -1.0
+            measure: -1.0
         }
     }
     Component.onCompleted: {
@@ -71,6 +73,11 @@ TableView{
     TableViewColumn{
         role: "borderDist"
         title: "to border"
+        width: 60
+    }
+    TableViewColumn{
+        role: "measure"
+        title: "measure"
         width: 60
     }
 }
