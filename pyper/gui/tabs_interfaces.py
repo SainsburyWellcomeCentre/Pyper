@@ -35,6 +35,8 @@ from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 
 from pyper.exceptions.exceptions import VideoStreamIOException
+from pyper.config import conf
+config = conf.config
 
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
@@ -212,8 +214,8 @@ class CalibrationIface(PlayerInterface):
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=200):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
-        self.n_columns = 9
-        self.n_rows = 6
+        self.n_columns = config['calibration']['n_columns']
+        self.n_rows = config['calibration']['n_rows']
         self.calib = CameraCalibration(self.n_columns, self.n_rows)
         self.matrix_type = 'normal'
 

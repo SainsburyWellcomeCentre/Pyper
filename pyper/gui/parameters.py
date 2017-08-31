@@ -5,6 +5,8 @@ from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
 from PyQt5.QtWidgets import QFileDialog
 
 from pyper.gui.tabs_interfaces import TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
+from pyper.config import conf
+config = conf.config
 
 
 class ParamsIface(QObject):
@@ -35,20 +37,21 @@ class ParamsIface(QObject):
         Reset the parameters to default.
         To customise the defaults, users should do this here.
         """
-        self.bg_frame_idx = 5
-        self.n_bg_frames = 1
+        self.bg_frame_idx = config['tracker']['frames']['ref']
+        self.n_bg_frames = config['tracker']['sd_mode']['n_background_frames']
         self.start_frame_idx = self.bg_frame_idx + self.n_bg_frames
-        self.end_frame_idx = -1
+        self.end_frame_idx = config['tracker']['frames']['end']
 
-        self.detection_threshold = 50
-        self.objects_min_area = 100
-        self.objects_max_area = 5000
-        self.teleportation_threshold = 10000
-        self.n_sds = 5.0
+        self.detection_threshold = config['tracker']['detection']['threshold']
+        self.objects_min_area = config['tracker']['detection']['min_area']
+        self.objects_max_area = config['tracker']['detection']['max_area']
+        self.teleportation_threshold = config['tracker']['detection']['teleportation_threshold']
 
-        self.clear_borders = False
-        self.normalise = False
-        self.extract_arena = False
+        self.n_sds = config['tracker']['sd_mode']['n_sds']
+
+        self.clear_borders = config['tracker']['checkboxes']['clear_borders']
+        self.normalise = config['tracker']['checkboxes']['normalise']
+        self.extract_arena = config['tracker']['checkboxes']['extract_arena']
 
     def __del__(self):
         """
