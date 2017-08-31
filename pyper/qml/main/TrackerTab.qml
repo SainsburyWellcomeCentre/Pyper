@@ -1,12 +1,12 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
-import "popup_messages"
-import "basic_types"
-import "video"
-import "roi"
-import "style"
-import "config"
+import "../popup_messages"
+import "../basic_types"
+import "../video"
+import "../roi"
+import "../style"
+import "../config"
 
 Rectangle {
     color: theme.background

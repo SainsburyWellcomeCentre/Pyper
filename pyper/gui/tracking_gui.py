@@ -71,7 +71,7 @@ if __name__ == '__main__':
     appEngine.addImageProvider("analysisprovider", analysis_image_provider)
     analysis_image_provider2 = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider2", analysis_image_provider2)
-    appEngine.load(QUrl('./pyper/qml/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
+    appEngine.load(QUrl('./pyper/qml/main/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
 
     try:
         win = appEngine.rootObjects()[0]

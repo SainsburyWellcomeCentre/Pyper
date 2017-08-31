@@ -1,12 +1,12 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
-import "popup_messages"
-import "basic_types"
-import "video"
-import "roi"
-import "style"
-import "config"
+import "../popup_messages"
+import "../basic_types"
+import "../video"
+import "../roi"
+import "../style"
+import "../config"
 
 Rectangle {
     id: rectangle1
@@ -70,7 +70,7 @@ Rectangle {
                     height: width
 
                     tooltip: "Starts video recording"
-                    iconSource: iconPath.getPath("record.png")
+                    iconSource: iconHandler.getPath("record.png")
 
                     enabled: false
                     onClicked:{
@@ -93,7 +93,7 @@ Rectangle {
                     height: width
 
                     tooltip: "Stops video recording"
-                    iconSource: iconPath.getPath("stop.png")
+                    iconSource: iconHandler.getPath("stop.png")
 
                     enabled: false
                     onClicked:{
@@ -125,8 +125,8 @@ Rectangle {
             width: recordBtn.width
             height: width
 
-            iconSource: iconPath.getPath("roi.png")
-            pressedSource: iconPath.getPath("roi_pressed.png")
+            iconSource: iconHandler.getPath("roi.png")
+            pressedSource: iconHandler.getPath("roi_pressed.png")
             tooltip:
                 "Draw ROI
 When pressed, this will open the ROI manager."
@@ -164,7 +164,7 @@ When pressed, this will open the ROI manager."
             width: 40
             height: width
 
-            iconSource: iconPath.getPath("document-save-as.png")
+            iconSource: iconHandler.getPath("document-save-as.png")
 
             tooltip: "Select video destination (before recording)"
             onClicked: {

@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
-import "basic_types"
+import "../basic_types"
 
 Column {
     id: root
