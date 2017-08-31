@@ -26,42 +26,43 @@ def coords(string):
 # CLI
 config = conf.config
 
-parser = argparse.ArgumentParser(prog=sys.argv[0])
+parser = argparse.ArgumentParser(prog=sys.argv[0])  # TODO: do parser groups
 
 parser.add_argument('video_file', type=str, nargs='?', default=conf['tests']['default_video'],
                     help='Path (relative or absolute) of the video file to process.')
-parser.add_argument('--threshold', type=int, default=config['tracker']['threshold'],
-                    help='The brightness level to threshold the image for feature detection. Default: %(default)s.')
 
-parser.add_argument('-b', '--background-time', dest='bg_time', metavar='MM:SS', type=str,
-                    help='Time in mm:ss format for the background frame.')
-parser.add_argument('-f', '--track-from', dest='track_from', metavar='MM:SS', type=str,
-                    help='Time in mm:ss format for the tracking start.')
-parser.add_argument('-t', '--track-to', type=str, dest='track_to', metavar='MM:SS',
-                    help='Time in mm:ss format for the tracking end.')
+parser.add_argument('-b', '--background-time', dest='bg_time', metavar='MM:SS',  # TODO: do frame indexed variant
+                    type=str, help='Time in mm:ss format for the background frame.')
+parser.add_argument('-f', '--track-from', dest='track_from', metavar='MM:SS',  # TODO: do frame indexed variant
+                    type=str, help='Time in mm:ss format for the tracking start.')
+parser.add_argument('-t', '--track-to', dest='track_to', metavar='MM:SS',  # TODO: do frame indexed variant
+                    type=str, help='Time in mm:ss format for the tracking end.')
 parser.add_argument('--n-background-frames', dest='n_background_frames', type=int,
-                    default=config['tracker']['n_background_frames'],
+                    default=config['tracker']['sd_mode']['n_background_frames'],
                     help='The number of frames to take for the background.'
                          ' If more than 1, they will be averaged and the SD used to check for movement.'
                          ' Default: %(default)s.')
-parser.add_argument('--n-SDs', dest='n_sds', type=float, default=config['tracker']['n_sds'],
+parser.add_argument('--n-SDs', dest='n_sds', type=float, default=config['tracker']['sd_mode']['n_sds'],
                     help='If the above n-background-frames option is selected,'
                          ' the number of standard deviations to use as threshold for movement. Default: %(default)s.')
 
 parser.add_argument('--clear-borders', dest='clear_borders', action='store_true',
                     default=config['tracker']['clear_borders'],
                     help='Clear the borders of the mask for the detection. Default: %(default)s.')
+# TODO: add normalise
 
-parser.add_argument('--min-area', dest='min_area', type=int, default=config['tracker']['mouse_area']['min'],
-                    help='The minimum area of the mouse in pixels to be considered valid. Default: %(default)s.')
-parser.add_argument('--max-area', dest='max_area', type=int, default=config['tracker']['mouse_area']['max'],
-                    help='The maximum area of the mouse in pixels to be considered valid. Default: %(default)s.')
-parser.add_argument('--n-iter', dest='n_iter', type=int, default=config['tracker']['n_iter'],
-                    help='The number of iterations for the erosion to remove the tail. Default: %(default)s.')
+parser.add_argument('--threshold', type=int, default=config['tracker']['detection']['threshold'],
+                    help='The brightness level to threshold the image for feature detection. Default: %(default)s.')
+parser.add_argument('--min-area', dest='min_area', type=int, default=config['tracker']['detection']['min_area'],
+                    help='The minimum area of the object in pixels to be considered valid. Default: %(default)s.')
+parser.add_argument('--max-area', dest='max_area', type=int, default=config['tracker']['detection']['max_area'],
+                    help='The maximum area of the object in pixels to be considered valid. Default: %(default)s.')
 parser.add_argument('--teleportation-threshold', dest='teleportation_threshold', type=int,
                     default=config['tracker']['teleportation_threshold'],
                     help="The number of pixels in either x or y the mouse shouldn't jump by to be considered valid."
                          " Default: %(default)s.")
+# parser.add_argument('--n-iter', dest='n_iter', type=int, default=config['tracker']['n_iter'],
+#                     help='The number of iterations for the erosion to remove the tail. Default: %(default)s.')  # FIXME: unused
 
 parser.add_argument('--filter-size', dest='one_d_kernel', type=int, default=config['analysis']['filter_size'],
                     help='Size in points of the Gaussian kernel filtered used to smooth the trajectory.'
@@ -141,8 +142,8 @@ if __name__ == '__main__':
                       max_area=args.max_area, teleportation_threshold=args.teleportation_threshold,
                       bg_start=args.bg_time, track_from=args.track_from, track_to=args.track_to,
                       n_background_frames=args.n_background_frames, n_sds=args.n_sds,
-                      clear_borders=args.clear_borders, normalise=False,
-                      plot=args.plot, fast=config['tracker']['fast'],
+                      clear_borders=args.clear_borders, normalise=config['tracker']['checkboxes']['normalise'],
+                      plot=args.plot, fast=config['tracker']['checkboxes']['fast'],
                       extract_arena=False)
     positions = tracker.track(roi=roi)
 
