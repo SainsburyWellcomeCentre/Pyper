@@ -10,9 +10,9 @@ This module is used to check the position of the mouse relative to a region of i
 """
 
 import numpy as np
-from math import radians, cos, sin
+from math import radians, cos, sin, sqrt
 import cv2
-from cv2 import norm
+from cv2 import norm, moments
 
 
 class Roi(object):
@@ -118,3 +118,44 @@ class Rectangle(Roi):
         points[2] = (top_x + self.width, top_y + self.height)
         points[3] = (top_x, top_y + self.height)
         return points
+
+
+class Ellipse(Roi):
+    def __init__(self, centre_x, centre_y, width, height):
+        Roi.__init__(self)
+        self.centre = (centre_x, centre_y)
+        self.width = width
+        self.height = height
+        points = self.get_points().astype(np.int32)
+        self.points = np.expand_dims(points, axis=1)
+
+    def __compute_ellipse(self, semi_major, semi_minor, xs):
+        return np.array([(semi_major / semi_minor) * sqrt(semi_minor**2 - x**2) for x in xs])
+
+    def get_points(self):
+        n_points = 200
+        semi_minor = self.height / 2.
+        semi_major = self.width / 2.
+        xs = np.linspace(-semi_major, semi_major, n_points/2.)  # FIXME: inverted ?
+        ys = self.__compute_ellipse(semi_minor, semi_major, xs)   # FIXME: inverted ?
+        ys = np.hstack((ys, -ys[::-1])) + self.centre[1]
+        xs = np.hstack((xs, xs[::-1])) + self.centre[0]
+        points = np.array(zip(xs, ys), dtype=np.float32)
+        return points
+
+
+class FreehandRoi(Roi):
+    def __init__(self, points):
+        Roi.__init__(self)
+        points = np.array(points, dtype=np.int32)
+        self.points = np.expand_dims(points, axis=1)
+        self.__bounding_rect = cv2.boundingRect(self.points)
+        self.width, self.height = self.get_width_height()
+        self.centre = self.get_centre()
+
+    def get_width_height(self):
+        return self.__bounding_rect[2], self.__bounding_rect[3]
+
+    def get_centre(self):
+        return self.__bounding_rect[:2]
+

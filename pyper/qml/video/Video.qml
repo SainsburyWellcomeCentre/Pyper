@@ -14,6 +14,9 @@ Item {
     property alias maximumValue: progressBar.maximumValue
     property alias img: previewImage
 
+    property alias imgWidth: previewImage.width
+    property alias imgHeight: previewImage.height
+
     signal progressPressed(real xPosition, real yPosition)
     signal progressReleased(real xPosition, real yPosition)
     signal progressClicked(int frameId)

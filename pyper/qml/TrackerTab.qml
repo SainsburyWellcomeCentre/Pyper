@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQml 2.0
 import QtQuick.Controls 1.2
 
 import "popup_messages"
@@ -26,18 +27,6 @@ Rectangle {
         z: 1
         visible: false
         anchors.centerIn: trackerDisplay
-    }
-    InfoScreen{
-        id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 100
-        height: 75
-
-        text: "Roi mode"
-        visible: false
-        z: 1
     }
     ErrorScreen{
         id: videoErrorScreen
@@ -80,67 +69,75 @@ Rectangle {
         id: trackerDisplay
         objectName: "trackerDisplay"
 
+        width: 640
+        height: 480
+
         anchors.margins: 10
         anchors.left: controlsColumn.right
         anchors.right: parent.right
         anchors.top: vidTitle.bottom
         anchors.bottom: parent.bottom
-        width: 640
-        height: 480
 
         source: "image://trackerprovider/img"
 
-        onWidthChanged: {
-            mouseRoi.width = img.width;
-            restrictionRoi.width = img.width;
-        }
-        onHeightChanged: {
-            mouseRoi.height = img.height;
-            restrictionRoi.height = img.height;
-        }
-        CircleRoi {
+        RoiFactory {
             id: mouseRoi
 
+            width: parent.imgWidth
+            height: parent.imgHeight
+
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: roiButton.isDown
 
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive){
-                        py_tracker.set_roi(width, height, roiX, roiY, roiWidth);
-                    } else {
-                        py_tracker.remove_roi();
-                        eraseRoi();
-                    }
-                }
-            }
+            source: "roi/EllipseRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
+            roiType: 'tracking'
         }
-        RectangleRoi {
+
+        RoiFactory {
             id: restrictionRoi
 
+            width: parent.imgWidth
+            height: parent.imgHeight
+
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: restrictionRoiButton.isDown
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive) {
-                        py_tracker.set_tracking_region_roi(width, height, roiX, roiY, roiWidth, roiHeight)
-                    } else {
-                        py_tracker.remove_tracking_region_roi();
-                        eraseRoi();
-                    }
-                }
-            }
+
+            source: "roi/RectangleRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
+            roiType: 'restriction'
+        }
+        RoiFactory {
+            id: measurementRoi
+
+            width: parent.imgWidth
+            height: parent.imgHeight
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
+            source: "roi/RectangleRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_tracker
+            roiType: 'measurement'
         }
     }
 
     Column {
         id: controlsColumn
         width: 140
+
         anchors.margins: 5
-        anchors.left: parent.left
         anchors.top: parent.top
+        anchors.left: parent.left
         // TODO: use SplitView
 
         spacing: 10
@@ -149,7 +146,7 @@ Rectangle {
             id: controls
             height: row1.height + 20
 
-            Row{
+            Row {
                 id: row1
 
                 anchors.centerIn: controls
@@ -163,19 +160,12 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: "../../../resources/icons/play.png"
+                     iconSource: "../../../resources/icons/play.png"
                     pressedSource: "../../../resources/icons/play_pressed.png"
                     tooltip: "Start tracking"
 
-                    onPressed:{
-                        splash.visible = true;
-                    }
-                    onClicked: {
-                        if (mouseRoi.isDrawn){
-                            py_tracker.set_roi(mouseRoi.width, mouseRoi.height, mouseRoi.roiX, mouseRoi.roiY, mouseRoi.roiWidth);
-                        }
-                        py_tracker.start()
-                    }
+                    onPressed:{ splash.visible = true; }
+                    onClicked: { py_tracker.start() }
                     onReleased:{
                         py_tracker.load();
                         splash.visible = false;
@@ -187,9 +177,9 @@ Rectangle {
                     width: startTrackBtn.width
                     height: width
 
+                    tooltip: "Stop tracking"
                     iconSource: "../../../resources/icons/stop.png"
                     pressedSource: "../../../resources/icons/stop_pressed.png"
-                    tooltip: "Stop tracking"
 
                     onClicked: py_tracker.stop()
                 }
@@ -206,78 +196,32 @@ Rectangle {
 
             visualisationOptions: ["Raw", "Diff", "Mask"]
         }
+        CustomButton {
+            id: roiManagerBtn
 
-        Row {
-            CustomButton {
-                id: roiButton
+            width: 50
+            height: width
 
-                property bool isDown
-                isDown: false
-                property string oldSource
-                oldSource: iconSource
+            anchors.horizontalCenter: parent.horizontalCenter
 
-                width: startTrackBtn.width
-                height: width
+            iconSource: "../../../resources/icons/roi.png"
 
-                iconSource: "../../../resources/icons/roi.png"
-                pressedSource: "../../../resources/icons/roi_pressed.png"
-                tooltip: "Draw ROI"
-
-                onPressed: {}
-                onReleased: {}
-
-                onClicked: {
-                    if (isDown) { // already active -> revert
-                        py_iface.restore_cursor();
-                        iconSource = oldSource;
-                        isDown = false;
-                        infoScreen.visible = false;
-                    } else {  // activate
-                        py_iface.chg_cursor();
-                        oldSource = iconSource;
-                        iconSource = pressedSource;
-                        isDown = true;
-                        infoScreen.visible = true;
-                        mouseRoi.z = 10;
-                        restrictionRoi.z = 9;
-                    }
-                }
-            }
-            CustomButton {
-                id: restrictionRoiButton
-
-                property bool isDown
-                isDown: false
-                property string oldSource
-                oldSource: iconSource
-
-                width: startTrackBtn.width
-                height: width
-
-                iconSource: "../../../resources/icons/roi.png"
-                pressedSource: "../../../resources/icons/roi_pressed.png"
-                tooltip: "Draw tracking area ROI"
-
-                onPressed: {}
-                onReleased: {}
-
-                onClicked: {
-                    if (isDown) { // already active -> revert
-                        py_iface.restore_cursor();
-                        iconSource = oldSource;
-                        isDown = false;
-                        infoScreen.visible = false;
-                    } else { // activate
-                        py_iface.chg_cursor();
-                        oldSource = iconSource;
-                        iconSource = pressedSource;
-                        isDown = true;
-                        infoScreen.visible = true;
-                        restrictionRoi.z = 10;
-                        mouseRoi.z = 9;
-                    }
-                }
+            tooltip: "Open ROI manager"
+            onClicked: {
+                roiManager.visible = !roiManager.visible;
             }
         }
+    }
+
+    RoiManager {
+        id: roiManager
+        pythonObject: py_iface
+        visible: false
+
+        roisControlsModelsList: [
+            RoiControlsModel { sourceRoi: mouseRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
+            RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
+        ]
     }
 }

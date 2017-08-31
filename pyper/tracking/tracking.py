@@ -220,7 +220,19 @@ class Tracker(object):
         
         self.default_pos = (-1, -1)
         self.positions = []
+        self.measures = []
         self.tracking_region_roi = None
+        self.measure_roi = None
+
+    def measure_callback(self, frame):
+        if self.measure_roi is not None:
+            mask = frame.copy()
+            mask.fill(0)
+            cv2.drawContours(mask, [self.measure_roi.points], 0, 255, cv2.cv.CV_FILLED)
+            values = np.extract(mask, frame)
+            return values.mean()
+        else:
+            return float('NaN')
         
     def _extract_arena(self):
         """
@@ -276,6 +288,7 @@ class Tracker(object):
             try:
                 if check_fps: prev_time = self._check_fps(prev_time)
                 frame = self._stream.read()
+                self.measures.append(float('NaN'))
                 if self.camera_calibration is not None:
                     frame = self.camera_calibration.remap(frame)
                 fid = self._stream.current_frame_idx
@@ -443,6 +456,7 @@ class Tracker(object):
                 self._draw_subregion_roi(plot_silhouette)
             if self.min_area < area < self.max_area:
                 self.positions[-1] = mouse.centre
+                self.measures[-1] = self.measure_callback(frame)
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
@@ -618,6 +632,9 @@ class GuiTracker(Tracker):
     def set_tracking_region_roi(self, roi):
         self.tracking_region_roi = roi
 
+    def set_measure_roi(self, roi):
+        self.measure_roi = roi
+
     def read(self):
         """
         The required method to behave as a video stream
@@ -649,6 +666,7 @@ class GuiTracker(Tracker):
         """
         try:
             frame = self._stream.read()
+            self.measures.append(float('NaN'))
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
             fid = self._stream.current_frame_idx

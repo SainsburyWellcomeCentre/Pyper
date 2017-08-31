@@ -31,7 +31,7 @@ Column {
         CustomColumn {
             id: col
 
-            IntLabel {
+            IntInput {
                 id: refFrameInput
                 width: parent.width
                 label: "Ref"
@@ -48,7 +48,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel {
+            IntInput {
                 id: startFrameInput
                 width: parent.width
                 label: "Start"
@@ -64,7 +64,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "End"
                 tooltip: "Select the last data frame"
@@ -91,7 +91,7 @@ Column {
         CustomColumn {
             id: col2
 
-            IntLabel{
+            IntInput {
                 id: nBgFramesInput
                 width: parent.width
                 label: "n"
@@ -106,7 +106,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel{
+            IntInput {
                 width: parent.width
                 label: "Sds"
                 tooltip: "Number of standard deviations above average"
@@ -132,7 +132,7 @@ Column {
         CustomColumn {
             id: col3
 
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Thrsh"
                 tooltip: "Detection threshold"
@@ -148,7 +148,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Min"
                 tooltip: "Minimum object area"
@@ -163,7 +163,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel {
+            IntInput {
                 width: parent.width
                 label: "Max"
                 tooltip: "Maximum object area"
@@ -178,7 +178,7 @@ Column {
                     root.updateTracker();
                 }
             }
-            IntLabel{
+            IntInput {
                 width: parent.width
                 label: "Mvmt"
                 tooltip: "Maximum displacement (between frames) threshold"

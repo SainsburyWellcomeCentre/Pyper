@@ -10,14 +10,15 @@ It essentially implements a class for each graphical interface tab.
 :author: crousse
 """
 
-import csv
-import matplotlib
-import numpy as np
 import os
-from scipy.misc import imsave
+import csv
+import re
 
 import cv2
 
+import numpy as np
+from scipy.misc import imsave
+import matplotlib
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
 
@@ -28,7 +29,7 @@ from pyper.tracking.tracking import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Circle, Rectangle
+from pyper.contours.roi import Circle, Rectangle, Ellipse, FreehandRoi
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
@@ -226,6 +227,7 @@ class CalibrationIface(PlayerInterface):
         """
         Compute the camera matrix 
         """
+        self.calib = CameraCalibration(self.n_columns, self.n_rows)
         self.calib.calibrate(self.src_folder)
         self.params.calib = self.calib
         
@@ -328,12 +330,15 @@ class TrackerIface(BaseInterface):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
         
         self.positions = []
+
         self.roi = None
         self.tracking_region_roi = None
+        self.measure_roi = None
+        self.tracker = None
+
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
-        self.tracker = None
         self.current_frame_idx = 0
         self.distances_from_arena = []
         self.output_type = "Raw"
@@ -347,8 +352,11 @@ class TrackerIface(BaseInterface):
         """
         idx = int(idx)
         if 0 <= idx < len(self.positions):
-            row = [idx] + list(self.positions[idx]) + list(self.distances_from_arena[idx])
-            return [str(e) for e in row]
+            row = [idx]
+            row.extend(self.positions[idx])
+            row.extend(self.distances_from_arena[idx])
+            row.append(self.tracker.measures[idx])
+            return map(str, row)
         else:
             return -1
 
@@ -439,54 +447,84 @@ class TrackerIface(BaseInterface):
         horizontal_scaling_factor = stream_width / width
         vertical_scaling_factor = stream_height / height
         return horizontal_scaling_factor, vertical_scaling_factor
+
+    def __get_scaled_roi_rectangle(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
+        horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
+        if 'ellipse' in source_type.lower():  # Top left based
+            scaled_x = (roi_x + roi_width / 2.) * horizontal_scaling_factor
+            scaled_y = (roi_y + roi_height / 2.) * vertical_scaling_factor
+        elif 'rectangle' in source_type.lower():  # Center based
+            scaled_x = roi_x * horizontal_scaling_factor
+            scaled_y = roi_y * vertical_scaling_factor
+        else:
+            raise NotImplementedError("Unknown ROI shape: {}".format(source_type))  # FIXME: change exception type
+        scaled_width = roi_width * horizontal_scaling_factor
+        scaled_height = roi_height * vertical_scaling_factor
+        return scaled_x, scaled_y, scaled_width, scaled_height
+
+    def __qurl_to_str(self, url):
+        url = url.replace("PyQt5.QtCore.QUrl(u", "")
+        url = url.strip(")\\'")
+        return url
+
+    def __assign_roi(self, roi_type, roi):
+        if roi_type == 'tracking':
+            self.roi = roi
+        elif roi_type == 'restriction':
+            self.tracking_region_roi = roi
+        elif roi_type == 'measurement':
+            self.measure_roi = roi
+        else:
+            NotImplementedError("Unknown ROI type: {}".format(roi_type))
         
-    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant)
-    def set_roi(self, width, height, x, y, diameter):
+    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
+    def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         """
         Sets the ROI (in which to check for the specimen) from the one drawn in QT
         Scaling is applied to match the (resolution difference) between the representation 
         of the frames in the GUI (on which the user draws the ROI) and the internal representation
         used to compute the position of the specimen.
-        
-        :param width: The width of the image representation in the GUI
-        :param height: The height of the image representation in the GUI
-        :param x: The center of the roi in the first dimension
-        :param y: The center of the roi in the second dimension
-        :param diameter: The diameter of the ROI
+
+        :param str roi_type: The type of roi, one of ("tracking", "restriction")
+        :param str source_type: The string representing the source type
+        :param float img_width: The width of the image representation in the GUI
+        :param float img_height: The height of the image representation in the GUI
+        :param float roi_x: The center of the roi in the first dimension
+        :param float roi_y: The center of the roi in the second dimension
+        :param float roi_width: The width of the ROI
+        :param float roi_height: The height of the ROI
         """
+
+        source_type = str(source_type)
+        source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
-            
-            radius = diameter / 2.0
-            scaled_x = (x + radius) * horizontal_scaling_factor
-            scaled_y = (y + radius) * vertical_scaling_factor
-            scaled_radius = radius * horizontal_scaling_factor
-            
-            self.roi = Circle((scaled_x, scaled_y), scaled_radius)
+            scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
+                                                            roi_x, roi_y, roi_width, roi_height)
+            if 'rectangle' in source_type.lower():
+                roi = Rectangle(*scaled_coords)
+            elif 'ellipse' in source_type.lower():
+                roi = Ellipse(*scaled_coords)
+            else:
+                raise NotImplementedError("Unknown ROI shape: {}".format(source_type))
+            self.__assign_roi(roi_type, roi)
         else:
-            print("No tracker object")
+            print("No tracker available")
 
-    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
-    def set_tracking_region_roi(self, width, height, roi_x, roi_y, roi_width, roi_height):
+    @pyqtSlot(str, float, float, QVariant)
+    def set_roi_from_points(self, roi_type, img_width, img_height, points):
         if self.tracker is not None:
-            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
-            scaled_x = roi_x * horizontal_scaling_factor
-            scaled_x -= 1
-            scaled_y = roi_y * vertical_scaling_factor
-            scaled_y -= 1
-            scaled_width = roi_width * horizontal_scaling_factor
-            scaled_height = roi_height * vertical_scaling_factor
-            self.tracking_region_roi = Rectangle(scaled_x, scaled_y, scaled_width, scaled_height)
-        else:
-            print("No tracker object")
+            exp = re.compile('\d+')
+            points = points.split("),")
+            points = np.array([map(float, exp.findall(p)) for p in points], dtype=np.float32)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
+            points[:, 0] *= horizontal_scaling_factor
+            points[:, 1] *= vertical_scaling_factor
+            roi = FreehandRoi(points)
+            self.__assign_roi(roi_type, roi)
 
-    @pyqtSlot()
-    def remove_roi(self):
-        self.roi = None
-
-    @pyqtSlot()
-    def remove_tracking_region_roi(self):
-        self.tracking_region_roi = None
+    @pyqtSlot(QVariant)
+    def remove_roi(self, roi_type):
+        self.__assign_roi(roi_type, None)
 
     @pyqtSlot(QVariant)
     def save(self, default_dest):

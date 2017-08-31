@@ -8,17 +8,16 @@ import "roi"
 import "style"
 
 Rectangle {
-    id: rectangle1
     color: theme.background
     anchors.fill: parent
-
-    onVisibleChanged: reload()
 
     function reload(){
         trackingControls.reload();
     }
 
-    ErrorScreen{
+    onVisibleChanged: { if (visible) { reload() } }
+
+    ErrorScreen {
         id: errorScreen
         width: 400
         height: 200
@@ -26,18 +25,6 @@ Rectangle {
         visible: false
         z: 1
         anchors.centerIn: parent
-    }
-    InfoScreen{
-        id: infoScreen
-
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 100
-        height: 75
-
-        text: "Roi mode"
-        visible: false
-        z: 1
     }
 
     Column {
@@ -64,18 +51,19 @@ Rectangle {
 
                 CustomButton {
                     id: recordBtn
-                    x: 20
+
                     width: 45
                     height: width
 
-                    tooltip: "Starts video recording"
                     iconSource: "../../../resources/icons/record.png"
+                    pressedSource: "../../../resources/icons/record_pressed.png"
+                    tooltip: "Starts video recording"
 
                     enabled: false
-                    onClicked:{
+                    onClicked: {  // FIXME: should have both ROIs and probably embed in factory
                         if (py_recorder.cam_detected()){
-                            if (roi.isDrawn){
-                                py_recorder.set_roi(roi.width, roi.height, roi.roiX, roi.roiY, roi.roiWidth);
+                            if (trackingRoi.isDrawn){
+                                py_recorder.set_roi(trackingRoi.width, trackingRoi.height, trackingRoi.roiX, trackingRoi.roiY, trackingRoi.roiWidth);
                             }
                             if (py_recorder.start()) {
                                 enabled = false;
@@ -88,11 +76,13 @@ Rectangle {
                 }
                 CustomButton {
                     id: stopBtn
+
                     width: recordBtn.width
                     height: width
 
                     tooltip: "Stops video recording"
                     iconSource: "../../../resources/icons/stop.png"
+                    pressedSource: "../../../resources/icons/stop_pressed.png"
 
                     enabled: false
                     onClicked:{
@@ -111,41 +101,23 @@ Rectangle {
 
             py_params_iface: py_iface
             py_tracking_iface: py_recorder
+
+            visualisationOptions: ["Raw", "Diff"]
         }
-
         CustomButton {
-            id: roiButton
+            id: roiManagerBtn
 
-            property bool isDown
-            isDown: false
-            property string oldSource
-            oldSource: iconSource
-
-            width: recordBtn.width
+            width: 50
             height: width
+
+            anchors.horizontalCenter: parent.horizontalCenter
 
             iconSource: "../../../resources/icons/roi.png"
             pressedSource: "../../../resources/icons/roi_pressed.png"
-            tooltip:
-                "Draw ROI
-When pressed, this will open the ROI manager."
 
-            onPressed: {}
-            onReleased: {}
-
+            tooltip: "Open ROI manager"
             onClicked: {
-                if (isDown){
-                    py_iface.restore_cursor();
-                    iconSource = oldSource;
-                    isDown = false;
-                    infoScreen.visible = false;
-                } else {
-                    py_iface.chg_cursor();
-                    oldSource = iconSource;
-                    iconSource = pressedSource;
-                    isDown = true;
-                    infoScreen.visible = true;
-                }
+                roiManager.visible = !roiManager.visible;
             }
         }
     }
@@ -158,6 +130,14 @@ When pressed, this will open the ROI manager."
         anchors.left: recordImage.left
         spacing: 5
 
+        function updatePath() {
+            if (py_recorder.cam_detected()){
+                recordBtn.enabled = true;
+            } else {
+                errorScreen.flash(3000);
+            }
+        }
+
         CustomButton {
             id: pathBtn
             width: 40
@@ -168,11 +148,7 @@ When pressed, this will open the ROI manager."
             tooltip: "Select video destination (before recording)"
             onClicked: {
                 pathTextField.text = py_iface.set_save_path("");
-                if (py_recorder.cam_detected()){
-                    recordBtn.enabled = true;
-                } else {
-                    errorScreen.flash(3000);
-                }
+                pathLayout.updatePath();
             }
         }
         TextField{
@@ -183,11 +159,7 @@ When pressed, this will open the ROI manager."
 
             onTextChanged: {
                 py_iface.set_save_path(text);
-                if (py_recorder.cam_detected()){
-                    recordBtn.enabled = true;
-                } else {
-                    errorScreen.flash(3000);
-                }
+                pathLayout.updatePath();
             }
         }
     }
@@ -195,35 +167,59 @@ When pressed, this will open the ROI manager."
         id: recordImage
         objectName: "recording"
 
+        width: 640
+        height: 480
+
         anchors.margins: 10
         anchors.left: controlsLayout.right
         anchors.right: parent.right
         anchors.top: pathLayout.bottom
         anchors.bottom: parent.bottom
-        width: 640
-        height: 480
 
         source: "image://recorderprovider/img"
 
-        onWidthChanged: {roi.width = img.width; }
-        onHeightChanged: {roi.height = img.height; }
+        RoiFactory {
+            id: trackingRoi
 
-        CircleRoi {
-            id: roi
+            width: parent.imgWidth
+            height: parent.imgHeight
+
             anchors.top: parent.top
             anchors.left: parent.left
-            isActive: roiButton.isDown
 
-            onReleased: {
-                if (isDrawn) {
-                    if (isActive){
-                        py_recorder.set_roi(width, height, roiX, roiY, roiWidth);
-                    } else {
-                        py_recorder.remove_roi();
-                        eraseRoi();
-                    }
-                }
-            }
+            source: "roi/EllipseRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_recorder
+            roiType: 'tracking'
         }
+        RoiFactory {
+            id: restrictionRoi
+
+            width: parent.imgWidth
+            height: parent.imgHeight
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+
+            source: "roi/RectangleRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_recorder
+            roiType: 'restriction'
+        }
+    }
+
+    RoiManager {
+        id: roiManager
+        pythonObject: py_iface
+        visible: false
+
+        roisControlsModelsList: [
+            RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
+        ]
     }
 }

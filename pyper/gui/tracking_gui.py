@@ -104,9 +104,6 @@ if __name__ == '__main__':
     context.setContextProperty('py_editor', editor)
     
     win.show()
-    try:
-        apcode = app.exec_()
-    except:
-        print('there was an issue')
-    finally:
-        sys.exit(apcode)
+
+    sys.exit(app.exec_())
+

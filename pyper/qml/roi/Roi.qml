@@ -2,8 +2,10 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 
 Item {
+    id: root
     property bool isActive
     property bool isDrawn
+    property bool drawingMode
 
     signal released(real xPosition, real yPosition)
     signal pressed(real xPosition, real yPosition)
@@ -17,9 +19,12 @@ Item {
     }
     onDragged: {
         if (isActive) {
-            expandRoi(xPosition, yPosition)
+            resizeRoi(xPosition, yPosition);
         }
     }
+
+    function setRoiPosition(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
+    function resizeRoi(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
 
     function drawRoi() {
         roi.visible = true;
@@ -29,12 +34,18 @@ Item {
         roi.visible = false;
         isDrawn = false;
     }
+    function releasedCallback() { }
 
     MouseArea {
         id: behavior
         anchors.fill: parent
 
-        onReleased: { parent.released(mouse.x, mouse.y) }
+        enabled: root.drawingMode
+
+        onReleased: {
+            releasedCallback();
+            parent.released(mouse.x, mouse.y);
+        }
         onPressed: { parent.pressed(mouse.x, mouse.y) }
         onPositionChanged: { parent.dragged(mouse.x, mouse.y) }
     }

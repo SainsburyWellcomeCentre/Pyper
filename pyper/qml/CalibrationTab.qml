@@ -111,7 +111,7 @@ Rectangle {
                     text: "Pattern:"
                     help: "Geometry of the calibration pattern"
                 }
-                IntLabel{
+                IntInput {
                     width: parent.width
                     label: "Rows"
                     tooltip: "Number of rows in pattern"
@@ -119,7 +119,7 @@ Rectangle {
                     onEdited: { py_calibration.set_n_rows(value); }
                     function reload() {value = py_calibration.get_n_rows() }
                 }
-                IntLabel{
+                IntInput {
                     width: parent.width
                     label: "Columns"
                     tooltip: "Number of columns in pattern"
