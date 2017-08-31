@@ -29,7 +29,7 @@ from pyper.tracking.tracking import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Circle, Rectangle, Ellipse, FreehandRoi
+from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
