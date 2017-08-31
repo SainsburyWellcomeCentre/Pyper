@@ -4,11 +4,13 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
+import QtGraphicalEffects 1.0
 
-import "popup_messages"
-import "basic_types"
-import "help"
-import "style"
+import "../popup_messages"
+import "../basic_types"
+import "../help"
+import "../style"
+import "../config"
 
 
 ApplicationWindow {
@@ -112,6 +114,21 @@ ApplicationWindow {
         id: mainMenuBar
         width: 70
         height: parent.height
+//        RadialGradient {
+//            anchors.fill: parent
+//            verticalRadius: parent.height * 2
+//            horizontalRadius: parent.width
+//            gradient: Gradient {
+//                GradientStop {
+//                    position: 0.0;
+//                    color: theme.background;
+//                }
+//                GradientStop {
+//                    position: 0.5;
+//                    color: theme.frameBorder;
+//                }
+//            }
+//        }
 
         Timer {
             id: timer
@@ -126,7 +143,7 @@ ApplicationWindow {
 
         Image{
            anchors.fill: parent
-           source: "../../resources/images/menu_bar.png"
+           source: imageHandler.getPath("menu_bar.png")
         }
         Column {
             spacing: 15
@@ -141,7 +158,7 @@ ApplicationWindow {
 
                 text: "Welcome"
                 tooltip: "Switch to welcome mode"
-                iconSource: "../../../resources/icons/welcome.png"
+                iconSource: iconHandler.getPath("welcome.png")
                 onClicked: tabs.currentIndex = 0
             }
 
@@ -155,7 +172,7 @@ ApplicationWindow {
 
                 text: "Preview"
                 tooltip: "Switch to preview mode"
-                iconSource: "../../../resources/icons/preview.png"
+                iconSource: iconHandler.getPath("preview.png")
                 onClicked: { mainMenuBar.checkPathLoaded(1) }
             }
             CustomToolButton{
@@ -168,7 +185,7 @@ ApplicationWindow {
 
                 text: "Track"
                 tooltip: "Switch to tracking mode"
-                iconSource: "../../../resources/icons/track.png"
+                iconSource: iconHandler.getPath("track.png")
 
                 onClicked: { mainMenuBar.checkPathLoaded(2) }
             }
@@ -182,7 +199,7 @@ ApplicationWindow {
 
                 text: "Record"
                 tooltip: "Switch to recording mode"
-                iconSource: "../../../resources/icons/camera.png"
+                iconSource: iconHandler.getPath("camera.png")
 
                 onClicked: { tabs.currentIndex = 3 }
             }
@@ -196,7 +213,7 @@ ApplicationWindow {
 
                 text: "Calibration"
                 tooltip: "Switch to camera calibration mode"
-                iconSource: "../../../resources/icons/calibration.png"
+                iconSource: iconHandler.getPath("calibration.png")
 
                 onClicked: { tabs.currentIndex = 4 }
             }
@@ -210,7 +227,7 @@ ApplicationWindow {
 
                 text: "Analyse"
                 tooltip: "Switch to analysis mode"
-                iconSource: "../../../resources/icons/analyse.png"
+                iconSource: iconHandler.getPath("analyse.png")
 
                 onClicked: { tabs.currentIndex = 5 }
             }

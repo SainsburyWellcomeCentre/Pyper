@@ -6,10 +6,10 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 
-import "basic_types"
-import "roi"
-import "popup_messages"
-import "style"
+import "../basic_types"
+import "../roi"
+import "../popup_messages"
+import "../style"
 
 ApplicationWindow {
     id: root

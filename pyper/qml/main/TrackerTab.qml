@@ -2,11 +2,12 @@ import QtQuick 2.3
 import QtQml 2.0
 import QtQuick.Controls 1.2
 
-import "popup_messages"
-import "basic_types"
-import "video"
-import "roi"
-import "style"
+import "../popup_messages"
+import "../basic_types"
+import "../video"
+import "../roi"
+import "../style"
+import "../config"
 
 Rectangle {
     color: theme.background
@@ -89,7 +90,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
 
-            source: "roi/EllipseRoi.qml"
+            source: "../roi/EllipseRoi.qml"
 
             drawingMode: roiManager.drawingMode
 
@@ -106,7 +107,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
 
-            source: "roi/RectangleRoi.qml"
+            source: "../roi/RectangleRoi.qml"
 
             drawingMode: roiManager.drawingMode
 
@@ -122,7 +123,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
 
-            source: "roi/RectangleRoi.qml"
+            source: "../roi/RectangleRoi.qml"
 
             drawingMode: roiManager.drawingMode
 
@@ -160,8 +161,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                     iconSource: "../../../resources/icons/play.png"
-                    pressedSource: "../../../resources/icons/play_pressed.png"
+                    iconSource: iconHandler.getPath("play.png")
+                    pressedSource: iconHandler.getPath("play_pressed.png")
                     tooltip: "Start tracking"
 
                     onPressed:{ splash.visible = true; }
@@ -177,9 +178,9 @@ Rectangle {
                     width: startTrackBtn.width
                     height: width
 
+                    iconSource: iconHandler.getPath("stop.png")
+                    pressedSource: iconHandler.getPath("stop_pressed.png")
                     tooltip: "Stop tracking"
-                    iconSource: "../../../resources/icons/stop.png"
-                    pressedSource: "../../../resources/icons/stop_pressed.png"
 
                     onClicked: py_tracker.stop()
                 }
@@ -204,7 +205,7 @@ Rectangle {
 
             anchors.horizontalCenter: parent.horizontalCenter
 
-            iconSource: "../../../resources/icons/roi.png"
+            iconSource: iconHandler.getPath("roi.png")
 
             tooltip: "Open ROI manager"
             onClicked: {

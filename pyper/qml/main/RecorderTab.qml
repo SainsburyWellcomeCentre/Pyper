@@ -1,11 +1,12 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
-import "popup_messages"
-import "basic_types"
-import "video"
-import "roi"
-import "style"
+import "../popup_messages"
+import "../basic_types"
+import "../video"
+import "../roi"
+import "../style"
+import "../config"
 
 Rectangle {
     color: theme.background
@@ -55,8 +56,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: "../../../resources/icons/record.png"
-                    pressedSource: "../../../resources/icons/record_pressed.png"
+                    iconSource: iconHandler.getPath("record.png")
+                    pressedSource: iconHandler.getPath("record_pressed.png")
                     tooltip: "Starts video recording"
 
                     enabled: false
@@ -81,8 +82,8 @@ Rectangle {
                     height: width
 
                     tooltip: "Stops video recording"
-                    iconSource: "../../../resources/icons/stop.png"
-                    pressedSource: "../../../resources/icons/stop_pressed.png"
+                    iconSource: iconHandler.getPath("stop.png")
+                    pressedSource: iconHandler.getPath("stop_pressed.png")
 
                     enabled: false
                     onClicked:{
@@ -112,8 +113,8 @@ Rectangle {
 
             anchors.horizontalCenter: parent.horizontalCenter
 
-            iconSource: "../../../resources/icons/roi.png"
-            pressedSource: "../../../resources/icons/roi_pressed.png"
+            iconSource: iconHandler.getPath("roi.png")
+            pressedSource: iconHandler.getPath("roi_pressed.png")
 
             tooltip: "Open ROI manager"
             onClicked: {
@@ -143,7 +144,7 @@ Rectangle {
             width: 40
             height: width
 
-            iconSource: "../../../resources/icons/document-save-as.png"
+            iconSource: iconHandler.getPath("document-save-as.png")
 
             tooltip: "Select video destination (before recording)"
             onClicked: {
@@ -187,7 +188,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
 
-            source: "roi/EllipseRoi.qml"
+            source: "../roi/EllipseRoi.qml"
 
             drawingMode: roiManager.drawingMode
 
@@ -203,7 +204,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
 
-            source: "roi/RectangleRoi.qml"
+            source: "../roi/RectangleRoi.qml"
 
             drawingMode: roiManager.drawingMode
 
