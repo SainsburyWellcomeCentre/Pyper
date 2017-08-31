@@ -34,7 +34,7 @@ Item {
         if (endsWith(src, "EllipseRoi.qml") || endsWith(src, "RectangleRoi.qml")) {
             tracker_py_iface.set_roi(roiType, source, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
         } else if (endsWith(src, "FreehandRoi.qml")) {
-            tracker_py_iface.set_roi_from_points(roiType, pointsToString(roi.item.points));
+            tracker_py_iface.set_roi_from_points(roiType, root.width, root.height, pointsToString(roi.item.points));
         } else {
             console.log("Unrecognised source: " + source);
         }

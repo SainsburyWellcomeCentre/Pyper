@@ -437,44 +437,18 @@ class TrackerIface(BaseInterface):
         vertical_scaling_factor = stream_height / height
         return horizontal_scaling_factor, vertical_scaling_factor
 
-    # @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)  # CIRCLE ROI
-    # def set_roi(self, width, height, x, y, roi_width, roi_height):
-    #     """
-    #     Sets the ROI (in which to check for the specimen) from the one drawn in QT
-    #     Scaling is applied to match the (resolution difference) between the representation
-    #     of the frames in the GUI (on which the user draws the ROI) and the internal representation
-    #     used to compute the position of the specimen.
-    #
-    #     :param width: The width of the image representation in the GUI
-    #     :param height: The height of the image representation in the GUI
-    #     :param x: The center of the roi in the first dimension
-    #     :param y: The center of the roi in the second dimension
-    #     :param roi_width: The width of the ROI
-    #     :param roi_height: The height of the ROI
-    #     """
-    #     if hasattr(self, 'tracker'):
-    #         horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(width, height)
-    #
-    #         radius = diameter / 2.0
-    #         scaled_x = (x + radius) * horizontal_scaling_factor
-    #         scaled_y = (y + radius) * vertical_scaling_factor
-    #         scaled_width = width * horizontal_scaling_factor
-    #         scaled_height = height * horizontal_scaling_factor
-    #
-    #         self.roi = Circle((scaled_x, scaled_y), scaled_radius)
-
     def __get_scaled_roi_rectangle(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
-        if 'ellipse' in source_type.lower():
-            scaled_x = (roi_x + roi_width / 2) * horizontal_scaling_factor
-            scaled_y = (roi_y + roi_height / 2) * vertical_scaling_factor
-        elif 'rectangle' in source_type.lower():
+        if 'ellipse' in source_type.lower():  # Top left based
+            scaled_x = (roi_x + roi_width / 2.) * horizontal_scaling_factor
+            scaled_y = (roi_y + roi_height / 2.) * vertical_scaling_factor
+        elif 'rectangle' in source_type.lower():  # Center based
             scaled_x = roi_x * horizontal_scaling_factor
             scaled_y = roi_y * vertical_scaling_factor
         else:
             raise NotImplementedError("Unknown ROI shape: {}".format(source_type))  # FIXME: change exception type
         scaled_width = roi_width * horizontal_scaling_factor
-        scaled_height = roi_height * horizontal_scaling_factor
+        scaled_height = roi_height * vertical_scaling_factor
         return scaled_x, scaled_y, scaled_width, scaled_height
 
     def __qurl_to_str(self, url):
@@ -525,12 +499,15 @@ class TrackerIface(BaseInterface):
         else:
             print("No tracker available")
 
-    @pyqtSlot(QVariant, QVariant)
-    def set_roi_from_points(self, roi_type, points):
+    @pyqtSlot(str, float, float, QVariant)
+    def set_roi_from_points(self, roi_type, img_width, img_height, points):
         if self.tracker is not None:
             exp = re.compile('\d+')
             points = points.split("),")
-            points = [map(float, exp.findall(p)) for p in points]
+            points = np.array([map(float, exp.findall(p)) for p in points], dtype=np.float32)
+            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
+            points[:, 0] *= horizontal_scaling_factor
+            points[:, 1] *= vertical_scaling_factor
             roi = FreehandRoi(points)
             self.__assign_roi(roi_type, roi)
 
