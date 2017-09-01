@@ -11,6 +11,7 @@ Roi {
     property alias points: canvas.path
 
     function setRoiPosition(xPosition, yPosition){
+        canvas.resetPath();
         roi.mouseX = xPosition;
         roi.mouseY = yPosition;
         canvas.lastX = xPosition;
@@ -102,6 +103,10 @@ Roi {
         property real lastY
 
         property var path: []
+
+        function resetPath() {
+            canvas.path = [];
+        }
 
         function drawPath() {
             var currentPoint = path[0];
