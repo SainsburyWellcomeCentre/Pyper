@@ -333,10 +333,11 @@ class TrackerIface(BaseInterface):
         
         self.positions = []
 
-        self.roi = None
-        self.tracking_region_roi = None
-        self.measure_roi = None
         self.tracker = None
+
+        self.rois = {'tracking': None,
+                     'restriction': None,
+                     'measurement': None}
 
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -379,7 +380,7 @@ class TrackerIface(BaseInterface):
             error_screen.setProperty('doFlash', True)
             return
         self.stream = self.tracker  # To comply with BaseInterface
-        self.tracker.roi = self.roi
+        self.tracker.roi = self.rois['tracking']
 
         self.n_frames = self.tracker._stream.n_frames - 1
         self.current_frame_idx = self.tracker._stream.current_frame_idx
@@ -410,8 +411,9 @@ class TrackerIface(BaseInterface):
             self.tracker.normalise = self.params.normalise
             self.tracker.extract_arena = self.params.extract_arena
 
-            self.tracker.set_roi(self.roi)
-            self.tracker.set_tracking_region_roi(self.tracking_region_roi)
+            self.tracker.set_roi(self.rois['tracking'])
+            self.tracker.set_tracking_region_roi(self.rois['restriction'])
+            self.tracker.set_measure_roi(self.rois['measurement'])
 
     def _reset_measures(self):
         self.positions = []  # reset between runs
@@ -470,14 +472,10 @@ class TrackerIface(BaseInterface):
         return url
 
     def __assign_roi(self, roi_type, roi):
-        if roi_type == 'tracking':
-            self.roi = roi
-        elif roi_type == 'restriction':
-            self.tracking_region_roi = roi
-        elif roi_type == 'measurement':
-            self.measure_roi = roi
-        else:
-            NotImplementedError("Unknown ROI type: {}".format(roi_type))
+        try:
+            self.rois[roi_type] = roi
+        except KeyError:
+            raise NotImplementedError("Unknown ROI type: {}".format(roi_type))
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
@@ -487,7 +485,7 @@ class TrackerIface(BaseInterface):
         of the frames in the GUI (on which the user draws the ROI) and the internal representation
         used to compute the position of the specimen.
 
-        :param str roi_type: The type of roi, one of ("tracking", "restriction")
+        :param str roi_type: The type of roi, one of ("tracking", "restriction", "measurement")
         :param str source_type: The string representing the source type
         :param float img_width: The width of the image representation in the GUI
         :param float img_height: The height of the image representation in the GUI
@@ -669,7 +667,7 @@ class RecorderIface(TrackerIface):
         self._set_display()
         self._update_img_provider()
         
-        self.tracker.set_roi(self.roi)
+        self.tracker.set_roi(self.rois['tracking'])
         
         self.timer.start(self.timer_speed)
         return True
