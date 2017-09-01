@@ -159,6 +159,7 @@ class Tracker(object):
                  n_background_frames=1, n_sds=5.0,
                  clear_borders=False, normalise=False,
                  plot=False, fast=False, extract_arena=False,
+                 infer_location=False,
                  camera_calibration=None, callback=None):
         """
         :param str src_file_path: The source file path to read from (camera if None)
@@ -211,6 +212,7 @@ class Tracker(object):
         self.plot = plot
         self.fast = fast
         self.extract_arena = extract_arena
+        self.infer_location = infer_location
         
         self.n_sds = n_sds
         self.bg = None
@@ -252,7 +254,7 @@ class Tracker(object):
         
     def _make_bottom_square(self):
         """
-        Creates a set of diagonaly opposed points to use as the corners
+        Creates a set of diagonally opposed points to use as the corners
         of the square displayed by the default callback method.
         """
         bottom_right_pt = self._stream.size
@@ -430,7 +432,10 @@ class Tracker(object):
 
         if IS_PI and self.fast:
             requested_output = 'mask'
-        self.positions.append(self.default_pos)
+        if self.infer_location and len(self.positions) > 0:
+            self.positions.append(self.positions[-1])
+        else:
+            self.positions.append(self.default_pos)
         if self.plot:
             if requested_output == 'raw':
                 plot_silhouette = (frame.color()).copy()
@@ -525,7 +530,7 @@ class Tracker(object):
             return
         last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
         if (last_vector > self.teleportation_threshold).any():
-            silhouette.save('teleportingSilhouette.tif')
+            silhouette.save('teleportingSilhouette.tif')  # Used for debugging
             frame.save('teleportingFrame.tif')
             err_msg = 'Frame: {}, mouse teleported from {} to {}'\
                 .format(self._stream.current_frame_idx, *self.positions[-2:])
@@ -689,7 +694,10 @@ class GuiTracker(Tracker):
                 if not contour_found:
                     if record: self._stream._save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
-                    return self.silhouette, self.default_pos, self.default_pos  # Skip if no contour found
+                    if self.infer_location:
+                        return self.silhouette, self.positions[-1], self.default_pos
+                    else:
+                        return self.silhouette, self.default_pos, self.default_pos  # Skip if no contour found
 
                 if self.roi is not None: self._check_mouse_in_roi()
                 self.paint(self.silhouette, 'c')

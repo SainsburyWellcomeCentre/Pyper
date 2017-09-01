@@ -414,6 +414,7 @@ class TrackerIface(BaseInterface):
             self.tracker.clear_borders = self.params.clear_borders
             self.tracker.normalise = self.params.normalise
             self.tracker.extract_arena = self.params.extract_arena
+            self.tracker.infer_location = self.params.infer_location
 
             if self.rois['tracking'] is not None:  # REFACTOR: refactor tracking.Tracker to use roi dictionnary and extract method
                 self.tracker.set_roi(self.rois['tracking'])

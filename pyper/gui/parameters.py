@@ -52,6 +52,7 @@ class ParamsIface(QObject):
         self.clear_borders = config['tracker']['checkboxes']['clear_borders']
         self.normalise = config['tracker']['checkboxes']['normalise']
         self.extract_arena = config['tracker']['checkboxes']['extract_arena']
+        self.infer_location = config['tracker']['checkboxes']['infer_location']
 
     def __del__(self):
         """
@@ -109,6 +110,15 @@ class ParamsIface(QObject):
     @pyqtSlot(result=bool)
     def get_extract_arena(self):
         return self.extract_arena
+
+    @pyqtSlot(bool)
+    def set_infer_location(self, status):
+        self.infer_location = status
+        config['tracker']['checkboxes']['infer_location'] = status
+
+    @pyqtSlot(result=bool)
+    def get_infer_location(self):
+        return self.infer_location
 
     # DETECTION OPTIONS
     @pyqtSlot(result=QVariant)

@@ -243,6 +243,19 @@ Column {
                     root.updateTracker();
                 }
             }
+            BoolLabel {
+                label: "Infer"
+                tooltip: "Infers that the object is still at the\nlast know location in case tracking is lost."
+                checked: root.py_params_iface.get_infer_location();
+                onClicked: {
+                    root.py_params_iface.set_infer_location(checked);
+                    root.updateTracker();
+                }
+                function reload() {
+                    checked = root.py_params_iface.get_infer_location();
+                    root.updateTracker();
+                }
+            }
         }
     }
 
