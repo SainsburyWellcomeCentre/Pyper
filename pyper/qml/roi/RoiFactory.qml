@@ -29,7 +29,6 @@ Item {
     }
 
     function setPyIfaceRoi() {
-//        console.log("Setting ROI " + roiType + " to: " + source + ", size:  " + roi.item.width + ", " + roi.item.height);
         var src = String(source);
         if (endsWith(src, "EllipseRoi.qml") || endsWith(src, "RectangleRoi.qml")) {
             tracker_py_iface.set_roi(roiType, source, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
@@ -40,6 +39,7 @@ Item {
         }
     }
     function unsetPyIfaceRoi() {
+        console.log("Setting ROI off");
         tracker_py_iface.remove_roi(roiType);
         roi.item.eraseRoi();
     }

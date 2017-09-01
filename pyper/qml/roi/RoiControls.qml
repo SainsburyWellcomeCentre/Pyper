@@ -45,9 +45,6 @@ Frame {
     onDrawingColorChanged: {
         sourceRoi.drawingColor = drawingColor;
     }
-    onRoiActiveChanged: {
-        sourceRoi.roiActive = roiActive;
-    }
 
     function changeRoiClass(roi, roiShape) {
         if (roiShape === "ellipse") {
@@ -87,6 +84,9 @@ Frame {
             CheckBox {
                 id: roiActive
                 text: ""
+                onCheckedChanged: {
+                    roiLayout.sourceRoi.roiActive = checked;
+                }
             }
         }
 

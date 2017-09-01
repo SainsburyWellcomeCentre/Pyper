@@ -44,6 +44,7 @@ Roi {
         onVisibleChanged: {
             if (visible) {
                 canvas.drawingColor = root.drawingColor;
+                canvas.requestPaint();
             } else {
                 canvas.drawingColor = 'transparent';
                 canvas.clearCanvas();
@@ -58,20 +59,22 @@ Roi {
         property color drawingColor: 'transparent'
         anchors.fill: parent
 
+        visible: roi.visible
+
         onPaint: {
-            var ctx = getContext('2d')
-            ctx.lineWidth = 3
-            ctx.strokeStyle = canvas.drawingColor
-            ctx.beginPath()
-            ctx.ellipse(roi.x, roi.y, roi.width, roi.height)
-            ctx.stroke()
+            var ctx = getContext('2d');
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = canvas.drawingColor;
+            ctx.beginPath();
+            ctx.ellipse(roi.x, roi.y, roi.width, roi.height);
+            ctx.stroke();
         }
         function clearCanvas() {
             var ctx = getContext("2d");
             try {
                 ctx.reset();
             } catch (err) {
-                //
+                //  FIXME:
             }
         }
     }

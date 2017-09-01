@@ -22,6 +22,7 @@ Roi {
         roi.mouseX = xPosition;
         roi.mouseY = yPosition;
         canvas.requestPaint();
+        canvas.path.push(Qt.point(canvas.lastX, canvas.lastY));
     }
 
     function releasedCallback() {
@@ -78,6 +79,9 @@ Roi {
         onVisibleChanged: {
             if (visible) {
                 canvas.drawingColor = root.drawingColor;
+                if (canvas.path.length > 0) {
+                    canvas.drawPath();
+                }
             } else {
                 canvas.drawingColor = 'transparent';
                 canvas.clearCanvas();
@@ -92,24 +96,49 @@ Roi {
         property color drawingColor: 'transparent'
         anchors.fill: parent
 
+        visible: roi.visible
+
         property real lastX
         property real lastY
 
         property var path: []
 
+        function drawPath() {
+            var currentPoint = path[0];
+            lastX = currentPoint.x;
+            lastY = currentPoint.y;
+
+            var ctx = getContext('2d');
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = drawingColor;
+            ctx.beginPath();
+
+            for (var i=1; i < path.length; i++) {
+                currentPoint = path[i];
+                roi.mouseX = currentPoint.x;
+                roi.mouseY = currentPoint.y;
+
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(roi.mouseX, roi.mouseY);
+
+                lastX = currentPoint.x;
+                lastY = currentPoint.y;
+            }
+            ctx.stroke();
+        }
+
         onPaint: {
-            var ctx = getContext('2d')
-            ctx.lineWidth = 3
-            ctx.strokeStyle = canvas.drawingColor
-            ctx.beginPath()
+            var ctx = getContext('2d');
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = canvas.drawingColor;
+            ctx.beginPath();
 
-            ctx.moveTo(lastX, lastY)
-            ctx.lineTo(roi.mouseX, roi.mouseY)
-            lastX = roi.mouseX
-            lastY = roi.mouseY
-            canvas.path.push(Qt.point(lastX, lastY))
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(roi.mouseX, roi.mouseY);
+            canvas.lastX = roi.mouseX;
+            canvas.lastY = roi.mouseY;
 
-            ctx.stroke()
+            ctx.stroke();
         }
         function clearCanvas() {
             var ctx = getContext("2d");

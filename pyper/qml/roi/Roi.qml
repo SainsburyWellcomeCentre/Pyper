@@ -22,6 +22,13 @@ Item {
             resizeRoi(xPosition, yPosition);
         }
     }
+    onIsActiveChanged: {
+        if (isActive == false) {
+            eraseRoi();
+        } else {
+            drawRoi();
+        }
+    }
 
     function setRoiPosition(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
     function resizeRoi(xPosition, yPosition) {}  // These functions have to be implemented in the derived classes
