@@ -339,6 +339,10 @@ class TrackerIface(BaseInterface):
                      'restriction': None,
                      'measurement': None}
 
+        self.roi_params = {'tracking': None,
+                           'restriction': None,
+                           'measurement': None}
+
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
@@ -411,9 +415,21 @@ class TrackerIface(BaseInterface):
             self.tracker.normalise = self.params.normalise
             self.tracker.extract_arena = self.params.extract_arena
 
-            self.tracker.set_roi(self.rois['tracking'])
-            self.tracker.set_tracking_region_roi(self.rois['restriction'])
-            self.tracker.set_measure_roi(self.rois['measurement'])
+            if self.rois['tracking'] is not None:  # REFACTOR: refactor tracking.Tracker to use roi dictionnary and extract method
+                self.tracker.set_roi(self.rois['tracking'])
+            else:
+                if self.roi_params['tracking'] is not None:
+                    self.tracker.set_roi(self.__get_roi(*self.roi_params['tracking']))
+            if self.rois['restriction'] is not None:
+                self.tracker.set_tracking_region_roi(self.rois['restriction'])
+            else:
+                if self.roi_params['restriction'] is not None:
+                    self.tracker.set_tracking_region_roi(self.__get_roi(*self.roi_params['restriction']))
+            if self.rois['measurement'] is not None:
+                self.tracker.set_measure_roi(self.rois['measurement'])
+            else:
+                if self.roi_params['measurement'] is not None:
+                    self.tracker.set_measure_roi(self.__get_roi_from_points(*self.roi_params['measurement']))
 
     def _reset_measures(self):
         self.positions = []  # reset between runs
@@ -474,8 +490,21 @@ class TrackerIface(BaseInterface):
     def __assign_roi(self, roi_type, roi):
         try:
             self.rois[roi_type] = roi
+            if roi is None:
+                self.roi_params[roi_type] = None
         except KeyError:
             raise NotImplementedError("Unknown ROI type: {}".format(roi_type))
+
+    def __get_roi(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
+        scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
+                                                        roi_x, roi_y, roi_width, roi_height)
+        if 'rectangle' in source_type.lower():
+            roi = Rectangle(*scaled_coords)
+        elif 'ellipse' in source_type.lower():
+            roi = Ellipse(*scaled_coords)
+        else:
+            raise NotImplementedError("Unknown ROI shape: {}".format(source_type))
+        return roi
         
     @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
     def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
@@ -498,29 +527,29 @@ class TrackerIface(BaseInterface):
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
-                                                            roi_x, roi_y, roi_width, roi_height)
-            if 'rectangle' in source_type.lower():
-                roi = Rectangle(*scaled_coords)
-            elif 'ellipse' in source_type.lower():
-                roi = Ellipse(*scaled_coords)
-            else:
-                raise NotImplementedError("Unknown ROI shape: {}".format(source_type))
+            self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
         else:
-            print("No tracker available")
+            self.roi_params[roi_type] = source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height
+            print("No tracker available, will assign later.")
+
+    def __get_roi_from_points(self, img_width, img_height, points):
+        exp = re.compile('\d+')
+        points = points.split("),")
+        points = np.array([map(float, exp.findall(p)) for p in points], dtype=np.float32)
+        horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
+        points[:, 0] *= horizontal_scaling_factor
+        points[:, 1] *= vertical_scaling_factor
+        roi = FreehandRoi(points)
+        return roi
 
     @pyqtSlot(str, float, float, QVariant)
     def set_roi_from_points(self, roi_type, img_width, img_height, points):
         if self.tracker is not None:
-            exp = re.compile('\d+')
-            points = points.split("),")
-            points = np.array([map(float, exp.findall(p)) for p in points], dtype=np.float32)
-            horizontal_scaling_factor, vertical_scaling_factor = self.__get_scaling_factors(img_width, img_height)
-            points[:, 0] *= horizontal_scaling_factor
-            points[:, 1] *= vertical_scaling_factor
-            roi = FreehandRoi(points)
+            roi = self.__get_roi_from_points(img_width, img_height, points)
             self.__assign_roi(roi_type, roi)
+        else:
+            self.roi_params[roi_type] = img_width, img_height, points
 
     @pyqtSlot(QVariant)
     def remove_roi(self, roi_type):
