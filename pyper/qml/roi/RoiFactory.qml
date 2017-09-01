@@ -39,7 +39,6 @@ Item {
         }
     }
     function unsetPyIfaceRoi() {
-        console.log("Setting ROI off");
         tracker_py_iface.remove_roi(roiType);
         roi.item.eraseRoi();
     }
@@ -51,6 +50,11 @@ Item {
             pts[i] = "(" + pt.x + "," + pt.y + ")"
         }
         return String(pts);
+    }
+    onRoiActiveChanged: {
+        if (roiActive == false) {
+            unsetPyIfaceRoi();
+        }
     }
 
     Loader {
@@ -78,8 +82,6 @@ Item {
                 root.roiHeight = target.roiHeight;
                 if (target.isActive) {
                      setPyIfaceRoi();
-                } else {
-                    unsetPyIfaceRoi();
                 }
             }
         }
