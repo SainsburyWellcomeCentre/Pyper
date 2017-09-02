@@ -22,6 +22,15 @@ Item {
     signal progressClicked(int frameId)
     signal progressWheel(int angleDelta)
 
+    property bool showProgressBar: true
+    onShowProgressBarChanged: {
+        if (showProgressBar) {
+            pBar.height = 20;
+        } else {
+            pBar.height = 0;
+        }
+    }
+
     function reload(){
         previewImage.reload();
     }
@@ -46,6 +55,7 @@ Item {
             }
         }
         Row {
+            id: pBar
             height: 20
             anchors.left: previewImage.left
             anchors.right: previewImage.right
