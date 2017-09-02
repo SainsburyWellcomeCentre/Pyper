@@ -235,6 +235,20 @@ ApplicationWindow {
 
                 onClicked: { tabs.currentIndex = 5 }
             }
+            CustomToolButton{
+                id: transcodeBtn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width * 1.25
+
+                active: transcodeTab.visible
+
+                text: "Transcode"
+                tooltip: "Switch to transcode mode\nSelect a video and crop/convert/scale..."
+                iconSource: iconHandler.getPath("transcode.png")
+
+                onClicked: { tabs.currentIndex = 6 }
+            }
         }
 
 
@@ -303,27 +317,31 @@ ApplicationWindow {
             Tab {
                 id: recordTab
                 title: "Record"
-                RecorderTab{
+                RecorderTab {
                     id: recorderWindow
                 }
             }
             Tab {
                 id: calibrationTab
                 title: "Calibrate"
-                CalibrationTab{
+                CalibrationTab {
                     id: calibrationWindow
                 }
             }
             Tab {
                 id: analysisTab
                 title: "Analyse"
-                AnalysisTab{
+                AnalysisTab {
                     id: analysisWindow
                 }
             }
 
             Tab {
+                id: transcodeTab
                 title: "Transcode"
+                TranscodeTab {
+                    id: transcodeWindow
+                }
             }
         }
     }
