@@ -77,7 +77,7 @@ Rectangle {
         anchors.left: controlsColumn.right
         anchors.right: parent.right
         anchors.top: vidTitle.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: graph.top
 
         source: "image://trackerprovider/img"
 
@@ -130,6 +130,15 @@ Rectangle {
             tracker_py_iface: py_tracker
             roiType: 'measurement'
         }
+    }
+    Graph {
+        id: graph
+        objectName: "dataGraph"
+
+        width: trackerDisplay.progressBarWidth
+        anchors.left: trackerDisplay.left
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
     }
 
     Column {
@@ -197,19 +206,37 @@ Rectangle {
 
             visualisationOptions: ["Raw", "Diff", "Mask"]
         }
-        CustomButton {
-            id: roiManagerBtn
-
-            width: 50
-            height: width
-
+        Row {
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 10
+            CustomButton {
+                id: roiManagerBtn
 
-            iconSource: iconHandler.getPath("roi.png")
+                width: 50
+                height: width
 
-            tooltip: "Open ROI manager"
-            onClicked: {
-                roiManager.visible = !roiManager.visible;
+                iconSource: iconHandler.getPath("roi.png")
+
+                tooltip: "Open ROI manager"
+                onClicked: {
+                    roiManager.visible = !roiManager.visible;
+                }
+            }
+            CustomButton {
+                id: loadGraphBtn
+
+                width: 50
+                height: width
+
+                iconSource: iconHandler.getPath('document-open.png')
+
+                tooltip: "Select a source of data to be displayed alongside the video."
+                onClicked: {
+                    var loaded = py_tracker.load_graph_data();
+                    if (loaded) {
+                        graph.height = 50;
+                    }
+                }
             }
         }
     }

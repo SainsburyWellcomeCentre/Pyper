@@ -18,7 +18,9 @@ import cv2
 
 import numpy as np
 from scipy.misc import imsave
+from scipy.io import loadmat
 import matplotlib
+
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
 
@@ -34,7 +36,7 @@ from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 
-from pyper.exceptions.exceptions import VideoStreamIOException
+from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
 config = conf.config
 
@@ -346,6 +348,8 @@ class TrackerIface(BaseInterface):
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
 
+        self.graph_data = None
+
         self.current_frame_idx = 0
         self.distances_from_arena = []
         self.output_type = "Raw"
@@ -528,7 +532,7 @@ class TrackerIface(BaseInterface):
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
+            roi = self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
         else:
             self.roi_params[roi_type] = source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height
@@ -574,6 +578,38 @@ class TrackerIface(BaseInterface):
         dest_path = dest_path[0]
         if dest_path:
             self.write(dest_path)
+
+    @pyqtSlot(result=bool)
+    def load_graph_data(self):
+        """
+        Load a 1 dimensional vector to display alongside the tracking.
+        If the sampling is not the same, it should be a multiple of the video frame rate.
+        """
+        diag = QFileDialog()
+        src_path = diag.getOpenFileName(parent=diag,
+                                        caption='Choose data file',
+                                        directory=os.getenv('HOME'),
+                                        filter="Data (*.mat *.npy *.csv)",
+                                        initialFilter="Data (*.npy)")
+
+        src_path = src_path[0]
+        if src_path:
+            extension = os.path.splitext(src_path)[-1]
+            if extension == '.npy':
+                self.graph_data = np.load(src_path)
+            elif extension == '.mat':
+                self.graph_data = loadmat(src_path)  # TEST:
+            elif extension == '.csv':
+                self.graph_data = np.genfromtext(src_path, delimiter=',')  # TEST:
+            else:
+                raise PyperError("Unknown extension: {}".format(extension))
+            graph_object = self.win.findChild(QObject, "dataGraph")
+            data_str = ";".join([str(d) for d in self.graph_data])
+            graph_object.setProperty("points", data_str)
+            return True
+        else:
+            return False
+        # FIXME: add resampling to fit video length
     
     def write(self, dest):
         """

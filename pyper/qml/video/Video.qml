@@ -17,6 +17,8 @@ Item {
     property alias imgWidth: previewImage.width
     property alias imgHeight: previewImage.height
 
+    property alias progressBarWidth: progressBar.width
+
     signal progressPressed(real xPosition, real yPosition)
     signal progressReleased(real xPosition, real yPosition)
     signal progressClicked(int frameId)
