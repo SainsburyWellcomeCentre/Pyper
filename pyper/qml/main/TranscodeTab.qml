@@ -1,12 +1,14 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
+import QtQuick.Dialogs 1.0
 
 import "../popup_messages"
 import "../style"
 import "../basic_types"
 import "../config"
 import "../roi"
+import "../video"
 
 Rectangle {
     id: background
@@ -23,7 +25,49 @@ Rectangle {
 
         spacing: 10
 
+        Frame {
+            id: controls
+            height: row1.height + 20
 
+            Row {
+                id: row1
+
+                anchors.centerIn: controls
+                width: children[0].width *2 + spacing
+                height: children[0].height
+                spacing: 10
+
+                CustomButton {
+                    id: startTranscodeBtn
+
+                    width: 45
+                    height: width
+
+                    iconSource: iconHandler.getPath("play.png")
+                    pressedSource: iconHandler.getPath("play_pressed.png")
+                    tooltip: "Start transcoding"
+
+                    onPressed:{ splash.visible = true; }
+                    onClicked: { py_transcoder.start() }
+                    onReleased:{
+                        py_transcoder.load();
+                        splash.visible = false;
+                    }
+                }
+                CustomButton {
+                    id: stopTrackBtn
+
+                    width: startTranscodeBtn.width
+                    height: width
+
+                    iconSource: iconHandler.getPath("stop.png")
+                    pressedSource: iconHandler.getPath("stop_pressed.png")
+                    tooltip: "Stop transcoding"
+
+                    onClicked: py_transcoder.stop()
+                }
+            }
+        }
         Frame {
             height: col.height + 20
             id: frameControls
@@ -31,53 +75,53 @@ Rectangle {
             CustomColumn {
                 id: col
 
-//                IntButton {
-//                    width: parent.width
-//                    enabled: parent.enabled
-//                    label: "Ref"
-//                    tooltip: "Select the reference frame"
-//                    text: py_iface.get_bg_frame_idx()
-//                    onTextChanged: {
-//                        py_iface.set_bg_frame_idx(text);
-//                        reload();
-//                    }
-//                    onClicked: { text = py_viewer.get_frame_idx() }
-//                    onEnabledChanged: reload()
-//                    function reload(){ text = py_iface.get_bg_frame_idx() }
-//                }
-                IntButton {
+                IntInput {
                     width: parent.width
                     enabled: parent.enabled
                     label: "Start"
                     tooltip: "Select the first data frame"
-//                    text: py_iface.get_start_frame_idx()
-                    onTextChanged: {
-//                        py_iface.set_start_frame_idx(text);
-//                        reload();
+                    value: py_transcoder.get_start_frame_idx()
+                    onEdited: {
+                        py_transcoder.set_start_frame_idx(text);
+                        reload();
                     }
-//                    onClicked: { text = py_viewer.get_frame_idx() }
-//                    onEnabledChanged: reload()
-//                    function reload(){ text = py_iface.get_start_frame_idx() }
+                    onEnabledChanged: reload()
+                    function reload(){ text = py_transcoder.get_start_frame_idx() }
                 }
-                IntButton {
+                IntInput {
                     width: parent.width
                     enabled: parent.enabled
                     label: "End"
                     tooltip: "Select the last data frame"
-//                    text: py_iface.get_end_frame_idx()
-                    onTextChanged: {
-//                        py_iface.set_end_frame_idx(text);
-//                        reload();
+                    value: py_transcoder.get_end_frame_idx()
+                    onEdited: {
+                        py_transcoder.set_end_frame_idx(text);
+                        reload();
                     }
-//                    onClicked: { text = py_viewer.get_frame_idx() }
-//                    onEnabledChanged: reload()
-//                    function reload(){ text = py_iface.get_end_frame_idx() }
+                    onEnabledChanged: reload()
+                    function reload(){ text = py_transcoder.get_end_frame_idx() }
                 }
+            }
+        }
+        CustomButton {
+            id: roiManagerBtn
+
+            width: 50
+            height: width
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            iconSource: iconHandler.getPath("roi.png")
+
+            tooltip: "Open ROI manager"
+            onClicked: {
+                roiManager.visible = !roiManager.visible;
             }
         }
     }
 
     Column {
+        id: pathControls
         spacing: 10
 
         anchors.margins: 10
@@ -91,14 +135,6 @@ Rectangle {
             anchors.right: parent.right
             spacing: 5
 
-            function updatePath() {
-//                if (py_recorder.cam_detected()){
-//                    recordBtn.enabled = true;
-//                } else {
-//                    errorScreen.flash(3000);
-//                }
-            }
-
             CustomButton {
                 id: pathBtn
                 width: 40
@@ -108,20 +144,23 @@ Rectangle {
 
                 tooltip: "Select video to transcode"
                 onClicked: {
-//                    pathTextField.text = py_iface.set_save_path("");
-//                    pathLayout.updatePath();
+                    inPathDialog.visible = true;
+                }
+                FileDialog {
+                    id: inPathDialog
+                    title: "Please select the path of the video to transcode"
+//                    folder: shortcuts.home
+                    onAccepted: {
+                        visible = false;
+                        py_transcoder.set_source_path(fileUrl);
+                    }
                 }
             }
             TextField{
                 id: pathTextField
                 width: 400
                 anchors.verticalCenter: pathBtn.verticalCenter
-                text: "..."
-
-                onTextChanged: {
-//                    py_iface.set_save_path(text);
-//                    pathLayout.updatePath();
-                }
+                text: inPathDialog.fileUrl
             }
         }
         Row {
@@ -132,13 +171,6 @@ Rectangle {
             anchors.right: parent.right
             spacing: 5
 
-            function updatePath() {
-                if (py_recorder.cam_detected()){
-                    recordBtn.enabled = true;
-                } else {
-                    errorScreen.flash(3000);
-                }
-            }
 
             CustomButton {
                 id: outPathBtn
@@ -147,52 +179,65 @@ Rectangle {
 
                 iconSource: iconHandler.getPath("document-save-as.png")
 
-                tooltip: "Select video to transcode"
+                tooltip: "Select the destination path"
                 onClicked: {
-//                    pathTextField.text = py_iface.set_save_path("");
-//                    pathLayout.updatePath();
+                    outPathDialog.visible = true;
+                }
+                FileDialog {
+                    id: outPathDialog
+                    title: "Please select the path to save the video"
+//                    folder: shortcuts.home
+                    onAccepted: {
+                        visible = false;
+                        py_transcoder.set_save_path(fileUrl);
+                    }
                 }
             }
             TextField{
                 id: outPathTextField
                 width: 400
                 anchors.verticalCenter: outPathBtn.verticalCenter
-                text: "..."
-
-                onTextChanged: {
-//                    py_iface.set_save_path(text);
-//                    pathLayout.updatePath();
-                }
+                text: outPathDialog.fileUrl
             }
         }
-        Image {
-            id: preview
+    }
+    Video {
+        id: preview
+        objectName: "transcodingDisplay"
 
-            width: 640
-            height: 480
+        width: 640
+        height: 480
 
-            RoiFactory {
-                id: restrictionRoi
+        anchors.margins: 10
+        anchors.left: controlsLayout.right
+        anchors.right: parent.right
+        anchors.top: pathControls.bottom
+        anchors.bottom: parent.bottom
 
-                anchors.fill: parent
+        source: "image://transcoderprovider/img"
 
-                source: "../roi/RectangleRoi.qml"
+        RoiFactory {
+            id: restrictionRoi
 
-                drawingMode: roiManager.drawingMode
+            anchors.fill: parent
 
-//                tracker_py_iface: py_recorder
-                roiType: 'restriction'
-            }
+            source: "../roi/RectangleRoi.qml"
+
+            drawingMode: roiManager.drawingMode
+
+            tracker_py_iface: py_transcoder
+            roiType: 'restriction'
         }
+    }
 
-        RoiManager {
-            id: roiManager
-//            pythonObject: py_iface
-            visible: false
+    RoiManager {
+        id: roiManager
+        pythonObject: py_iface
+        visible: false
 
-            roisControlsModelsList: [
-                RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
-            ]
-        }
+        // FIXME: Force rectangle ROI because other shapes do not make sense
+        roisControlsModelsList: [
+            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
+        ]
     }
 }

@@ -441,11 +441,10 @@ class TrackerIface(BaseInterface):
         """
         Start the tracking of the loaded video with the parameters from self.params
         """
-        if self.tracker is None:
-            return
-        self._reset_measures()
-        self.set_tracker_params()
-        self.timer.start(self.timer_speed)
+        if self.tracker is not None:
+            self._reset_measures()
+            self.set_tracker_params()
+            self.timer.start(self.timer_speed)
 
     @pyqtSlot()
     def stop(self):
@@ -483,7 +482,7 @@ class TrackerIface(BaseInterface):
         scaled_height = roi_height * vertical_scaling_factor
         return scaled_x, scaled_y, scaled_width, scaled_height
 
-    def __qurl_to_str(self, url):
+    def __qurl_to_str(self, url):  # FIXME: extract to helper module
         url = url.replace("PyQt5.QtCore.QUrl(u", "")
         url = url.strip(")\\'")
         return url
@@ -528,7 +527,7 @@ class TrackerIface(BaseInterface):
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
+            roi = self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
         else:
             self.roi_params[roi_type] = source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height

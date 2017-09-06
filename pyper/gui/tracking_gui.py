@@ -13,6 +13,8 @@ Creates the graphical interface
 import os
 import sys
 
+from pyper.video.transcoder import TranscoderIface
+
 sys.path.append(os.path.abspath("./"))  # FIXME: to be done by setup.py
 
 from OpenGL import GL # Hack necessary to get qtQuick working
@@ -63,10 +65,12 @@ if __name__ == '__main__':
     appEngine = QQmlApplicationEngine()
     
     context = appEngine.rootContext()
-    appEngine.addImageProvider('viewerprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('trackerprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('recorderprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
-    appEngine.addImageProvider('calibrationprovider', CvImageProvider())  # Hack to make qml believe provider is valid before its creation
+    # ALL THE ADDIMAGEPROVIDER LINES BELOW ARE REQUIRED TO MAKE QML BELIEVE THE PROVIDER IS VALID BEFORE ITS CREATION
+    appEngine.addImageProvider('viewerprovider', CvImageProvider())
+    appEngine.addImageProvider('trackerprovider', CvImageProvider())
+    appEngine.addImageProvider('recorderprovider', CvImageProvider())
+    appEngine.addImageProvider('calibrationprovider', CvImageProvider())
+    appEngine.addImageProvider('transcoderprovider', CvImageProvider())
     
     analysis_image_provider = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider", analysis_image_provider)
@@ -94,6 +98,7 @@ if __name__ == '__main__':
     recorder = RecorderIface(app, context, win, params, "recording", "recorderprovider",
                              analysis_image_provider, analysis_image_provider2)
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
+    transcoder = TranscoderIface(app, context, win, params, "transcodingDisplay", "transcoderprovider")
     editor = EditorIface(app, context, win)
     
     context.setContextProperty('py_iface', params)
@@ -102,6 +107,7 @@ if __name__ == '__main__':
     context.setContextProperty('py_recorder', recorder)
     context.setContextProperty('py_calibration', calibrater)
     context.setContextProperty('py_editor', editor)
+    context.setContextProperty('py_transcoder', transcoder)
     
     win.show()
 

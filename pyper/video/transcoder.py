@@ -14,9 +14,87 @@ from scipy.misc import imresize
 import cv2
 from cv2 import cv
 
+from PyQt5.QtCore import QObject, pyqtSlot, QVariant
+
+from pyper.gui.tabs_interfaces import PlayerInterface
 from video_stream import RecordedVideoStream
 
 from progressbar import Percentage, Bar, ProgressBar
+
+# TODO: extract format from file extension
+# TODO: crop to ROI
+# TODO: transcode only between start and endframe
+
+
+class TranscoderIface(PlayerInterface):
+    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
+        PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
+        self.start_frame_idx = 0
+        self.end_frame_idx = -1
+
+        self.tracker = None
+        self.rois = {'restriction': None}
+        self.roi_params = {'restriction': None}
+
+    @pyqtSlot(int)
+    def set_start_frame_idx(self, idx):
+        self.start_frame_idx = idx
+
+    @pyqtSlot(result=QVariant)
+    def get_start_frame_idx(self):
+        return self.start_frame_idx
+
+    @pyqtSlot(int)
+    def set_end_frame_idx(self, idx):
+        self.end_frame_idx = idx
+
+    @pyqtSlot(result=QVariant)
+    def get_end_frame_idx(self):
+        return self.end_frame_idx
+
+    @pyqtSlot()
+    def load(self):
+        pass
+
+    def load(self):
+        """
+        Load the video and create the GuiTracker object (or subclass)
+        Also registers the analysis image providers (for the analysis tab) with QT
+        """
+        try:
+            self.tracker = Tracker(self, src_file_path=self.params.src_path, dest_file_path=None,
+                                   n_background_frames=1, plot=True,
+                                   fast=True, camera_calibration=self.params.calib,
+                                   callback=None)
+        except VideoStreamIOException:
+            self.tracker = None
+            error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
+            error_screen.setProperty('doFlash', True)
+            return
+        self.stream = self.tracker  # To comply with BaseInterface
+        self.tracker.roi = self.rois['tracking']
+
+        self.n_frames = self.tracker._stream.n_frames - 1
+        self.current_frame_idx = self.tracker._stream.current_frame_idx
+
+        if self.params.end_frame_idx == -1:
+            self.params.end_frame_idx = self.n_frames
+
+        self._set_display()
+        self._set_display_max()
+        self._update_img_provider()
+
+    @pyqtSlot()
+    def set_tracker_params(self):
+        if self.tracker is not None:
+            self.tracker.track_from = self.start_frame_idx
+            self.tracker.track_to = self.end_frame_idx if (self.params.end_frame_idx > 0) else None
+
+            if self.rois['restriction'] is not None:
+                self.tracker.set_tracking_region_roi(self.rois['restriction'])
+            else:
+                if self.roi_params['restriction'] is not None:
+                    self.tracker.set_tracking_region_roi(self.__get_roi(*self.roi_params['restriction']))
 
 
 class Transcoder(RecordedVideoStream):
@@ -64,3 +142,25 @@ class Transcoder(RecordedVideoStream):
         pbar.finish()
         self.video_writer.release()
         self.video_writer = None
+
+    def set_tracking_region_roi(self, roi):
+        self.tracking_region_roi = roi
+
+    def read(self):
+        """
+        The required method to behave as a video stream
+        It calls self.track() and increments the current_frame_idx
+        It also updates the uiIface positions accordingly
+        """
+        try:
+            self.current_frame_idx = self._stream.current_frame_idx + 1
+            img = self.transcode_frame(record=self.record, requested_output=self.ui_iface.output_type)
+        except EOFError:
+            self.ui_iface._stop('End of recording reached')
+            # FIXME: stop recording ?
+            return
+        except cv2.error as e:
+            self.ui_iface.timer.stop()
+            self._stream.stop_recording('Error {} stopped recording'.format(e))
+            return
+        return img
