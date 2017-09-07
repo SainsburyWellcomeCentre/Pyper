@@ -424,12 +424,12 @@ class TrackerIface(BaseInterface):
                 self.tracker.set_roi(self.rois['tracking'])
             else:
                 if self.roi_params['tracking'] is not None:
-                    self.tracker.set_roi(self.__get_roi(*self.roi_params['tracking']))
+                    self.tracker.set_roi(self._get_roi(*self.roi_params['tracking']))
             if self.rois['restriction'] is not None:
                 self.tracker.set_tracking_region_roi(self.rois['restriction'])
             else:
                 if self.roi_params['restriction'] is not None:
-                    self.tracker.set_tracking_region_roi(self.__get_roi(*self.roi_params['restriction']))
+                    self.tracker.set_tracking_region_roi(self._get_roi(*self.roi_params['restriction']))
             if self.rois['measurement'] is not None:
                 self.tracker.set_measure_roi(self.rois['measurement'])
             else:
@@ -445,11 +445,10 @@ class TrackerIface(BaseInterface):
         """
         Start the tracking of the loaded video with the parameters from self.params
         """
-        if self.tracker is None:
-            return
-        self._reset_measures()
-        self.set_tracker_params()
-        self.timer.start(self.timer_speed)
+        if self.tracker is not None:
+            self._reset_measures()
+            self.set_tracker_params()
+            self.timer.start(self.timer_speed)
 
     @pyqtSlot()
     def stop(self):
@@ -487,7 +486,7 @@ class TrackerIface(BaseInterface):
         scaled_height = roi_height * vertical_scaling_factor
         return scaled_x, scaled_y, scaled_width, scaled_height
 
-    def __qurl_to_str(self, url):
+    def __qurl_to_str(self, url):  # FIXME: extract to helper module
         url = url.replace("PyQt5.QtCore.QUrl(u", "")
         url = url.strip(")\\'")
         return url
@@ -500,7 +499,7 @@ class TrackerIface(BaseInterface):
         except KeyError:
             raise NotImplementedError("Unknown ROI type: {}".format(roi_type))
 
-    def __get_roi(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
+    def _get_roi(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
                                                         roi_x, roi_y, roi_width, roi_height)
         if 'rectangle' in source_type.lower():
@@ -532,7 +531,7 @@ class TrackerIface(BaseInterface):
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            roi = self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
+            roi = self._get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
         else:
             self.roi_params[roi_type] = source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height
