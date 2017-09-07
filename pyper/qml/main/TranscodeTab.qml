@@ -47,12 +47,8 @@ Rectangle {
                     pressedSource: iconHandler.getPath("play_pressed.png")
                     tooltip: "Start transcoding"
 
-//                    onPressed:{ splash.visible = true; }
-                    onClicked: { py_transcoder.start() }
-                    onReleased:{
-                        py_transcoder.load();
-//                        splash.visible = false;
-                    }
+                    onClicked: { py_transcoder.start(); }
+                    onReleased:{ py_transcoder.load(); }
                 }
                 CustomButton {
                     id: stopTrackBtn
@@ -117,8 +113,9 @@ Rectangle {
                     tooltip: "Select the Horizontal scaling factor"
                     stepSize: 0.1
                     minimumValue: 0.1
-                    maximumValue: 1
-                    value: 1
+                    maximumValue: 1.0
+                    decimals: 1
+                    value: 1.0
                     onEdited: {
                         py_transcoder.set_x_scale(value);
                     }
@@ -130,8 +127,9 @@ Rectangle {
                     tooltip: "Select the Vertical scaling factor"
                     stepSize: 0.1
                     minimumValue: 0.1
-                    maximumValue: 1
-                    value: 1
+                    maximumValue: 1.0
+                    decimals: 1
+                    value: 1.0
                     onEdited: {
                         py_transcoder.set_y_scale(value);
                     }

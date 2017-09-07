@@ -17,6 +17,7 @@ Item {
     property alias maximumValue: spinBox.maximumValue
     property alias stepSize: spinBox.stepSize
     property alias suffix: spinBox.suffix
+    property alias decimals: spinBox.decimals
 
     signal edited()
 

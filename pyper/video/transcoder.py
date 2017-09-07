@@ -19,13 +19,13 @@ import math
 from PyQt5.QtCore import pyqtSlot, QVariant
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperValueError
-from pyper.gui.tabs_interfaces import PlayerInterface, TrackerIface
+from pyper.gui.tabs_interfaces import TrackerIface
 from pyper.tracking.tracking import GuiTracker
 from video_stream import RecordedVideoStream
 
 from progressbar import Percentage, Bar, ProgressBar
 
-# TODO: QML, use set_codec, set_scale
+# TODO: see if can avoid to swap axis multiple times for Transcoder below
 
 
 class TranscoderIface(TrackerIface):
@@ -53,7 +53,7 @@ class TranscoderIface(TrackerIface):
         self.rois = {'restriction': None}
         self.roi_params = {'restriction': None}
 
-        self.scale_params = (1, 1)
+        self.scale_params = [1, 1]
         self.codec = None
 
     @pyqtSlot(str)
@@ -68,7 +68,7 @@ class TranscoderIface(TrackerIface):
 
     @pyqtSlot(float, float)
     def set_scale(self, x_scale, y_scale):  # TODO: QML code needs menu (float from 0.1 to 1)
-        self.scale_params = (x_scale, y_scale)
+        self.scale_params = [x_scale, y_scale]
 
     @pyqtSlot(float)
     def set_x_scale(self, x_scale):
@@ -115,8 +115,7 @@ class TranscoderIface(TrackerIface):
     @pyqtSlot()
     def load(self):
         """
-        Load the video and create the GuiTracker object (or subclass)
-        Also registers the analysis image providers (for the analysis tab) with QT
+        Load the video and create the GuiTranscoder object
         """
         if self.codec is None:
             self.codec = self._infer_codec()
@@ -155,7 +154,8 @@ class TranscoderIface(TrackerIface):
                 self.tracker.set_tracking_region_roi(self.rois['restriction'])
             else:
                 if self.roi_params['restriction'] is not None:
-                    self.tracker.set_tracking_region_roi(self.__get_roi(*self.roi_params['restriction']))
+                    params = self.roi_params['restriction']
+                    self.tracker.set_tracking_region_roi(self._get_roi(*params))
 
 
 class GuiTranscoder(GuiTracker):
@@ -177,16 +177,12 @@ class GuiTranscoder(GuiTracker):
         self.scale_params = np.array(scale_params)  # (scale_x, scale_y), e.g. (0,5, 0.2)
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
-        # DEBUG:
-        print("Output size: {}".format(output_size))
-        print("FPS: {}".format(self._stream.fps))
-        print("Destination: {}".format(dest_file_path))
+
         self.video_writer = cv2.VideoWriter(dest_file_path,
                                             cv.CV_FOURCC(*codec),
                                             float(self._stream.fps),
-                                            output_size,
+                                            output_size[::-1],  # invert size with openCV
                                             True)
-        # print(self.video_writer.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
 
     def _get_crop_params(self):
         if self.tracking_region_roi is not None:
@@ -196,12 +192,12 @@ class GuiTranscoder(GuiTracker):
             scale_x, scale_y = self.scale_params
             cropped_width = top_x + self._scale_crop_param(roi_width, scale_x)
             cropped_height = top_y + self._scale_crop_param(roi_height, scale_y)
-            crop_x = (top_x, cropped_width)
-            crop_y = (top_y, cropped_height)
-            crop_params = (crop_x, crop_y)
-            return crop_params
+            crop_x = (int(top_x), int(cropped_width))
+            crop_y = (int(top_y), int(cropped_height))
+            crop_params = (crop_y, crop_x)  # Flipped because of openCV weirdness
         else:
-            return (0, self._stream.width), (0, self._stream.height)
+            crop_params = (0, self._stream.height), (0, self._stream.width)  # Flipped because of openCV weirdness
+        return crop_params
 
     def _scale_crop_param(self, crop_param, scale_param):
         """
@@ -220,7 +216,7 @@ class GuiTranscoder(GuiTracker):
         cropped_size = np.array((cropped_width, cropped_height))
 
         final_size = cropped_size * self.scale_params
-        final_size = tuple(final_size.astype(np.uint32))[::-1]
+        final_size = tuple(final_size.astype(np.uint32))
         return final_size
 
     def _crop_frame(self, frame):
@@ -239,14 +235,9 @@ class GuiTranscoder(GuiTracker):
         if self._stream.current_frame_idx >= self.track_to:
             raise EOFError("End of tracking reached")
         if self.track_from <= self._stream.current_frame_idx:
-            # frame = self._crop_frame(frame)
-            # frame = self._scale_frame(frame)
-            frame = np.swapaxes(frame, 0, 1)  # Need to flip image because of openCV weird indexing
-            frame = frame.astype(np.uint8)
-            print(frame.shape)
-            self.video_writer.write(frame)
-            print("Frame {} encoded".format(self._stream.current_frame_idx))
-            # self.video_writer.write(np.uint8(np.dstack([frame]*3)))
+            frame = self._crop_frame(frame)
+            frame = self._scale_frame(frame)
+            self.video_writer.write(frame.astype(np.uint8))
         return original_frame
 
     def finalise_recording(self):

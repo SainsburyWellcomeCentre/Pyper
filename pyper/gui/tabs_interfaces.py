@@ -420,12 +420,12 @@ class TrackerIface(BaseInterface):
                 self.tracker.set_roi(self.rois['tracking'])
             else:
                 if self.roi_params['tracking'] is not None:
-                    self.tracker.set_roi(self.__get_roi(*self.roi_params['tracking']))
+                    self.tracker.set_roi(self._get_roi(*self.roi_params['tracking']))
             if self.rois['restriction'] is not None:
                 self.tracker.set_tracking_region_roi(self.rois['restriction'])
             else:
                 if self.roi_params['restriction'] is not None:
-                    self.tracker.set_tracking_region_roi(self.__get_roi(*self.roi_params['restriction']))
+                    self.tracker.set_tracking_region_roi(self._get_roi(*self.roi_params['restriction']))
             if self.rois['measurement'] is not None:
                 self.tracker.set_measure_roi(self.rois['measurement'])
             else:
@@ -495,7 +495,7 @@ class TrackerIface(BaseInterface):
         except KeyError:
             raise NotImplementedError("Unknown ROI type: {}".format(roi_type))
 
-    def __get_roi(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
+    def _get_roi(self, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         scaled_coords = self.__get_scaled_roi_rectangle(source_type, img_width, img_height,
                                                         roi_x, roi_y, roi_width, roi_height)
         if 'rectangle' in source_type.lower():
@@ -527,7 +527,7 @@ class TrackerIface(BaseInterface):
         source_type = str(source_type)
         source_type = self.__qurl_to_str(source_type)
         if self.tracker is not None:
-            roi = self.__get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
+            roi = self._get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
         else:
             self.roi_params[roi_type] = source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height
