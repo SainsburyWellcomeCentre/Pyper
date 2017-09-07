@@ -47,11 +47,11 @@ Rectangle {
                     pressedSource: iconHandler.getPath("play_pressed.png")
                     tooltip: "Start transcoding"
 
-                    onPressed:{ splash.visible = true; }
+//                    onPressed:{ splash.visible = true; }
                     onClicked: { py_transcoder.start() }
                     onReleased:{
                         py_transcoder.load();
-                        splash.visible = false;
+//                        splash.visible = false;
                     }
                 }
                 CustomButton {
@@ -82,11 +82,11 @@ Rectangle {
                     tooltip: "Select the first data frame"
                     value: py_transcoder.get_start_frame_idx()
                     onEdited: {
-                        py_transcoder.set_start_frame_idx(text);
+                        py_transcoder.set_start_frame_idx(value);
                         reload();
                     }
                     onEnabledChanged: reload()
-                    function reload(){ text = py_transcoder.get_start_frame_idx() }
+                    function reload(){ value = py_transcoder.get_start_frame_idx() }
                 }
                 IntInput {
                     width: parent.width
@@ -95,14 +95,57 @@ Rectangle {
                     tooltip: "Select the last data frame"
                     value: py_transcoder.get_end_frame_idx()
                     onEdited: {
-                        py_transcoder.set_end_frame_idx(text);
+                        py_transcoder.set_end_frame_idx(value);
                         reload();
                     }
                     onEnabledChanged: reload()
-                    function reload(){ text = py_transcoder.get_end_frame_idx() }
+                    function reload(){ value = py_transcoder.get_end_frame_idx() }
                 }
             }
         }
+        Frame {
+            height: col.height + 20
+            id: scaleControls
+            function reload(){ col.reload() }
+            CustomColumn {
+                id: col1
+
+                IntInput {
+                    width: parent.width
+                    enabled: parent.enabled
+                    label: "x scale"
+                    tooltip: "Select the Horizontal scaling factor"
+                    stepSize: 0.1
+                    minimumValue: 0.1
+                    maximumValue: 1
+                    value: 1
+                    onEdited: {
+                        py_transcoder.set_x_scale(value);
+                    }
+                }
+                IntInput {
+                    width: parent.width
+                    enabled: parent.enabled
+                    label: "y scale"
+                    tooltip: "Select the Vertical scaling factor"
+                    stepSize: 0.1
+                    minimumValue: 0.1
+                    maximumValue: 1
+                    value: 1
+                    onEdited: {
+                        py_transcoder.set_y_scale(value);
+                    }
+                }
+            }
+        }
+        ComboBox {
+            id: codecSelector
+            anchors.left: parent.left
+            anchors.right: parent.right
+            model: [ "MPG4", "X264", "THEO", "DIVX","XVID", "WMV2", "WMV1" ]
+            onCurrentTextChanged: { py_transcoder.set_codec(currentText); }
+        }
+
         CustomButton {
             id: roiManagerBtn
 
@@ -186,6 +229,8 @@ Rectangle {
                 FileDialog {
                     id: outPathDialog
                     title: "Please select the path to save the video"
+                    selectExisting: false
+//                    selectedNameFilter:
 //                    folder: shortcuts.home
                     onAccepted: {
                         visible = false;
