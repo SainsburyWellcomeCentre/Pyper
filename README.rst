@@ -7,6 +7,25 @@
 Welcome to Pyper's documentation!
 =================================
 
+Version 2.0 is out now
+----------------------
+
+This new version draws on user feedback to implement most of the requested features.
+
+What's new:
+    -  New goodies:
+        - A new *transcoding* tab to fix broken videos, extract parts of and scale the video.
+        - A new ROI system with the ability to select the shape of the ROI, and it's color
+        - New ROI functions: measure video values and spatially restrict tracking.
+        - A new plugin system for tracking methods. Also adds pupil tracking.
+        - Live update of the tracking parameters. If you change the parameters in the GUI they are immediately
+          taken into account.
+        - Tracking visible even when nothing is found. This helps fine tune the parameters.
+    - Behind the scenes:
+        - Refactors python code to PEP8 compliance.
+        - Major refactoring of the GUI code.
+    - Various bug fixes.
+
 
 Introduction
 ------------
@@ -34,7 +53,7 @@ Two classes are also supplied for viewing of the recorded videos or transcoding.
 =======
 Example
 =======
-.. figure:: https://github.com/SainsburyWellcomeCentre/pyper/raw/master/doc/source/exampleCapture.gif
+.. figure:: https://github.com/SainsburyWellcomeCentre/pyper/raw/master/doc/source/example_capture.gif
     :align: center
     :alt: A usage example of the software
     :figwidth: 500
@@ -56,17 +75,30 @@ or alternatively, head to http://pyper.readthedocs.org/en/latest/
 =======
 Authors
 =======
-Charly V Rousseau\ :sup:`1`\ , Antonio Gonzalez\ :sup:`2`\ , Andrew Erskin\ :sup:`3`\ , Christian J Niedworok\ :sup:`1`\ , Troy W Margrie\ :sup:`1`\ .
+Charly V Rousseau\ :sup:`1`\ , Antonio Gonzalez\ :sup:`2`\ , Stephen Lenzi :sup:`1`\ ,
+Andrew Erskin\ :sup:`3`\ , Christian J Niedworok\ :sup:`1`\ , Troy W Margrie\ :sup:`1`\ .
 
 Author information:
     • \ :sup:`1`\ Margrie lab. Sainsbury Wellcome Centre for Neural Circuits and Behaviour, University College London, London, U.K.
     • \ :sup:`2`\ Burdakov lab. Mill Hill Laboratory, The Francis Crick Institute, London, U.K.
     • \ :sup:`3`\ Schaefer lab. Mill Hill Laboratory, The Francis Crick Institute, London, U.K.
 
-The authors would like to thank Edward F Bracey, Nicholas Burczyk, Julia J Harris, Cornelia Schöne and Mateo Vélez-Fort for their useful comments about the interface design and the user instructions.
+The authors would like to thank Edward F Bracey, Nicholas Burczyk, Julia J Harris, Cornelia Schöne and Mateo Vélez-Fort
+for their useful comments about the interface design and the user instructions.
+
+============
+Contributing
+============
+You can contribute in different ways :
+    - Suggesting features
+    - Submitting bug reports
+    - Doing pull requests
 
 =======
 Licence
 =======
-| The software in this repository is licensed under the GNU General Public License, version 2 http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
-| The graphic assets (under resources/icons or resources/images) are distributed under a Creative commons Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0) http://creativecommons.org/licenses/by-sa/4.0/legalcode.
+| The software in this repository is licensed under the GNU General Public License,
+  version 2 http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
+| The graphic assets (under resources/icons or resources/images)
+  are distributed under a Creative commons Attribution-ShareAlike 4.0 International licence (CC BY-SA 4.0)
+  http://creativecommons.org/licenses/by-sa/4.0/legalcode.

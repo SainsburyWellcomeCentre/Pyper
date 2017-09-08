@@ -1,7 +1,8 @@
 =====================
 API (For programmers)
 =====================
-Only public methods and the constructor are documented here
+
+Only public methods and the constructor are documented here.
 
 The core
 --------

@@ -35,10 +35,17 @@ Installation on linux (assuming a debian based distribution)
 ------------------------------------------------------------
 
 .. note::
-    Please note that the GUI will currently not work on the raspberry pi. This is due to a limitation of the video driver supplied by Broadcom. This program uses QtQuick which in turn uses hardware acceleration to minimise the load on the CPU. The current driver does not support this feature. This issue might be solved in the future using EGLFS. Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
+    Please note that the GUI will currently not work on the raspberry pi.
+    This is due to a limitation of the video driver supplied by Broadcom.
+    This program uses QtQuick which in turn uses hardware acceleration to minimise the load on the CPU.
+    The current driver does not support this feature. This issue might be solved in the future using EGLFS.
+    Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
 
 .. important::
-    If you use an Ubuntu distribution, Ubuntu removed the PyQt5 bindings for python 2.7 in 14.04 but reintroduced them afterwards. Please ensure that you use a version for which the *python-pyqt5* is available and not only *python3-pyqt5*. You can check this using:
+    If you use an Ubuntu distribution, Ubuntu removed the PyQt5 bindings for python 2.7 in 14.04
+    but reintroduced them afterwards.
+    Please ensure that you use a version for which the *python-pyqt5* is available and not only *python3-pyqt5*.
+    You can check this using:
 
 .. code-block:: bash
     
@@ -56,22 +63,23 @@ Then download the motion tracking program using:
     
 .. code-block:: bash
     
-    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyper
     
-If you want to use the command line interface, copy the motionTracking.conf file from the src folder
-to your home folder preceded by a dot. Assuming pyperMotionTracking is in your home folder, type the following
+If you want to use the command line interface, copy the pyper.conf file from the pyper folder
+to your home folder preceded by a dot. Assuming pyper is in your home folder, type the following
 command:
 
 .. code-block:: bash
     
-    cp ~/pyperMotionTracking/src/motionTracking.conf ~/.motionTracking.conf
+    cp ~/pyper/config/pyper.conf ~/.pyper.conf
 
 
 The following will install the additional dependencies for the GUI:
 
 .. code-block:: bash
 
-     sudo apt-get install python-pyqt5 python-opengl python-pyqt5.qtopengl python-pyqt5.qtquick qml-module-qtquick-controls
+     sudo apt-get install python-pyqt5 python-opengl python-pyqt5.qtopengl python-pyqt5.qtquick
+     sudo apt-get install qml-module-qtquick-controls
      
      
 Finally, for the raspberry-pi camera:
@@ -94,15 +102,20 @@ Installation instructions by Christian Niedworok.
 
 Installing Homebrew:
 ^^^^^^^^^^^^^^^^^^^^
-Homebrew is a package manager that allows to install a lot of standard open source software on mac that wouldn't be available otherwise. One of them is OpenCV.
+Homebrew is a package manager that allows to install a lot of standard open source software on mac
+ that wouldn't be available otherwise. One of them is OpenCV.
 
 .. important::
     You will need XCode to install Homebrew
     
-If you have the OSX 10.10 you can install Xcode from the app store, otherwise you need to go to https://developer.apple.com/xcode/, sign in with your apple account (you may have to register as a developer to do this) and download an earlier version. The last version that runs on OSX 10.9 is Xcode 6.2.
+If you have the OSX 10.10 you can install Xcode from the app store,
+otherwise you need to go to https://developer.apple.com/xcode/, sign in with your apple account
+(you may have to register as a developer to do this) and download an earlier version.
+The last version that runs on OSX 10.9 is Xcode 6.2.
 
 .. note::
-    After installation of Xcode make sure you start it, since it will finalize the install upon its first launch. Be advised that downloading and installing Xcode can take considerable time (>30 minutes).
+    After installation of Xcode make sure you start it, since it will finalize the install upon its first launch.
+    Be advised that downloading and installing Xcode can take considerable time (>30 minutes).
     
 Then, you can install homebrew.    
 
@@ -110,7 +123,9 @@ Then, you can install homebrew.
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     
-the installer will run and probably tell you it will change some user rights. For example: *“The following directories will be made group writable: /user/local/lib”*. It will also probably ask you to confirm with enter and prompt for your admin password.
+The installer will run and probably tell you it will change some user rights.
+For example: *“The following directories will be made group writable: /user/local/lib”*.
+It will also probably ask you to confirm with enter and prompt for your admin password.
 
 Now we have to make sure homebrew software is visible to the system. Open a new terminal **window**, and in there, type:
 
@@ -131,7 +146,12 @@ if “/usr/local/sbin” is missing, do the same but replace /usr/local/bin by /
 Now open another new terminal window, close the other (old) terminals, run the command in the “important” box below and get ready to install openCV and python.
 
 .. important::
-    Homebrew will potentially install additional versions of software you might already have on your system. This software will be installed to /usr/local/. To prevent these versions from clashing, run the following command whenever you are working on the terminal and want to use homebrew or a software that has been installed using homebrew.This will ensure that - during the currently open terminal session - the homebrew versions have precedence over any other potentially installed versions.
+    Homebrew will potentially install additional versions of software you might already have on your system.
+    This software will be installed to /usr/local/.
+    To prevent these versions from clashing, run the following command whenever you are working on the terminal
+    and want to use homebrew or a software that has been installed using homebrew.
+    This will ensure that - during the currently open terminal session - the homebrew versions have precedence
+    over any other potentially installed versions.
     
 .. code-block:: bash
 
@@ -140,10 +160,12 @@ Now open another new terminal window, close the other (old) terminals, run the c
 Installing openCV with python:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please note that there is a default python on the mac that should not be modified. Unfortunately for us though, it is quite an old version. So we'll install a new one and use/modify that one.
+Please note that there is a default python on the mac that should not be modified.
+Unfortunately for us though, it is quite an old version. So we'll install a new one and use/modify that one.
 
 .. note::
-    Be aware that the installation with homebrew may take some time and will use processor resources as it will need to compile software.
+    Be aware that the installation with homebrew may take some time and will use processor resources
+     as it will need to compile software.
     
 .. code-block:: bash
 
@@ -152,7 +174,8 @@ Please note that there is a default python on the mac that should not be modifie
     brew install python
 
 
-The following will set up python for package downloads and create an alias called brewPython that will run the python you just installed.
+The following will set up python for package downloads and create an alias called brewPython
+ that will run the python you just installed.
 
 .. code-block:: bash
 
@@ -179,7 +202,8 @@ The following will now install python dependencies for the motion tracking softw
 Installing the GUI:
 ^^^^^^^^^^^^^^^^^^^
 
-The Graphical User Interface relies on a graphical library called QT (initially developed by Nokia). To use the GUI, you will need to install this library and its python bindings.
+The Graphical User Interface relies on a graphical library called QT (initially developed by Nokia).
+To use the GUI, you will need to install this library and its python bindings.
 
 .. caution::
     QT5 with homebrew requires OS X Lion or newer
@@ -198,15 +222,15 @@ Finally download the motion tracking program using:
     
 .. code-block:: bash
     
-    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyper
     
-If you want to use the command line interface, copy the motionTracking.conf file from the src folder
-to your home folder preceded by a dot. Assuming pyperMotionTracking is in your home folder, type the following
+If you want to use the command line interface, copy the pyper.conf file from the pyper folder
+to your home folder preceded by a dot. Assuming pyper is in your home folder, type the following
 command:
 
 .. code-block:: bash
     
-    cp ~/pyperMotionTracking/src/motionTracking.conf ~/.motionTracking.conf
+    cp ~/pyper/config/pyper.conf ~/.pyper.conf
     
 At the end if the program doesn't start, try running:
 
@@ -218,7 +242,11 @@ At the end if the program doesn't start, try running:
     
 This should let you know if there are any issues with your homebrew installation.
 It might be that homebrew is asking you to link some libraries. If so follow the instructions on screen.
-Ensure that /usr/loca/lib is writable.
+Ensure that /usr/loca/lib is writeable.
+
+.. code-block:: bash
+
+    ls -l /usr/loca/lib
 
 Installation on Windows
 -----------------------
@@ -245,17 +273,19 @@ The core of the program works fine. You just have to install openCV and link it 
 
 .. code-block:: python
 
-   >> import cv2
-   >> print cv2.__version__
+   >>> import cv2
+   >>> print cv2.__version__
    
 Finally download the motion tracking program using:
     
 .. code-block:: Batch
     
-    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyperMotionTracking
+    git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyper
     
-If you want to use the command line interface, copy the motionTracking.conf file from the src folder
+If you want to use the command line interface, copy the pyper.conf file from the pyper/config folder
 to your home folder preceded by a dot.
    
-The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7 on windows. If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
+The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7
+on windows.
+If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
     
