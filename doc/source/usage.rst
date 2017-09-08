@@ -75,12 +75,19 @@ This tab provides simple analysis and graphing features as well as the ability t
 
 First select the checkbox that corresponds to the tab you want to analyse. Then, click **Update** and you can finaly save your coordinates and plot graphs of distance made by the specimen between frames and change of directions at each frame. To save the graphs, right click on them and a menu will promt you for a destination path.
 
+The *Transcoding* tab
+^^^^^^^^^^^^^^^^^^^^^
+
+This tab allows you to change the file format of your video, extract parts  of it and scale it.
+
 Using the Command Line Interface:
 ---------------------------------
 
-.. automodule:: tracking_cli
+.. automodule:: pyper.cli.tracking_cli
 
 .. only :: isSystem
 
-    .. autoprogram:: tracking_cli:parser
-        :prog: tracking_cli.py
+    .. argparse::
+        :module: pyper.cli.tracking_cli
+        :func: get_parser
+        :prog: tracking_cli

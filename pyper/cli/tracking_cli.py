@@ -23,67 +23,69 @@ def coords(string):
     except:
         raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(string))
 
-# CLI
-config = conf.config
+def get_parser():
+    config = conf.config
 
-parser = argparse.ArgumentParser(prog=sys.argv[0])  # TODO: do parser groups
+    parser = argparse.ArgumentParser(prog=sys.argv[0])  # TODO: do parser groups
 
-parser.add_argument('video_file', type=str, nargs='?', default=conf['tests']['default_video'],
-                    help='Path (relative or absolute) of the video file to process.')
+    parser.add_argument('video_file', type=str, nargs='?', default=config['tests']['default_video'],
+                        help='Path (relative or absolute) of the video file to process.')
 
-parser.add_argument('-b', '--background-time', dest='bg_time', metavar='MM:SS',  # TODO: do frame indexed variant
-                    type=str, help='Time in mm:ss format for the background frame.')
-parser.add_argument('-f', '--track-from', dest='track_from', metavar='MM:SS',  # TODO: do frame indexed variant
-                    type=str, help='Time in mm:ss format for the tracking start.')
-parser.add_argument('-t', '--track-to', dest='track_to', metavar='MM:SS',  # TODO: do frame indexed variant
-                    type=str, help='Time in mm:ss format for the tracking end.')
-parser.add_argument('--n-background-frames', dest='n_background_frames', type=int,
-                    default=config['tracker']['sd_mode']['n_background_frames'],
-                    help='The number of frames to take for the background.'
-                         ' If more than 1, they will be averaged and the SD used to check for movement.'
-                         ' Default: %(default)s.')
-parser.add_argument('--n-SDs', dest='n_sds', type=float, default=config['tracker']['sd_mode']['n_sds'],
-                    help='If the above n-background-frames option is selected,'
-                         ' the number of standard deviations to use as threshold for movement. Default: %(default)s.')
+    parser.add_argument('-b', '--background-time', dest='bg_time', metavar='MM:SS',  # TODO: do frame indexed variant
+                        type=str, help='Time in mm:ss format for the background frame.')
+    parser.add_argument('-f', '--track-from', dest='track_from', metavar='MM:SS',  # TODO: do frame indexed variant
+                        type=str, help='Time in mm:ss format for the tracking start.')
+    parser.add_argument('-t', '--track-to', dest='track_to', metavar='MM:SS',  # TODO: do frame indexed variant
+                        type=str, help='Time in mm:ss format for the tracking end.')
+    parser.add_argument('--n-background-frames', dest='n_background_frames', type=int,
+                        default=config['tracker']['sd_mode']['n_background_frames'],
+                        help='The number of frames to take for the background.'
+                             ' If more than 1, they will be averaged and the SD used to check for movement.'
+                             ' Default: %(default)s.')
+    parser.add_argument('--n-SDs', dest='n_sds', type=float, default=config['tracker']['sd_mode']['n_sds'],
+                        help='If the above n-background-frames option is selected,'
+                             ' the number of standard deviations to use as threshold for movement. Default: %(default)s.')
 
-parser.add_argument('--clear-borders', dest='clear_borders', action='store_true',
-                    default=config['tracker']['clear_borders'],
-                    help='Clear the borders of the mask for the detection. Default: %(default)s.')
-# TODO: add normalise
+    parser.add_argument('--clear-borders', dest='clear_borders', action='store_true',
+                        default=config['tracker']['checkboxes']['clear_borders'],
+                        help='Clear the borders of the mask for the detection. Default: %(default)s.')
+    # TODO: add normalise
 
-parser.add_argument('--threshold', type=int, default=config['tracker']['detection']['threshold'],
-                    help='The brightness level to threshold the image for feature detection. Default: %(default)s.')
-parser.add_argument('--min-area', dest='min_area', type=int, default=config['tracker']['detection']['min_area'],
-                    help='The minimum area of the object in pixels to be considered valid. Default: %(default)s.')
-parser.add_argument('--max-area', dest='max_area', type=int, default=config['tracker']['detection']['max_area'],
-                    help='The maximum area of the object in pixels to be considered valid. Default: %(default)s.')
-parser.add_argument('--teleportation-threshold', dest='teleportation_threshold', type=int,
-                    default=config['tracker']['teleportation_threshold'],
-                    help="The number of pixels in either x or y the mouse shouldn't jump by to be considered valid."
-                         " Default: %(default)s.")
-# parser.add_argument('--n-iter', dest='n_iter', type=int, default=config['tracker']['n_iter'],
-#                     help='The number of iterations for the erosion to remove the tail. Default: %(default)s.')  # FIXME: unused
+    parser.add_argument('--threshold', type=int, default=config['tracker']['detection']['threshold'],
+                        help='The brightness level to threshold the image for feature detection. Default: %(default)s.')
+    parser.add_argument('--min-area', dest='min_area', type=int, default=config['tracker']['detection']['min_area'],
+                        help='The minimum area of the object in pixels to be considered valid. Default: %(default)s.')
+    parser.add_argument('--max-area', dest='max_area', type=int, default=config['tracker']['detection']['max_area'],
+                        help='The maximum area of the object in pixels to be considered valid. Default: %(default)s.')
+    parser.add_argument('--teleportation-threshold', dest='teleportation_threshold', type=int,
+                        default=config['tracker']['detection']['teleportation_threshold'],
+                        help="The number of pixels in either x or y the mouse shouldn't jump by to be considered valid."
+                             " Default: %(default)s.")
+    # parser.add_argument('--n-iter', dest='n_iter', type=int, default=config['tracker']['n_iter'],
+    #                     help='The number of iterations for the erosion to remove the tail. Default: %(default)s.')  # FIXME: unused
 
-parser.add_argument('--filter-size', dest='one_d_kernel', type=int, default=config['analysis']['filter_size'],
-                    help='Size in points of the Gaussian kernel filtered used to smooth the trajectory.'
-                         ' Set to zero to avoid smoothing. Default: %(default)s.')
+    parser.add_argument('--filter-size', dest='one_d_kernel', type=int, default=config['analysis']['filter_size'],
+                        help='Size in points of the Gaussian kernel filtered used to smooth the trajectory.'
+                             ' Set to zero to avoid smoothing. Default: %(default)s.')
 
-parser.add_argument('--roi-center', dest='center', type=coords, nargs=2, default=config['tracker']['roi']['center'],
-                    help='Center (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
-parser.add_argument('--roi-radius', dest='radius', type=int, default=config['tracker']['roi']['radius'],
-                    help='Radius (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
+    parser.add_argument('--roi-center', dest='center', type=coords, nargs=2, default=config['tracker']['roi']['center'],
+                        help='Center (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
+    parser.add_argument('--roi-radius', dest='radius', type=int, default=config['tracker']['roi']['radius'],
+                        help='Radius (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
 
-parser.add_argument('--plot', action='store_true', default=config['figures']['plot'],
-                    help='Whether to display the tracking progress.')
-parser.add_argument('--save-graphics', dest='save_graphs', action='store_true', default=config['figures']['save'],
-                    help='Whether to save the plots.')
-parser.add_argument('--image-file-format', dest='img_file_format', type=str,
-                    choices=config['analysis']['image_format']['options'],
-                    default=config['analysis']['image_format']['default'],
-                    help='The image format to save the figures in.')
-parser.add_argument('--prefix', type=str, help='A prefix to append to the saved figures and data.')
+    parser.add_argument('--plot', action='store_true', default=config['figures']['plot'],
+                        help='Whether to display the tracking progress.')
+    parser.add_argument('--save-graphics', dest='save_graphs', action='store_true', default=config['figures']['save'],
+                        help='Whether to save the plots.')
+    parser.add_argument('--image-file-format', dest='img_file_format', type=str,
+                        choices=config['analysis']['image_format']['options'],
+                        default=config['analysis']['image_format']['default'],
+                        help='The image format to save the figures in.')
+    parser.add_argument('--prefix', type=str, help='A prefix to append to the saved figures and data.')
+    return parser
 
 if __name__ == '__main__':
+    parser = get_parser()
     args = parser.parse_args()
     assert 0 <= args.threshold < 256,\
         "The threshold must be between " \

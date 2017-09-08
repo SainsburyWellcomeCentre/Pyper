@@ -59,7 +59,7 @@ class Viewer(object):
         
         :return int bg_frame: set using the 'b' key
         :return int track_start: set using the 's' key
-        :return int track_end:set using the 'q' key
+        :return int track_end: set using the 'q' key
         """
         is_recording = hasattr(self._stream, 'n_frames')
         if is_recording:

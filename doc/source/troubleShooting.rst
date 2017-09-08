@@ -18,8 +18,7 @@ The detection doesn't give me any result
 The diff is noisy and there is a lot of background
 --------------------------------------------------
     - As the camera will setup/settle at the beginning of the recording and the video format may use compression (filtering) in time, using the very first frame as reference is usually inadvisable, considering using frame >= 5 instead for best results.
-     - If the images are noisy, you can consider using more than n=1 for the number of reference frames. In that case, the frames will be averaged and the signal n*SD above average used for tracking.
-Please consider using high SD numbers in the case where background is detected.
+    - If the images are noisy, you can consider using more than n=1 for the number of reference frames. In that case, the frames will be averaged and the signal n*SD above average used for tracking. Please consider using high SD numbers in the case where background is detected.
 
 
 I performed the tracking but no coordinates appear in the 'Analyse' tab
