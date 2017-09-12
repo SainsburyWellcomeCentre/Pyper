@@ -2,14 +2,14 @@
 Welcome to Pyper's documentation!
 =================================
 
-.. include:: doc/source/v2_changes.rst
+.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/v2_changes.rst
 
-.. include:: doc/source/introduction.rst
+.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/introduction.rst
 
 =======
 Example
 =======
-.. figure:: https://github.com/SainsburyWellcomeCentre/pyper/raw/master/doc/source/example_capture.gif
+.. figure:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/example_capture.gif
     :align: center
     :alt: A usage example of the software
     :figwidth: 500
@@ -41,7 +41,7 @@ Author information:
 The authors would like to thank Edward F Bracey, Nicholas Burczyk, Julia J Harris, Cornelia Schöne and Mateo Vélez-Fort
 for their useful comments about the interface design and the user instructions.
 
-.. include:: doc/source/contributing.rst
+.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/contributing.rst
 
 =======
 Licence

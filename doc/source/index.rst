@@ -4,7 +4,6 @@ Welcome to Pyper's documentation!
 
 .. include:: v2_changes.rst
 
-
 .. include:: introduction.rst
 
 =======
