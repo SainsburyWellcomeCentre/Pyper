@@ -2,9 +2,56 @@
 Welcome to Pyper's documentation!
 =================================
 
-.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/v2_changes.rst
+News : Pyper v2 is here.
+------------------------
 
-.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/introduction.rst
+This new version draws on user feedback to implement most of the requested features.
+
+What's new:
+    -  New goodies:
+        - A new *transcoding* tab to fix broken videos, extract parts of and scale the video.
+        - A new ROI system with the ability to select the shape of the ROI, and it's color
+        - New ROI functions: measure video values and spatially restrict tracking.
+        - A new plugin system for tracking methods. Also adds pupil tracking.
+        - Live update of the tracking parameters. If you change the parameters in the GUI they are immediately
+          taken into account.
+        - Tracking visible even when nothing is found. This helps fine tune the parameters.
+    - Behind the scenes:
+        - Refactors python code to PEP8 compliance.
+        - Major refactoring of the GUI code.
+    - Various bug fixes.
+
+Introduction
+------------
+
+Pyper is designed to track the path of an object of interest in a live feed
+from a camera or a recorded video. This program has been used to track rodents
+in a open field maze as well as the retina of mice. The new version of Pyper
+also allows you to easily customise the image processing to track different
+kind of objects.
+
+The live stream of frames can be generated from a USB or firewire camera
+(webcam) or from the camera (normal or NoIR) of the Raspberry Pi.
+On the Raspberry Pi, a subclass of the standard PiCamera
+object is used to speed-up video acquisition and online processing.
+
+The combination of recording and online position tracking allows the definition
+of complex behavioural experiment as the program can send a TTL pulse to an
+other computer upon detecting the mouse (for example: in a certain region of
+space).
+
+Two other kind or ROIs allow you to measure the video pixel values and process
+(e.g. average) them as well as restrict the region of space where the tracking
+occurs. Finally, the behaviour of the ROIs is extensible through the ROI manager.
+
+The modules can be used interactively from the python interpreter or through
+the provided interfaces.
+This program provides both a command line interface and a graphical user
+interface. For the CLI, the defaults are saved to a user specific preference
+file.
+
+Some basic analysis of the extracted position data is also available.
+Recorded videos can also be transcoded and regions extracted by Pyper.
 
 =======
 Example
@@ -41,7 +88,16 @@ Author information:
 The authors would like to thank Edward F Bracey, Nicholas Burczyk, Julia J Harris, Cornelia Schöne and Mateo Vélez-Fort
 for their useful comments about the interface design and the user instructions.
 
-.. include:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/contributing.rst
+============
+Contributing
+============
+Contributions to Pyper are welcome.
+You can contribute in different ways (with various levels or programing skills required):
+
+- Improving this documentation
+- Suggesting features
+- Submitting bug reports
+- Improving the software directly by doing pull requests
 
 =======
 Licence
