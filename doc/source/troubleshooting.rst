@@ -8,12 +8,10 @@ The buttons are grayed out I can't use them
 
 The detection doesn't give me any result
 ----------------------------------------
-    - Please check that your sample is in the image during the frame range you are tracking
-    - broaden your size restriction and lower your threshold
-    - use the diff option and check what the camera is seeing as the diff.
-    - Select your threshold based on the previous test.
+    - Please check that your sample is in the video during the frame range you are tracking.
+    - Use the diff option and check what the camera is seeing as the diff.
+    - Broaden your size restriction and lower your threshold.
     - See 'The diff is noisy and there is a lot of background' below for further troubleshooting.
-
 
 The diff is noisy and there is a lot of background
 --------------------------------------------------
@@ -25,16 +23,16 @@ The diff is noisy and there is a lot of background
       In that case, the frames will be averaged and the signal n*SD above average used for tracking.
       Please consider using high SD numbers in the case where background is detected.
 
-
 I performed the tracking but no coordinates appear in the 'Analyse' tab
 -----------------------------------------------------------------------
     - Make sure that you select the proper mode (tracking or recording) via the UI tickboxes and select update.
     
 I changed some parameters but the tracking is not affected
 ----------------------------------------------------------
-    - The tracking can only run in a non interactive way.
-      You need to click the stop button and play again after changing parameters (ref, threshold...)
-      except for the type of frame displayed.
+    - Prior to v2.0, the tracking could only run in a non interactive way.
+      This is not the case anymore since v2.0.
+      With versions < 2.0, you need to click the stop button and play again after changing parameters
+      (ref, threshold...) except for the type of frame displayed.
     
 I see two ROIs
 --------------
@@ -47,5 +45,11 @@ Known issues
 ============
 A list/discussion of known issues and planned features of the program can be found at:
 https://github.com/SainsburyWellcomeCentre/Pyper/issues
+
+==============
+Reporting bugs
+==============
+Please go to https://github.com/SainsburyWellcomeCentre/Pyper/issues and create an issue with a description of your
+system setup.
 
     

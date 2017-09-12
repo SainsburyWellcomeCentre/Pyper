@@ -35,10 +35,10 @@ Installation on linux (assuming a debian based distribution)
 ------------------------------------------------------------
 
 .. note::
-    Please note that the GUI will currently not work on the raspberry pi.
-    This is due to a limitation of the video driver supplied by Broadcom.
-    This program uses QtQuick which in turn uses hardware acceleration to minimise the load on the CPU.
-    The current driver does not support this feature. This issue might be solved in the future using EGLFS.
+    The Graphical User Interface relies on a graphical library called QT (initially developed by Nokia).
+    The GUI of Pyper is devlopped using a QT technique called QtQuick which relies on OpenGL.
+    The most recent version of the Raspberry pi video driver should allow for OpenGL accelerated programs
+    to run on the X window system. However, this has not been tested with Pyper yet.
     Also, the new UP project by Aaeon should not have this issue as it uses an Intel GPU.
 
 .. important::
@@ -66,7 +66,7 @@ Then download the motion tracking program using:
     git clone https://github.com/SainsburyWellcomeCentre/Pyper.git pyper
     
 If you want to use the command line interface, copy the pyper.conf file from the pyper folder
-to your home folder preceded by a dot. Assuming pyper is in your home folder, type the following
+to your home folder preceded by a dot. Assuming Pyper is in your home folder, type the following
 command:
 
 .. code-block:: bash
@@ -143,7 +143,8 @@ if “/usr/local/bin” is missing, run the following:
     
 if “/usr/local/sbin” is missing, do the same but replace /usr/local/bin by /usr/local/sbin
 
-Now open another new terminal window, close the other (old) terminals, run the command in the “important” box below and get ready to install openCV and python.
+Now open another new terminal window, close the other (old) terminals,
+run the command in the “important” box below and get ready to install openCV and python.
 
 .. important::
     Homebrew will potentially install additional versions of software you might already have on your system.
@@ -191,7 +192,7 @@ If you want to use this version of python from your standard mac "Applications" 
    brew linkapps python
 
 
-The following will now install python dependencies for the motion tracking software:
+The following will now install python dependencies for Pyper:
 
 .. code-block:: bash
 
@@ -265,7 +266,8 @@ The core of the program works fine. You just have to install openCV and link it 
 
 * Extract the file (automatic) (doesn't have to be Python folder)
 
-* Go to the folder where you extracted OpenCV and find opencv\\build\\python\\<yourversion (e.g. 2.7)>\\<yoursystem (e.g. 64-bit)>\\cv2.pyd
+* Go to the folder where you extracted OpenCV and find
+  opencv\\build\\python\\<yourversion (e.g. 2.7)>\\<yoursystem (e.g. 64-bit)>\\cv2.pyd
 
 * Copy the cv2.pyd file and put it in C:\\<PythonFolder (e.g. Python27)>\\Lib\\site-packages\\
 
@@ -276,7 +278,7 @@ The core of the program works fine. You just have to install openCV and link it 
    >>> import cv2
    >>> print cv2.__version__
    
-Finally download the motion tracking program using:
+Finally download pyper:
     
 .. code-block:: Batch
     
@@ -284,8 +286,10 @@ Finally download the motion tracking program using:
     
 If you want to use the command line interface, copy the pyper.conf file from the pyper/config folder
 to your home folder preceded by a dot.
-   
-The GUI however should work but has not been tested because the python bindings for QT5 are not provided for python 2.7
-on windows.
-If you would like to use the GUI, you will have to compile pyqt5 for python 2.7. This has not been tested here.
+
+.. warning::
+    Although the GUI should work, it has not been tested because the python bindings for QT5
+    are not provided for python < 3 on windows.
+    If you would like to use the GUI, you will have to compile pyqt5 for python 2.7.
+    Although there is no reason to believe this would not work, this has not been tested here.
     
