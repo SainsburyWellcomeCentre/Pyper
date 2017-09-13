@@ -220,9 +220,11 @@ class Tracker(object):
         
         self.camera_calibration = camera_calibration
         
-        self.default_pos = (-1, -1)
+        self.default_pos = (-1, -1)  # FIXME: extract the following lists to a resutls class
         self.positions = []
         self.measures = []
+        self.areas = []  # The area of the tracked object
+
         self.tracking_region_roi = None
         self.measure_roi = None
 
@@ -291,6 +293,7 @@ class Tracker(object):
                 if check_fps: prev_time = self._check_fps(prev_time)
                 frame = self._stream.read()
                 self.measures.append(float('NaN'))
+                self.areas.append(0.)
                 if self.camera_calibration is not None:
                     frame = self.camera_calibration.remap(frame)
                 fid = self._stream.current_frame_idx
@@ -462,6 +465,7 @@ class Tracker(object):
             if self.min_area < area < self.max_area:
                 self.positions[-1] = mouse.centre
                 self.measures[-1] = self.measure_callback(frame)
+                self.areas[-1] = area
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
@@ -672,6 +676,7 @@ class GuiTracker(Tracker):
         try:
             frame = self._stream.read()
             self.measures.append(float('NaN'))
+            self.areas.append(0.)
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
             fid = self._stream.current_frame_idx

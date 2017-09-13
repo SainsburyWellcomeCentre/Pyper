@@ -26,9 +26,10 @@ TableView{
                 mod.append({"frameId": parseInt(result[0]),
                             "x": parseFloat(result[1]),
                             "y": parseFloat(result[2]),
-                            "centerDist": parseFloat(result[3]),
-                            "borderDist": parseFloat(result[4]),
-                            "measure": parseFloat(result[5])}
+                            "area": parseFloat(result[3]),
+                            "centerDist": parseFloat(result[4]),
+                            "borderDist": parseFloat(result[5]),
+                            "measure": parseFloat(result[6])}
                            );
                 idx += 1;
             }
@@ -41,6 +42,7 @@ TableView{
             frameId: 0  // uint
             x: 0.0  // unsigned float
             y: 0.0
+            area: 0.0
             centerDist: -1.0  // signed float
             boderDist: -1.0
             measure: -1.0
@@ -63,6 +65,11 @@ TableView{
     TableViewColumn{
         role: "y"
         title: "Y"
+        width: 60
+    }
+    TableViewColumn{
+        role: "area"
+        title: "Area"
         width: 60
     }
     TableViewColumn{

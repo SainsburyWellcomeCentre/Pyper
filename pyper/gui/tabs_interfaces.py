@@ -330,7 +330,8 @@ class TrackerIface(BaseInterface):
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker (or subclass thereof) object of the tracking module.
     """
-    def __init__(self, app, context, parent, params, display_name, provider_name, analysis_provider_1, analysis_provider_2):
+    def __init__(self, app, context, parent, params, display_name, provider_name,
+                 analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
         
         self.positions = []
@@ -365,6 +366,7 @@ class TrackerIface(BaseInterface):
         if 0 <= idx < len(self.positions):
             row = [idx]
             row.extend(self.positions[idx])
+            row.append(self.tracker.areas[idx])
             row.extend(self.distances_from_arena[idx])
             row.append(self.tracker.measures[idx])
             return map(str, row)
