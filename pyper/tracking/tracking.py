@@ -534,11 +534,11 @@ class Tracker(object):
             return
         last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
         if (last_vector > self.teleportation_threshold).any():
-            silhouette.save('teleportingSilhouette.tif')  # Used for debugging
-            frame.save('teleportingFrame.tif')
+            silhouette.save('teleporting_silhouette.tif')  # Used for debugging
+            frame.save('teleporting_frame.tif')
             err_msg = 'Frame: {}, mouse teleported from {} to {}'\
                 .format(self._stream.current_frame_idx, *self.positions[-2:])
-            err_msg += '\nPlease see teleportingSilhouette.tif and teleportingFrame.tif for debugging'
+            err_msg += '\nPlease see teleporting_silhouette.tif and teleporting_frame.tif for debugging'
             self._stream.stop_recording(err_msg)
             raise EOFError('End of recording reached')
 

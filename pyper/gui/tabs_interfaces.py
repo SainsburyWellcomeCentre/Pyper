@@ -14,8 +14,6 @@ import os
 import csv
 import re
 
-import cv2
-
 import numpy as np
 from scipy.misc import imsave
 from scipy.io import loadmat
@@ -35,6 +33,7 @@ from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
+from pyper.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
@@ -750,11 +749,13 @@ class RecorderIface(TrackerIface):
         """
         Check if a camera is available
         """
-        cap = cv2.VideoCapture(0)
-        detected = False
-        if cap.isOpened():
+        default_cam_idx = 0
+        try:
+            cap = VideoCapture(default_cam_idx)
             detected = True
-        cap.release()
+            cap.release()  # TODO: see if should be in finally block
+        except VideoCaptureOpenError:
+            detected = False
         return detected
 
     def get_img(self):

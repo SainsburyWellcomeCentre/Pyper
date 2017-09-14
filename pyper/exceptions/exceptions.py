@@ -50,3 +50,4 @@ class VideoStreamTypeException(VideoStreamException):
     not specific
     """
     pass
+

@@ -13,7 +13,7 @@ class PupilGuiTracker(GuiTracker):
 
     def _pre_process_frame(self, frame):
         treated_frame = Frame(frame.gray().astype(np.uint8))
-        # if not isPi and not self.fast:
+        # if not IS_PI and not self.fast:
         #     treated_frame = treated_frame.denoise(3).blur(3)
         treated_frame = treated_frame.blur(1)
         return treated_frame
