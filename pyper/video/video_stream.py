@@ -440,7 +440,7 @@ class QuickRecordedVideoStream(RecordedVideoStream):
         self.frames = []
         while True:
             try:
-                stream.read()
+                frame = stream.read()
                 n_frames += 1
                 frame = scipy.misc.imresize(frame, 0.2, interp='bilinear')  # FIXME: parametrise resizing factor
                 self.frames.append(frame)
