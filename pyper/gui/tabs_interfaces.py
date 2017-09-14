@@ -354,6 +354,11 @@ class TrackerIface(BaseInterface):
         self.distances_from_arena = []
         self.output_type = "Raw"
 
+    @pyqtSlot()
+    def prevent_video_update(self):
+        if hasattr(self, 'image_provider'):
+            self.image_provider.reuse_on_next_load = True
+
     @pyqtSlot(QVariant, result=QVariant)
     def get_row(self, idx):
         """
@@ -466,6 +471,7 @@ class TrackerIface(BaseInterface):
         """
         self.timer.stop()
         self.tracker._stream.stop_recording(msg)
+        self.image_provider.reuse_on_next_load = True  # Prevents loading on next resize
 
     def __get_scaling_factors(self, width, height):
         stream_width, stream_height = self.tracker._stream.size  # flipped for openCV

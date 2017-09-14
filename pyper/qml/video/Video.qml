@@ -37,6 +37,10 @@ Item {
         previewImage.reload();
     }
 
+    signal sizeChanged
+    onWidthChanged: { sizeChanged(); }
+    onHeightChanged: { sizeChanged(); }
+
     Column {
         anchors.fill: parent
         spacing: 5
