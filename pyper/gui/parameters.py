@@ -248,7 +248,7 @@ class ParamsIface(QObject):
 
     @pyqtSlot(result=QVariant)
     def is_path_selected(self):
-        return hasattr(self, "src_path")
+        return hasattr(self, "src_path") and self.src_path
 
     @pyqtSlot(result=QVariant)
     def get_path(self):
