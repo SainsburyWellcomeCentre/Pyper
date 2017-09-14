@@ -22,6 +22,7 @@ from pyper.exceptions.exceptions import VideoStreamIOException, PyperValueError
 from pyper.gui.tabs_interfaces import TrackerIface
 from pyper.tracking.tracking import GuiTracker
 from video_stream import RecordedVideoStream
+from pyper.cv_wrappers.video_writer import VideoWriter
 
 from progressbar import Percentage, Bar, ProgressBar
 
@@ -178,11 +179,11 @@ class GuiTranscoder(GuiTracker):
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
 
-        self.video_writer = cv2.VideoWriter(dest_file_path,
-                                            cv.CV_FOURCC(*codec),
-                                            float(self._stream.fps),
-                                            output_size[::-1],  # invert size with openCV
-                                            True)
+        self.video_writer = VideoWriter(dest_file_path,
+                                        cv.CV_FOURCC(*codec),
+                                        float(self._stream.fps),
+                                        output_size[::-1],  # invert size with openCV
+                                        True)
 
     def _get_crop_params(self):
         if self.tracking_region_roi is not None:
@@ -277,11 +278,11 @@ class Transcoder(RecordedVideoStream):
         self.crop_params = np.array(crop_params)
         self.scale_params = np.array(scale_params)
         size = self.get_final_size()
-        self.video_writer = cv2.VideoWriter(dest_file_path,
-                                            cv.CV_FOURCC(*'mp4v'),  # FIXME: Format as argument
-                                            self.fps,
-                                            size[::-1],
-                                            True)
+        self.video_writer = VideoWriter(dest_file_path,
+                                        cv.CV_FOURCC(*'mp4v'),  # FIXME: Format as argument
+                                        self.fps,
+                                        size[::-1],
+                                        True)
 
     def get_final_size(self):
         cropped_width = self.size[0] - sum(self.crop_params[0])

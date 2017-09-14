@@ -37,6 +37,9 @@ class VideoCapture(object):
             self.cam_idx = cam_idx
             self.capture = cv2.VideoCapture(cam_idx)
         else:
+            filename_or_cam = str(filename_or_cam)
+            if "file://" in filename_or_cam:  # Added by QDialog
+                filename_or_cam = filename_or_cam.replace("file://", "")
             try:
                 open(filename_or_cam, 'r')
             except IOError as err:
