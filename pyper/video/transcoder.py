@@ -132,7 +132,7 @@ class TranscoderIface(TrackerIface):
             # error_screen.setProperty('doFlash', True)
             return
         self.stream = self.tracker  # To comply with BaseInterface
-        self.tracker.restriction = self.rois['restriction']
+        # self.tracker.set_tracking_region_roi(self.rois['restriction'])
 
         self.n_frames = self.tracker._stream.n_frames - 1
         self.current_frame_idx = self.tracker._stream.current_frame_idx
@@ -172,18 +172,33 @@ class GuiTranscoder(GuiTracker):
         GuiTracker.__init__(self, ui_iface, src_file_path=src_file_path, dest_file_path=dest_file_path,
                             track_from=transcode_start, track_to=transcode_end,
                             camera_calibration=camera_calibration)
-        codec = [str(c) for c in codec]
-        self.tracking_region_roi = None
-        self.set_tracking_region_roi(roi)
+        self.codec = [str(c) for c in codec]
+        if roi is not None:
+            self.set_tracking_region_roi(roi)
         self.scale_params = np.array(scale_params)  # (scale_x, scale_y), e.g. (0,5, 0.2)
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
 
-        self.video_writer = VideoWriter(dest_file_path,
-                                        cv.CV_FOURCC(*codec),
+        self.dest_file_path = dest_file_path
+
+        self.video_writer = VideoWriter(self.dest_file_path,
+                                        cv.CV_FOURCC(*self.codec),
                                         float(self._stream.fps),
                                         output_size[::-1],  # invert size with openCV
                                         True)
+
+    def _update_video_writer(self):
+        self.crop_params = self._get_crop_params()
+        output_size = self._get_final_size()
+        self.video_writer = VideoWriter(self.dest_file_path,
+                                        cv.CV_FOURCC(*self.codec),
+                                        float(self._stream.fps),
+                                        output_size[::-1],  # invert size with openCV
+                                        True)
+
+    def set_tracking_region_roi(self, roi):
+        self.tracking_region_roi = roi
+        self._update_video_writer()
 
     def _get_crop_params(self):
         if self.tracking_region_roi is not None:
