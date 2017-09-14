@@ -93,8 +93,7 @@ the ignored portion will just be displayed as the source (i.e. *raw*).
 
 .. include:: roi_manager.rst
 
-You can alter the behaviour of the ROIs by overwriting the callback methods
- in a subclass of the GuiTraker class (see API).
+.. include:: customising_tracking.rst
 
 If you cannot detect your sample successfully, please refer to the :doc:`troubleshooting` section.
 
