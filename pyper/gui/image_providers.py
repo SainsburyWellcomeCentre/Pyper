@@ -97,6 +97,8 @@ class CvImageProvider(TrackingImageProvider):
         """
         TrackingImageProvider.__init__(self, requestedImType=requestedImType)
         self._stream = stream
+        self.reuse_on_next_load = False  # reuse the current frame for the next load
+        self.img = None
 
     def getBaseImg(self, size):
         """
@@ -106,17 +108,26 @@ class CvImageProvider(TrackingImageProvider):
         :returns: the output image
         :rtype: QImage
         """
-        if self._stream is not None:
-            img = self._stream.read()
-            if img is not None:
-                img = img.color().copy()
-                size = img.shape[:2]
-            else:                
+        if not self.reuse_on_next_load:
+            if self._stream is not None:
+                img = self._stream.read()
+                if img is not None:
+                    img = img.color().copy()
+                    size = img.shape[:2]
+                else:
+                    img = self.getRndmImg(size)
+                    write_structure_not_found_msg(img, size, self._stream.current_frame_idx)
+            else:
                 img = self.getRndmImg(size)
-                write_structure_not_found_msg(img, size, self._stream.current_frame_idx)
+                img = (img[:, :, :3]).copy()  # For images with transparency channel, take only first 3 channels
+            self.img = img
         else:
-            img = self.getRndmImg(size)
-        img = (img[:, :, :3]).copy()  # For images with transparency channel, take only first 3 channels
+            self.reuse_on_next_load = False
+            if self.img is not None:
+                img = self.img
+                size = img.shape[:2]
+            else:
+                img = self.getRndmImg(size)
         w, h = size
         qimg = QImage(img, h, w, QImage.Format_RGB888)
         return qimg

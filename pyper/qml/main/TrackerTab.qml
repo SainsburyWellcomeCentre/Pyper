@@ -81,6 +81,10 @@ Rectangle {
 
         source: "image://trackerprovider/img"
 
+        onSizeChanged: {
+            py_tracker.prevent_video_update();  // prevents loading next frame on a simple resize
+        }
+
         RoiFactory {
             id: mouseRoi
 
