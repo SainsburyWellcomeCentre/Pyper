@@ -6,6 +6,16 @@ from PyQt5.QtWidgets import QFileDialog
 
 from pyper.gui.tabs_interfaces import TRACKER_CLASSES
 
+try:
+    from pygments import highlight
+    from pygments.lexers import PythonLexer
+    from pygments.formatters import HtmlFormatter
+    from pyper.utilities.utils import strip_html_tags
+
+    PYGMENTS_IMPORTED = True
+except ImportError:
+    PYGMENTS_IMPORTED = False
+
 
 class EditorIface(QObject):
     def __init__(self, app, context, parent):
@@ -56,6 +66,8 @@ class EditorIface(QObject):
 
     @pyqtSlot(str, result=str)
     def export_code_to_plugins(self, code):
+        if PYGMENTS_IMPORTED:
+            code = strip_html_tags(code)
         code_lines = code.split("\n")
         if [l.startswith('class') for l in code_lines].count(True) > 1:  # We don't know how to handle more than one
             return ''
@@ -77,4 +89,11 @@ class EditorIface(QObject):
     def load_plugin_template(self):
         with open(os.path.join(self.plugin_dir, 'template.py'), 'r') as in_file:
             template_code = in_file.read()
+        if PYGMENTS_IMPORTED:
+            template_code = self.highlight_code(template_code)
         return template_code
+
+    @pyqtSlot(str, result=str)
+    def highlight_code(self, code):
+        return highlight(code, PythonLexer(), HtmlFormatter(full=True, style='native'))
+

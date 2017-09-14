@@ -35,12 +35,13 @@ ApplicationWindow {
                 text: qsTr("&Save")
                 shortcut: "Ctrl+S"
                 onTriggered: {
-                    py_editor.save_plugin_code(document.text);
+                    py_editor.save_plugin_code(document.getText(0, document.text.length));
                 }
             }
             MenuItem {
                 text: qsTr("Export")
                 onTriggered: {
+//                    var cls_name = py_editor.export_code_to_plugins(document.getText(0, document.text.length));
                     var cls_name = py_editor.export_code_to_plugins(document.text);
 
                     var menuComponent = Qt.createComponent("AlgorithmMenuItem.qml");
@@ -75,8 +76,13 @@ ApplicationWindow {
         TextArea {
             id: document
             anchors.fill: parent
+            textFormat: Text.RichText
+            wrapMode: TextEdit.Wrap
             text: py_editor.load_plugin_template();
-            textColor: theme.codeTextColor;
+            // FIXME: creates infinite loop
+//            onTextChanged: {
+//                text = py_editor.highlight_code(getText(0, text.length));
+//            }
         }
     }
 }

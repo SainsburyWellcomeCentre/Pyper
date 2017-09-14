@@ -14,7 +14,7 @@ QtObject {
     readonly property color terminalSelection: "steelblue"
     readonly property color terminalSelectedText: "cyan"
 
-    readonly property color codeBackground: "LightGray"
+    readonly property color codeBackground: "#202020"  // Same as code backgound from pygments 'native' template
     readonly property color codeTextColor: "white"
 
     readonly property color spinBoxBackground: 'Gray'
