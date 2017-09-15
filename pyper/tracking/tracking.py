@@ -65,7 +65,7 @@ class Viewer(object):
         if is_recording:
             widgets = ['Video Progress: ', Percentage(), Bar()]
             pbar = ProgressBar(widgets=widgets, maxval=self._stream.n_frames).start()
-        bg_frame = track_start = track_end = None
+        bg_frame, track_start, track_end = [None] * 3
         while True:
             try:
                 frame = self._stream.read()
