@@ -148,6 +148,74 @@ def write_structure_size_incorrect_msg(img, img_size, msg):
     cv2.putText(img, msg, (x, y), font_type, font_size, font_color)
 
 
+class Background(object):
+    def __init__(self, n_sds):
+        self.use_sd = None
+        self.global_avg = None
+        self.n_sds = n_sds
+        self.bg = None
+        self.bg_std = None
+        self.bg_source = None
+
+    def finalise(self):
+        """
+        Finalise the background (average stack and compute SD if more than one image)
+        """
+        if self.bg.ndim > 2:
+            self.get_std()
+            self.flatten()
+        self.global_avg = self.bg.mean()
+
+    def get_std_threshold(self):
+        return self.bg_std * self.n_sds
+
+    def diff(self, frame):
+        return Frame(cv2.absdiff(frame, self.bg))
+
+    def to_mask(self, threshold):
+        bg = self.bg.copy()
+        bg = bg.astype(np.uint8)
+        mask = bg.threshold(threshold)
+        return mask
+
+    def clear(self):
+        self.global_avg = None
+        self.n_sds = 2
+        self.bg = None
+        self.bg_std = None
+        self.bg_source = None
+
+    def flatten(self):
+        self.bg = self.bg.mean(2)
+
+    def get_std(self):
+        self.bg_std = np.std(self.bg, axis=2)
+        self.use_sd = True
+
+    def build(self, frame):
+        if __debug__:
+            print("Building background")
+        bg = frame.denoise().blur().gray()
+        if self.bg_source is None:
+            if self.bg is None:
+                self.bg = bg
+            else:
+                self.bg = Frame(np.dstack((self.bg, bg)))
+        else:
+            self.bg = Frame(self.bg_source.astype(np.float32))
+            self.bg = self.bg.denoise().blur().gray()
+            if self.bg.ndim == 3:
+                self.bg = self.bg.mean(2)
+
+
+class TrackingResults(object):
+    def __init__(self):
+        self.default_pos = (-1, -1)
+        self.positions = []
+        self.measures = []
+        self.areas = []  # The area of the tracked object
+
+
 class Tracker(object):
     """
     A tracker object to track a mouse in a video stream
@@ -189,7 +257,7 @@ class Tracker(object):
         :type callback: `function`
         """
 
-        if callback is not None: self.callback = callback
+        if callback is not None: self.handle_object_in_tracking_roi = callback
         track_range_params = (bg_start, n_background_frames)
         if src_file_path is None:
             if IS_PI:
@@ -213,30 +281,17 @@ class Tracker(object):
         self.fast = fast
         self.extract_arena = extract_arena
         self.infer_location = infer_location
-        
-        self.n_sds = n_sds
-        self.bg = None
-        self.bg_std = None
+
+        self.bg = Background(n_sds)
         
         self.camera_calibration = camera_calibration
-        
-        self.default_pos = (-1, -1)  # FIXME: extract the following lists to a resutls class
-        self.positions = []
-        self.measures = []
-        self.areas = []  # The area of the tracked object
+
+        self.results = TrackingResults()
+
+        self.arena = None
 
         self.tracking_region_roi = None
         self.measure_roi = None
-
-    def measure_callback(self, frame):
-        if self.measure_roi is not None:
-            mask = frame.copy()
-            mask.fill(0)
-            cv2.drawContours(mask, [self.measure_roi.points], 0, 255, cv2.cv.CV_FILLED)
-            values = np.extract(mask, frame)
-            return values.mean()
-        else:
-            return float('NaN')
         
     def _extract_arena(self):
         """
@@ -246,13 +301,12 @@ class Tracker(object):
         :return: arena
         :rtype: Circle
         """
-        bg = self.bg.copy()
-        bg = bg.astype(np.uint8)
-        mask = bg.threshold(self.threshold)
-        cnt = self._get_biggest_contour(mask)
-        arena = Circle(*cv2.minEnclosingCircle(cnt))
-        self.distances_from_arena = []
-        return arena
+        if self.extract_arena:
+            mask = self.bg.to_mask(self.threshold)
+            cnt = self._get_biggest_contour(mask)
+            arena = Circle(*cv2.minEnclosingCircle(cnt))
+            self.distances_from_arena = []
+            self.arena = arena
         
     def _make_bottom_square(self):
         """
@@ -280,7 +334,7 @@ class Tracker(object):
             self._make_bottom_square()
         
         is_recording = type(self._stream) == RecordedVideoStream
-        self.bg = None  # reset for each track
+        self.bg.clear()
         if is_recording:
             widgets = ['Tracking frames: ', Percentage(), Bar()]
             pbar = ProgressBar(widgets=widgets, maxval=self._stream.n_frames).start()
@@ -303,11 +357,12 @@ class Tracker(object):
                 if fid < self._stream.bg_start_frame:
                     continue  # Skip junk frames
                 elif self._stream.is_bg_frame():
-                    self._build_bg(frame)
+                    self.bg.build(frame)
+                    self.arena = self._extract_arena()
                 elif self._stream.bg_end_frame < fid < self.track_from:
                     continue  # Skip junk frames
                 else:  # Tracked frame
-                    if fid == self.track_from: self._finalise_bg()
+                    if fid == self.track_from: self.bg.finalise()
                     contour_found, sil = self._track_frame(frame)
                     self.silhouette = sil.copy()
                     if not contour_found:
@@ -326,10 +381,7 @@ class Tracker(object):
                 
     def _last_pos_is_default(self):
         last_pos = tuple(self.positions[-1])
-        if last_pos == self.default_pos:
-            return True
-        else:
-            return False
+        return last_pos == self.default_pos
 
     def _check_mouse_in_roi(self):
         """
@@ -339,7 +391,7 @@ class Tracker(object):
         if self._last_pos_is_default():
             return
         if self.roi.point_in_roi(self.positions[-1]):
-            self.callback()
+            self.handle_object_in_tracking_roi()
             self.silhouette = self.silhouette.copy()
             
     def _get_distance_from_arena_border(self):
@@ -375,46 +427,46 @@ class Tracker(object):
         self.paint(sil)
         sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.current_frame_idx), curve=self.positions)
 
-    def callback(self):
+    def handle_object_in_tracking_roi(self):
         """
         The method called when the mouse is found in the roi.
         This method is meant to be overwritten in subclasses of Tracker.
         """
         cv2.rectangle(self.silhouette, self.bottom_square[0], self.bottom_square[1], (0, 255, 255), -1)
 
-    def _build_bg(self, frame):
-        """
-        Initialise the background if empty, expand otherwise.
-        Will also initialise the arena roi if the option is selected
-        
-        :param frame: The video frame to use as background or part of the background.
-        :type frame: video_frame.Frame
-        """
-        if __debug__:
-            print("Building background")
-        bg = frame.denoise().blur().gray()
-        if self.bg is None:
-            self.bg = bg
+    def measure_callback(self, frame):
+        if self.measure_roi is not None:
+            mask = frame.copy()
+            mask.fill(0)
+            cv2.drawContours(mask, [self.measure_roi.points], 0, 255, cv2.cv.CV_FILLED)
+            values = np.extract(mask, frame)
+            return values.mean()
         else:
-            self.bg = Frame(np.dstack((self.bg, bg)))
-        if self.extract_arena:
-            self.arena = self._extract_arena()
-                
-    def _finalise_bg(self):
-        """
-        Finalise the background (average stack and compute SD if more than one image)
-        """
-        if self.bg.ndim > 2:
-            self.bg_std = np.std(self.bg, axis=2)
-            self.bg = np.average(self.bg, axis=2)
-        if self.normalise:
-            self.bg_avg_avg = self.bg.mean()  # TODO: rename
+            return float('NaN')
     
     def _pre_process_frame(self, frame):
         treated_frame = frame.gray()
-        if not IS_PI and not self.fast:
+        if not self.fast:
             treated_frame = treated_frame.denoise().blur()
         return treated_frame
+
+    def _get_plot_silhouette(self, requested_output, frame, diff, silhouette):
+        color_is_default = False
+        if self.plot:
+            if requested_output == 'raw':
+                plot_silhouette = (frame.color()).copy()
+            elif requested_output == 'mask':
+                plot_silhouette = silhouette.copy()
+                color_is_default = True
+            elif requested_output == 'diff':
+                plot_silhouette = (diff.color()).copy()
+            else:
+                raise NotImplementedError("Expected one of ('raw', 'mask', 'diff') "
+                                          "for requested_output, got: {}".format(requested_output))
+        else:
+            color_is_default = True
+            plot_silhouette = frame
+        return plot_silhouette, color_is_default
         
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
@@ -439,22 +491,9 @@ class Tracker(object):
             self.positions.append(self.positions[-1])
         else:
             self.positions.append(self.default_pos)
-        if self.plot:
-            if requested_output == 'raw':
-                plot_silhouette = (frame.color()).copy()
-                color = requested_color
-            elif requested_output == 'mask':
-                plot_silhouette = silhouette.copy()
-                color = 'w'
-            elif requested_output == 'diff':
-                plot_silhouette = (diff.color()).copy()
-                color = requested_color
-            else:
-                raise NotImplementedError("Expected one of ('raw', 'mask', 'diff') "
-                                          "for requested_output, got: {}".format(requested_output))
-        else:
-            color = 'w'
-            plot_silhouette = frame
+        plot_silhouette, color_is_default = self._get_plot_silhouette(requested_output, frame, diff, silhouette)
+        color = 'w' if color_is_default else requested_color
+
         contour_found = False
         if biggest_contour is not None:
             area = cv2.contourArea(biggest_contour)
@@ -534,6 +573,9 @@ class Tracker(object):
             return
         last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
         if (last_vector > self.teleportation_threshold).any():
+            # if self.infer_location:
+            #     self.positions[-1] = self.positions[-2]
+            # else:
             silhouette.save('teleporting_silhouette.tif')  # Used for debugging
             frame.save('teleporting_frame.tif')
             err_msg = 'Frame: {}, mouse teleported from {} to {}'\
@@ -586,10 +628,10 @@ class Tracker(object):
         :rtype: video_frame.Frame
         """
         if self.normalise:
-            frame = frame.normalise(self.bg_avg_avg)
-        diff = Frame(cv2.absdiff(frame, self.bg))
-        if self.bg_std is not None:
-            threshold = self.bg_std * self.n_sds
+            frame = frame.normalise(self.bg.global_avg)
+        diff = self.bg.diff(frame)
+        if self.bg.use_sd:
+            threshold = self.bg.get_std_threshold()
             silhouette = diff > threshold
             silhouette = silhouette.astype(np.uint8) * 255
         else:
@@ -631,6 +673,7 @@ class GuiTracker(Tracker):
         self.ui_iface = ui_iface
         self.current_frame_idx = 0
         self.record = dest_file_path is not None
+        self.current_frame = None
     
     def set_roi(self, roi):
         """Set the region of interest and enable it"""
@@ -653,6 +696,7 @@ class GuiTracker(Tracker):
         try:
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
+            self.current_frame = None
         except EOFError:
             self.ui_iface._stop('End of recording reached')
             return
@@ -664,6 +708,7 @@ class GuiTracker(Tracker):
             img, position, distances = result
             self.ui_iface.positions.append(position)
             self.ui_iface.distances_from_arena.append(distances)
+            self.current_frame = img
             return img
         else:
             self.ui_iface.positions.append(self.default_pos)
@@ -686,14 +731,15 @@ class GuiTracker(Tracker):
             if fid < self._stream.bg_start_frame:
                 return frame.color(), self.default_pos, self.default_pos  # Skip junk frames
             elif self._stream.is_bg_frame():
-                self._build_bg(frame)
+                self.bg.build(frame)
+                self.arena = self._extract_arena()
                 if record: self._stream._save(frame)
                 return frame.color(), self.default_pos, self.default_pos
             elif self._stream.bg_end_frame < fid < self.track_from:
                 if record: self._stream._save(frame)
                 return frame.color(), self.default_pos, self.default_pos  # Skip junk frames
             else:  # Tracked frame
-                if fid == self.track_from: self._finalise_bg()
+                if fid == self.track_from: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
                 self.silhouette = sil.copy()
                 if not contour_found:
