@@ -13,18 +13,18 @@ instead of a usb camera by default. It also slightly optimises for speed.
 """
 from __future__ import division
 
-import platform
-
 import numpy as np
-import cv2
+import platform
 from progressbar import *
-
 from time import time
 
+import cv2
+
 from pyper.contours.object_contour import ObjectContour
+from pyper.contours.roi import Circle
+from pyper.tracking.tracking_background import Background
 from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
-from pyper.contours.roi import Circle
 
 IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
@@ -146,66 +146,6 @@ def write_structure_size_incorrect_msg(img, img_size, msg):
     font_size = 0.75  # percent
     font_type = int(2)
     cv2.putText(img, msg, (x, y), font_type, font_size, font_color)
-
-
-class Background(object):
-    def __init__(self, n_sds):
-        self.use_sd = None
-        self.global_avg = None
-        self.n_sds = n_sds
-        self.bg = None
-        self.bg_std = None
-        self.bg_source = None
-
-    def finalise(self):
-        """
-        Finalise the background (average stack and compute SD if more than one image)
-        """
-        if self.bg.ndim > 2:
-            self.get_std()
-            self.flatten()
-        self.global_avg = self.bg.mean()
-
-    def get_std_threshold(self):
-        return self.bg_std * self.n_sds
-
-    def diff(self, frame):
-        return Frame(cv2.absdiff(frame, self.bg))
-
-    def to_mask(self, threshold):
-        bg = self.bg.copy()
-        bg = bg.astype(np.uint8)
-        mask = bg.threshold(threshold)
-        return mask
-
-    def clear(self):
-        self.global_avg = None
-        self.n_sds = 2
-        self.bg = None
-        self.bg_std = None
-        self.bg_source = None
-
-    def flatten(self):
-        self.bg = self.bg.mean(2)
-
-    def get_std(self):
-        self.bg_std = np.std(self.bg, axis=2)
-        self.use_sd = True
-
-    def build(self, frame):
-        if __debug__:
-            print("Building background")
-        bg = frame.denoise().blur().gray()
-        if self.bg_source is None:
-            if self.bg is None:
-                self.bg = bg
-            else:
-                self.bg = Frame(np.dstack((self.bg, bg)))
-        else:
-            self.bg = Frame(self.bg_source.astype(np.float32))
-            self.bg = self.bg.denoise().blur().gray()
-            if self.bg.ndim == 3:
-                self.bg = self.bg.mean(2)
 
 
 class TrackingResults(object):
