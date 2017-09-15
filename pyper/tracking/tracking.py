@@ -217,6 +217,7 @@ class Tracker(object):
         self.n_sds = n_sds
         self.bg = None
         self.bg_std = None
+        self.bg_source = None
         
         self.camera_calibration = camera_calibration
         
@@ -393,13 +394,19 @@ class Tracker(object):
         if __debug__:
             print("Building background")
         bg = frame.denoise().blur().gray()
-        if self.bg is None:
-            self.bg = bg
+        if self.bg_source is None:
+            if self.bg is None:
+                self.bg = bg
+            else:
+                self.bg = Frame(np.dstack((self.bg, bg)))
         else:
-            self.bg = Frame(np.dstack((self.bg, bg)))
+            self.bg = Frame(self.bg_source.astype(np.float32))
+            self.bg = self.bg.denoise().blur().gray()
+            if self.bg.ndim == 3:
+                self.bg = self.bg.mean(2)
         if self.extract_arena:
             self.arena = self._extract_arena()
-                
+
     def _finalise_bg(self):
         """
         Finalise the background (average stack and compute SD if more than one image)
@@ -534,6 +541,9 @@ class Tracker(object):
             return
         last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
         if (last_vector > self.teleportation_threshold).any():
+#            if self.infer_location:
+#                self.positions[-1] = self.positions[-2]
+#            else:
             silhouette.save('teleporting_silhouette.tif')  # Used for debugging
             frame.save('teleporting_frame.tif')
             err_msg = 'Frame: {}, mouse teleported from {} to {}'\

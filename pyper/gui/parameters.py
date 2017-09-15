@@ -1,6 +1,8 @@
 import os
 import sys
 
+from scipy.misc import imread
+
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
 from PyQt5.QtWidgets import QFileDialog
 
@@ -29,6 +31,7 @@ class ParamsIface(QObject):
         self.dest_path = ''
 
         self.calib = None
+        self.ref = None
 
         self._set_defaults()
 
@@ -59,6 +62,11 @@ class ParamsIface(QObject):
         Reset the standard out on destruction
         """
         sys.stdout = sys.__stdout__
+        
+    @pyqtSlot(str)
+    def set_ref_source(self, ref_path):
+        ref_path = ref_path.replace("file://", "")  # TODO: extract
+        self.ref = imread(ref_path)
 
     @pyqtSlot()
     def write_defaults(self):

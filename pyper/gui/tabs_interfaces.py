@@ -414,6 +414,7 @@ class TrackerIface(BaseInterface):
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
             self.tracker.track_from = self.params.start_frame_idx
             self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+            self.tracker.bg_source = self.params.ref
 
             self.tracker.threshold = self.params.detection_threshold
             self.tracker.min_area = self.params.objects_min_area
