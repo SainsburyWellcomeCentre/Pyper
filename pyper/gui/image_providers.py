@@ -19,7 +19,7 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtQuick import QQuickImageProvider
 
-from pyper.tracking.tracking import write_structure_not_found_msg
+from pyper.utilities.utils import write_structure_not_found_msg
 
 
 class TrackingImageProvider(QQuickImageProvider):

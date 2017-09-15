@@ -11,7 +11,8 @@ import csv
 import shutil
 import tempfile
 
-from pyper.tracking.tracking import Viewer, Tracker
+from pyper.tracking.tracking import Tracker
+from pyper.tracking.viewer import Viewer
 from pyper.contours.roi import Circle
 from pyper.analysis.video_analysis import *
 from pyper.config import conf

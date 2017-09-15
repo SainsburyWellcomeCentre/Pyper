@@ -1,6 +1,8 @@
 import sys
 from HTMLParser import HTMLParser
 
+import cv2
+
 
 def spin_progress_bar(val):
     """
@@ -49,3 +51,36 @@ def strip_html_tags(html):
     stripped_text = stripper.strip()
     return stripped_text
 
+
+def write_structure_not_found_msg(img, img_size, frame_idx):
+    """
+    Write an error message on the image supplied as argument. The operation is performed in place
+
+    :param int frame_idx: The frame at which the structure cannot be found
+    :param img: The source image to write onto
+    :param tuple img_size: The size of the source image
+    """
+    line1 = "No contour found at frame: {}".format(frame_idx)
+    line2 = "Please check your parameters"
+    line3 = "And ensure specimen is there"
+    x = int(50)
+    y = int(img_size[0] / 2)
+    y_spacing = 40
+    font_color = (255, 255, 0)  # yellow
+    font_size = 0.75  # percent
+    font_type = int(2)
+    cv2.putText(img, line1, (x, y), font_type, font_size, font_color)
+    y += y_spacing
+    cv2.putText(img, line2, (x, y), font_type, font_size, font_color)
+    y += y_spacing
+    cv2.putText(img, line3, (x, y), font_type, font_size, font_color)
+
+
+def write_structure_size_incorrect_msg(img, img_size, msg):
+    x = int(50)
+    y_spacing = 40
+    y = int(img_size[0] / 2) - y_spacing
+    font_color = (255, 255, 0)  # yellow
+    font_size = 0.75  # percent
+    font_type = int(2)
+    cv2.putText(img, msg, (x, y), font_type, font_size, font_color)
