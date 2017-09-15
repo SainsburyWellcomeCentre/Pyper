@@ -23,13 +23,19 @@ class Roi(object):
     def __init__(self):
         pass
     
-    def point_in_roi(self, point):
+    def contains_point(self, point):
         """
         Returns True if the point is in the ROI
         
         :param tuple point: the (x, y) point to check
         """
         return cv2.pointPolygonTest(self.points, point, False) > 0
+
+    def contains_contour(self, contour):
+        for p in contour:
+            if not self.contains_point(tuple(p[0])):  # at least one point outside self
+                return False
+        return True
         
     def dist_from_border(self, point):
         """
@@ -56,7 +62,7 @@ class Circle(Roi):
     
     >>> roi = Circle((256, 256), 30) # creates a circle of radius 30 at center 256, 256
     >>> mouse_position = (250, 242)
-    >>> if roi.point_in_roi(mouse_position):
+    >>> if roi.contains_point(mouse_position):
     >>>     print('The mouse entered the ROI')
     """
 

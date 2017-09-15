@@ -36,6 +36,44 @@ class TrackingResults(object):
         self.positions = []
         self.measures = []
         self.areas = []  # The area of the tracked object
+        self.distances_from_arena = []  # FIXME: fill
+
+    def get_last_position(self):
+        last_pos = tuple(self.positions[-1])
+        return last_pos
+
+    def last_pos_is_default(self):
+        return self.get_last_position() == self.default_pos
+
+    def repeat_last_position(self):
+        self.positions.append(self.positions[-1])
+
+    def append_default_pos(self):
+        self.positions.append(self.default_pos)
+
+    def overwrite_last_pos(self, position):
+        self.positions[-1] = position
+
+    def overwrite_last_measure(self, measure):
+        self.measures[-1] = measure
+
+    def overwrite_last_area(self, area):
+        self.areas[-1] = area
+
+    def get_last_movement_vector(self):
+        if len(self.positions) < 2:
+            return
+        last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
+        return last_vector
+
+    def get_last_pos_pair(self):
+        return self.positions[-2:]
+
+    def append_default_measure(self):
+        self.measures.append(float('NaN'))
+
+    def append_default_area(self):
+        self.areas.append(0.)
 
 
 class Tracker(object):
@@ -168,8 +206,8 @@ class Tracker(object):
             try:
                 if check_fps: prev_time = self._check_fps(prev_time)
                 frame = self._stream.read()
-                self.measures.append(float('NaN'))
-                self.areas.append(0.)
+                self.results.append_default_measure()
+                self.results.append_default_area()
                 if self.camera_calibration is not None:
                     frame = self.camera_calibration.remap(frame)
                 fid = self._stream.current_frame_idx
@@ -199,35 +237,31 @@ class Tracker(object):
                 if is_recording: pbar.finish()
                 msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
                 self._stream.stop_recording(msg)
-                return self.positions
-                
-    def _last_pos_is_default(self):
-        last_pos = tuple(self.positions[-1])
-        return last_pos == self.default_pos
+                return self.results.positions
 
     def _check_mouse_in_roi(self):
         """
         Checks whether the mouse is within the specified ROI and
         calls the specified callback method if so.
         """
-        if self._last_pos_is_default():
+        if self.results.last_pos_is_default():
             return
-        if self.roi.point_in_roi(self.positions[-1]):
+        if self.roi.contains_point(self.results.get_last_position()):
             self.handle_object_in_tracking_roi()
             self.silhouette = self.silhouette.copy()
             
     def _get_distance_from_arena_border(self):
-        if self._last_pos_is_default():
+        if self.results.last_pos_is_default():
             return
         if self.extract_arena:
-            last_pos = tuple(self.positions[-1])
+            last_pos = self.results.get_last_position()
             return self.arena.dist_from_border(last_pos)
             
     def _get_distance_from_arena_center(self):
-        if self._last_pos_is_default():
+        if self.results.last_pos_is_default():
             return
         if self.extract_arena:
-            last_pos = tuple(self.positions[-1])
+            last_pos = self.results.get_last_position()
             return self.arena.dist_from_center(last_pos)
             
     def paint(self, frame, roi_color='y', arena_color='m'):
@@ -247,7 +281,8 @@ class Tracker(object):
         """
         sil = self.silhouette
         self.paint(sil)
-        sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.current_frame_idx), curve=self.positions)
+        sil.display(win_name='Diff', text='Frame: {}'.format(self._stream.current_frame_idx),
+                    curve=self.results.positions)
 
     def handle_object_in_tracking_roi(self):
         """
@@ -292,7 +327,7 @@ class Tracker(object):
         
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
-        Get the position of the mouse in frame and append to self.positions
+        Get the position of the mouse in frame and append to self.results
         Returns the mask of the current frame with the mouse potentially drawn
         
         :param frame: The video frame to use.
@@ -309,10 +344,10 @@ class Tracker(object):
 
         if IS_PI and self.fast:
             requested_output = 'mask'
-        if self.infer_location and len(self.positions) > 0:
-            self.positions.append(self.positions[-1])
+        if self.infer_location and len(self.results.positions) > 0:
+            self.results.repeat_last_position()
         else:
-            self.positions.append(self.default_pos)
+            self.results.append_default_pos()
         plot_silhouette, color_is_default = self._get_plot_silhouette(requested_output, frame, diff, silhouette)
         color = 'w' if color_is_default else requested_color
 
@@ -324,9 +359,9 @@ class Tracker(object):
                 mouse.draw()  # even if wrong size to held spot issues
                 self._draw_subregion_roi(plot_silhouette)
             if self.min_area < area < self.max_area:
-                self.positions[-1] = mouse.centre
-                self.measures[-1] = self.measure_callback(frame)
-                self.areas[-1] = area
+                self.results.overwrite_last_pos(mouse.centre)  # TODO: group to overwrite_last_result ?
+                self.results.overwrite_last_measure(self.measure_callback(frame))
+                self.results.overwrite_last_area(area)
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
@@ -338,11 +373,6 @@ class Tracker(object):
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
 
-    def _draw_subregion_roi(self, img, color='y'):
-        if self.tracking_region_roi is not None:
-            test_roi = ObjectContour(self.tracking_region_roi.points, img, contour_type='raw', color=color)
-            test_roi.draw()
-
     def _handle_bad_size_contour(self, area, img=None):
         if area > self.max_area:
             msg = 'Biggest structure too big ({} > {})'.format(area, self.max_area)
@@ -351,6 +381,11 @@ class Tracker(object):
         self._fast_print(msg)
         if img is not None:
             write_structure_size_incorrect_msg(img, img.shape[:2], msg)
+
+    def _draw_subregion_roi(self, img, color='y'):
+        if self.tracking_region_roi is not None:
+            test_roi = ObjectContour(self.tracking_region_roi.points, img, contour_type='raw', color=color)
+            test_roi.draw()
 
     def _fast_print(self, in_str):
         """
@@ -383,17 +418,15 @@ class Tracker(object):
         notably the fitting in the past. If so, call self._stream.stopRecording() and raise
         EOFError.
         
-        :param frame: The current frame (to be saved for troubleshooting if teleportation occured)
+        :param frame: The current frame (to be saved for troubleshooting if teleportation occurred)
         :type frame: video_frame.Frame
         :param silhouette: The binary mask of the current frame\
-         (to be saved for troubleshooting if teleportation occured)
+         (to be saved for troubleshooting if teleportation occurred)
         :type silhouette: video_frame.Frame
         
         :raises: EOFError if the mouse teleported
         """
-        if len(self.positions) < 2:
-            return
-        last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
+        last_vector = self.results.get_last_movement_vector()
         if (last_vector > self.teleportation_threshold).any():
             # if self.infer_location:
             #     self.positions[-1] = self.positions[-2]
@@ -401,16 +434,10 @@ class Tracker(object):
             silhouette.save('teleporting_silhouette.tif')  # Used for debugging
             frame.save('teleporting_frame.tif')
             err_msg = 'Frame: {}, mouse teleported from {} to {}'\
-                .format(self._stream.current_frame_idx, *self.positions[-2:])
+                .format(self._stream.current_frame_idx, *self.results.get_last_pos_pair())
             err_msg += '\nPlease see teleporting_silhouette.tif and teleporting_frame.tif for debugging'
             self._stream.stop_recording(err_msg)
             raise EOFError('End of recording reached')
-
-    def __all_contour_points_in_roi(self, contour):
-        for p in contour:
-            if not self.tracking_region_roi.point_in_roi(tuple(p[0])):  # at least one point outside of ROI
-                return False
-        return True
 
     def _get_biggest_contour(self, silhouette):
         """
@@ -432,7 +459,7 @@ class Tracker(object):
             else:
                 for cnt in descending_contours:  # use cv2.contourArea(c)
                     closed_contour = len(cnt) >= 4
-                    if closed_contour and self.__all_contour_points_in_roi(cnt):
+                    if closed_contour and self.tracking_region_roi.contains_contour(cnt):
                         return cnt
                     else:
                         continue
@@ -533,17 +560,17 @@ class GuiTracker(Tracker):
             self.current_frame = img
             return img
         else:
-            self.ui_iface.positions.append(self.default_pos)
-            self.ui_iface.distances_from_arena.append(self.default_pos)
+            self.ui_iface.positions.append(self.results.default_pos)  # FIXME: set in results (all at once and not have ui_iface attribute (pass it results object)
+            self.ui_iface.distances_from_arena.append(self.results.default_pos)  # FIXME: set in results (all at once and not have ui_iface attribute (pass it results object)
     
     def track_frame(self, record=False, requested_output='raw'):
         """
         Reimplementation of Tracker.trackFrame for the GUI
         """
-        try:
+        try:  # FIXME: fix all default_pos calls
             frame = self._stream.read()
-            self.measures.append(float('NaN'))
-            self.areas.append(0.)
+            self.results.append_default_measure()
+            self.results.append_default_area()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
             fid = self._stream.current_frame_idx
