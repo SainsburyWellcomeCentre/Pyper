@@ -5,6 +5,7 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
 import QtGraphicalEffects 1.0
+import QtQuick.Dialogs 1.0
 
 import "../popup_messages"
 import "../basic_types"
@@ -23,7 +24,7 @@ ApplicationWindow {
         id: pyperTopMenuBar
 
         Menu {
-            title: qsTr("File")
+            title: qsTr("&File")
             MenuItem {
                 text: qsTr("&Open")
                 shortcut: "Ctrl+O"
@@ -57,7 +58,7 @@ ApplicationWindow {
         }
         Menu {
             id: trackingAlgorithmMenu
-            title: qsTr("Tracking Method")
+            title: qsTr("&Tracking Method")
             AlgorithmMenuItem { id: algo1; checked:true; text: "Open field"; className: "GuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
             AlgorithmMenuItem { id: algo2; text: "Pupil tracking"; className: "PupilGuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
             MenuSeparator { }
@@ -79,7 +80,19 @@ ApplicationWindow {
             MenuSeparator { }
         }
         Menu {
-            title: qsTr("Help")
+            title: qsTr("&Reference")
+            MenuItem {
+                text: qsTr("Load")
+                onTriggered: { loadRefDialog.visible = true; }
+            }
+            MenuItem {
+                text: qsTr("Save")
+                onTriggered: { saveRefDialog.visible = true; }
+            }
+        }
+
+        Menu {
+            title: qsTr("&Help")
             MenuItem {
                 text: qsTr("Program documentation")
                 onTriggered: {
@@ -87,23 +100,15 @@ ApplicationWindow {
                     helpWindow.visible = true;
                 }
             }
-
             MenuItem {
                 text: qsTr("Help on current tab")
+                shortcut: "Ctrl+h"
                 onTriggered: {
                     var currentTab = tabs.getTab(tabs.currentIndex).title;
                     if (currentTab === "Welcome") {
                         helpWindow.url = "http://pyper.readthedocs.io/en/latest/";
-                    } else if (currentTab === "Preview") {
-                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#preview";
-                    } else if (currentTab === "Track") {
-                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#tracking";
-                    } else if (currentTab === "Record") {
-                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#recording";
-//                    } else if (currentTab === "Calibration") {
-//                    helpWindow.url = "";
-                    } else if (currentTab === "Analyse") {
-                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/gettingStarted.html#analysis";
+                    } else {
+                        helpWindow.url = "http://pyper.readthedocs.io/en/latest/usage.html#the-" + currentTab.toLowerCase() + "-tab";
                     }
                     helpWindow.visible = true;
                 }
@@ -358,6 +363,40 @@ ApplicationWindow {
             selectionColor: theme.terminalSelection
             selectedTextColor: theme.terminalSelectedText
         }
+    }
+    FileDialog {
+        id: loadRefDialog
+        title: "Select reference image"
+
+        selectExisting: true
+
+        nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
+        onAccepted: {
+            py_params_iface.set_ref_source(text);
+            visible = false;  // TODO: see if necessary
+        }
+        onRejected: { }
+    }
+    FileDialog {
+        id: saveRefDialog
+        title: "Select reference image"
+
+        selectExisting: false
+
+        nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
+        function startsWith(str, prefix) {
+            return str.indexOf(prefix, 0) !== -1;
+        }
+        onAccepted: {
+            var currentTabName = tabs.getTab(tabs.currentIndex).title;
+            if (startsWith(currentTabName, "Track")) {
+                py_tracker.save_ref_source(fileUrl);
+            } else if (startsWith(currentTabName, "Record")) {
+                py_recorder.save_ref_source(fileUrl);
+            }
+            visible = false;  // TODO: see if necessary
+        }
+        onRejected: { }
     }
     HelpWindow {
         id: helpWindow

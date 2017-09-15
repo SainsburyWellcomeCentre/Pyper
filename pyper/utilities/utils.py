@@ -49,3 +49,9 @@ def strip_html_tags(html):
     stripped_text = stripper.strip()
     return stripped_text
 
+
+def un_file(file_path):
+    if "file://" in file_path:  # Added by QDialog
+        file_path = file_path.replace("file://", "")
+    return file_path
+

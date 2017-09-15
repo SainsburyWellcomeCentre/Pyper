@@ -1,6 +1,7 @@
 import cv2
 
 from pyper.exceptions.exceptions import PyperError
+from pyper.utilities.utils import un_file
 
 
 class VideoCaptureGrabError(PyperError):
@@ -38,8 +39,7 @@ class VideoCapture(object):
             self.capture = cv2.VideoCapture(cam_idx)
         else:
             filename_or_cam = str(filename_or_cam)
-            if "file://" in filename_or_cam:  # Added by QDialog
-                filename_or_cam = filename_or_cam.replace("file://", "")
+            filename_or_cam = un_file(filename_or_cam)
             try:
                 open(filename_or_cam, 'r')
             except IOError as err:

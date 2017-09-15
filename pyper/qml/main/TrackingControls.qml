@@ -1,6 +1,5 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
-import QtQuick.Dialogs 1.0
 
 import "../basic_types"
 
@@ -49,35 +48,6 @@ Column {
                     root.updateTracker();
                 }
             }
-            Label {
-                id: refPath
-                width: 20
-                text: "..."
-                onTextChanged: {
-                    if (text != "...") {
-                        py_params_iface.set_ref_source(text);
-                    }
-                }
-                MouseArea {
-                    id: behavior
-                    anchors.fill: parent
-                    onClicked: {
-                        fileDialog.visible = true;
-                    }
-                }
-                FileDialog {
-                    id: fileDialog
-                    title: "Select reference image"
-
-                    nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
-                    onAccepted: {
-                        refPath.text = fileDialog.fileUrl;
-                        visible = false;  // TODO: see if necessary
-                    }
-                    onRejected: { }
-                }
-            }
-
             IntInput {
                 id: startFrameInput
                 width: parent.width

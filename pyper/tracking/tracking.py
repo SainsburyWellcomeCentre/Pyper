@@ -641,6 +641,7 @@ class GuiTracker(Tracker):
         self.ui_iface = ui_iface
         self.current_frame_idx = 0
         self.record = dest_file_path is not None
+        self.current_frame = None
     
     def set_roi(self, roi):
         """Set the region of interest and enable it"""
@@ -663,6 +664,7 @@ class GuiTracker(Tracker):
         try:
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
+            self.current_frame = None
         except EOFError:
             self.ui_iface._stop('End of recording reached')
             return
@@ -674,6 +676,7 @@ class GuiTracker(Tracker):
             img, position, distances = result
             self.ui_iface.positions.append(position)
             self.ui_iface.distances_from_arena.append(distances)
+            self.current_frame = img
             return img
         else:
             self.ui_iface.positions.append(self.default_pos)
