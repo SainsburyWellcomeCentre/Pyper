@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
-from pyper.tracking.tracking import GuiTracker
+from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream

@@ -20,7 +20,7 @@ from PyQt5.QtCore import pyqtSlot, QVariant
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperValueError
 from pyper.gui.tabs_interfaces import TrackerIface
-from pyper.tracking.tracking import GuiTracker
+from pyper.gui.gui_tracker import GuiTracker
 from video_stream import RecordedVideoStream
 from pyper.cv_wrappers.video_writer import VideoWriter
 
