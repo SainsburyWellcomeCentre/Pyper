@@ -62,7 +62,7 @@ class VideoStream(object):
         
         self.current_frame_idx = -1  # We start out since we increment upon frame loading
 
-    def _save(self, frame):  # FIXME: fix video_writer calls
+    def save(self, frame):  # FIXME: fix video_writer calls
         """
         Saves the frame supplied as argument to self.video_writer
         
@@ -95,7 +95,7 @@ class VideoStream(object):
     
     def _start_video_capture_session(self, src_path):
         """ Should return a stream of frames to be used by read()
-        and a cv2.VideoWriter object to be used by _save()
+        and a cv2.VideoWriter object to be used by save()
         This is one of the methods that are expected to change the most between 
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
@@ -111,7 +111,7 @@ class VideoStream(object):
     
     def record_current_frame_to_disk(self):
         """ Saves current frame to video file (self.dest) """
-        self._save(self.read())
+        self.save(self.read())
         
     def stop_recording(self, msg):
         """
