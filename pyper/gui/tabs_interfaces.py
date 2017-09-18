@@ -10,14 +10,14 @@ It essentially implements a class for each graphical interface tab.
 :author: crousse
 """
 
-import os
-import csv
-import re
-
-import numpy as np
-from scipy.misc import imsave
-from scipy.io import loadmat
 import matplotlib
+import numpy as np
+import os
+import re
+from scipy.io import loadmat
+from scipy.misc import imsave
+
+from pyper.utilities.utils import qurl_to_str
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
@@ -332,8 +332,6 @@ class TrackerIface(BaseInterface):
     def __init__(self, app, context, parent, params, display_name, provider_name,
                  analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
-        
-        self.positions = []
 
         self.tracker = None
 
@@ -351,7 +349,6 @@ class TrackerIface(BaseInterface):
         self.graph_data = None
 
         self.current_frame_idx = 0
-        self.distances_from_arena = []
         self.output_type = "Raw"
 
     @pyqtSlot()
@@ -360,20 +357,15 @@ class TrackerIface(BaseInterface):
             self.image_provider.reuse_on_next_load = True
 
     @pyqtSlot(QVariant, result=QVariant)
-    def get_row(self, idx):
+    def get_row(self, idx):  # TODO: see id idx could be declared as int
         """
-        Get the data (position and distancesFromArena) at row idx
+        Get the data (position ... from the TrackingResults object) at row idx
         
         :param int idx: The index of the row to return
         """
         idx = int(idx)
-        if 0 <= idx < len(self.positions):
-            row = [idx]
-            row.extend(self.positions[idx])
-            row.append(self.tracker.areas[idx])
-            row.extend(self.distances_from_arena[idx])
-            row.append(self.tracker.measures[idx])
-            return map(str, row)
+        if 0 <= idx < len(self.tracker.results):
+            return map(str, self.tracker.results.get_row(idx))
         else:
             return -1
 
@@ -409,7 +401,7 @@ class TrackerIface(BaseInterface):
     @pyqtSlot()
     def set_tracker_params(self):
         if self.tracker is not None:
-            self.tracker._stream.bg_start_frame = self.params.bg_frame_idx  # FIXME: params attributes case
+            self.tracker._stream.bg_start_frame = self.params.bg_frame_idx
             n_background_frames = self.params.n_bg_frames
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
             self.tracker.track_from = self.params.start_frame_idx
@@ -443,8 +435,7 @@ class TrackerIface(BaseInterface):
                     self.tracker.set_measure_roi(self.__get_roi_from_points(*self.roi_params['measurement']))
 
     def _reset_measures(self):
-        self.positions = []  # reset between runs
-        self.distances_from_arena = []
+        self.tracker.results.reset()   # reset between runs
 
     @pyqtSlot()
     def start(self):
@@ -493,11 +484,6 @@ class TrackerIface(BaseInterface):
         scaled_height = roi_height * vertical_scaling_factor
         return scaled_x, scaled_y, scaled_width, scaled_height
 
-    def __qurl_to_str(self, url):  # FIXME: extract to helper module
-        url = url.replace("PyQt5.QtCore.QUrl(u", "")
-        url = url.strip(")\\'")
-        return url
-
     def __assign_roi(self, roi_type, roi):
         try:
             self.rois[roi_type] = roi
@@ -536,7 +522,7 @@ class TrackerIface(BaseInterface):
         """
 
         source_type = str(source_type)
-        source_type = self.__qurl_to_str(source_type)
+        source_type = qurl_to_str(source_type)
         if self.tracker is not None:
             roi = self._get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
             self.__assign_roi(roi_type, roi)
@@ -569,7 +555,7 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def save(self, default_dest):
         """
-        Save the data (positions and distancesFromArena) as a csv style file
+        Save the data (positions and other measures, see tracker.results attributes) as a csv style file
         """
         diag = QFileDialog()
         if default_dest:
@@ -583,7 +569,7 @@ class TrackerIface(BaseInterface):
                                          initialFilter="Text (*.csv)")
         dest_path = dest_path[0]
         if dest_path:
-            self.write(dest_path)
+            self.tracker.results.to_csv(dest_path)
 
     @pyqtSlot(result=bool)
     def load_graph_data(self):
@@ -616,15 +602,6 @@ class TrackerIface(BaseInterface):
         else:
             return False
         # FIXME: add resampling to fit video length
-    
-    def write(self, dest):
-        """
-        The method called by save() to write the csv file
-        """
-        with open(dest, 'w') as outFile:
-            writer = csv.writer(outFile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            for fid, row in enumerate(self.positions):
-                writer.writerow([fid]+list(row))
 
     @pyqtSlot(QVariant)
     def set_frame_type(self, output_type):
@@ -642,7 +619,7 @@ class TrackerIface(BaseInterface):
         """
         if self.tracker is not None:
             fig, ax = plt.subplots()
-            angles = video_analysis.get_angles(self.positions)
+            angles = video_analysis.get_angles(self.tracker.results.positions)
             video_analysis.plot_angles(angles, self.get_sampling_freq())
             self.analysis_image_provider._fig = fig
 
@@ -653,7 +630,7 @@ class TrackerIface(BaseInterface):
         """
         if self.tracker is not None:
             fig, ax = plt.subplots()
-            distances = video_analysis.pos_to_distances(self.positions)
+            distances = video_analysis.pos_to_distances(self.tracker.results.positions)
             video_analysis.plot_distances(distances, self.get_sampling_freq())
             self.analysisImageProvider2._fig = fig
 
