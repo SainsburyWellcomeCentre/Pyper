@@ -31,8 +31,9 @@ class EditorIface(QObject):
 
         self.src_path = None
 
-        self.plugin_dir = os.getenv('HOME')  # FIXME:
-        self.plugins = TRACKER_CLASSES  # FIXME: see if can improve
+        self.plugin_dir = os.path.abspath("config/plugins/")  # FIXME: improve (currently dependant on start folder)
+        self.plugins = TRACKER_CLASSES
+        # FIXME: for file found in self.plugins_dir -> extract class -> self.plugins[class_name] = class
 
     @pyqtSlot(result=str)
     def open_plugin_code(self):
