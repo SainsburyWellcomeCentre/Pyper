@@ -2,6 +2,7 @@ import sys
 from HTMLParser import HTMLParser
 
 import cv2
+import time
 
 
 def spin_progress_bar(val):
@@ -84,3 +85,25 @@ def write_structure_size_incorrect_msg(img, img_size, msg):
     font_size = 0.75  # percent
     font_type = int(2)
     cv2.putText(img, msg, (x, y), font_type, font_size, font_color)
+
+
+def qurl_to_str(url):  # FIXME: extract to helper module
+    url = url.replace("PyQt5.QtCore.QUrl(u", "")
+    url = url.strip(")\\'")
+    return url
+
+
+def check_fps(prev_time):
+    """
+    Prints the number of frames per second
+    using the time elapsed since prevTime.
+
+    :param prev_time:
+    :type prev_time: time object
+    :returns: The new time
+    :rtype: time object
+    """
+    fps = 1 / (time.time() - prev_time)
+    print("{} fps".format(fps))
+    return time.time()
+
