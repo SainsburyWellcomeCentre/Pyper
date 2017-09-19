@@ -372,7 +372,7 @@ ApplicationWindow {
 
         nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
         onAccepted: {
-            py_params_iface.set_ref_source(text);
+            py_iface.set_ref_source(fileUrl);
             visible = false;  // TODO: see if necessary
         }
         onRejected: { }
