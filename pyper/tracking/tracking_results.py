@@ -115,3 +115,8 @@ class TrackingResults(object):
         if distances[0] is not None:
             self.overwrite_last_dist_from_arena(distances)
 
+    def has_non_default_position(self):
+        if len(self) == 0:
+            return
+        return (np.array(self.positions) != self.default_pos).any()
+

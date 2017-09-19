@@ -388,7 +388,7 @@ class Tracker(object):
         if not self.fast:
             print(in_str)
         
-    def _check_teleportation(self, frame, silhouette):  # FIXME: add check that one non default position exists
+    def _check_teleportation(self, frame, silhouette):
         """
         Check if the mouse moved too much, which would indicate an issue with the tracking
         notably the fitting in the past. If so, call self._stream.stopRecording() and raise
@@ -402,6 +402,8 @@ class Tracker(object):
         
         :raises: EOFError if the mouse teleported
         """
+        if not self.results.has_non_default_position():  # No tracking yet
+            return
         last_vector = self.results.get_last_movement_vector()
         if (last_vector > self.teleportation_threshold).any():
             # if self.infer_location:
@@ -413,7 +415,7 @@ class Tracker(object):
                 .format(self._stream.current_frame_idx, *self.results.get_last_pos_pair())
             err_msg += 'Please see teleporting_silhouette.tif and teleporting_frame.tif for debugging'
             self._stream.stop_recording(err_msg)
-            raise EOFError('End of recording reached')
+            raise EOFError('Teleportation')
 
     def _get_biggest_contour(self, silhouette):
         """
