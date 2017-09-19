@@ -78,7 +78,7 @@ class EditorIface(QObject):
         else:
             return ''
 
-    def code_to_plugin(self, class_name, code):  # FIXME: add SyntaxError except or similar
+    def code_to_plugin(self, class_name, code):
         plugin = imp.new_module(class_name)
         try:
             exec code in plugin.__dict__
@@ -88,7 +88,7 @@ class EditorIface(QObject):
         cls = getattr(plugin, class_name)
         sys.modules[class_name.lower()] = plugin
         exec("from {} import {} as cls".format(class_name.lower(), class_name))
-        self.plugins[class_name] = cls  # FIXME: need to pass np ?
+        self.plugins[class_name] = cls
 
     @pyqtSlot()
     def scrape_plugins_dir(self):
