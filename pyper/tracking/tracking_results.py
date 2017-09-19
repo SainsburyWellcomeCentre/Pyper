@@ -107,3 +107,11 @@ class TrackingResults(object):
 
     def repeat_last_distance_from_arena(self):
         self.distances_from_arena.append(self.distances_from_arena[-1])
+
+    def update(self, position, area, measure, distances):
+        self.overwrite_last_pos(position)
+        self.overwrite_last_measure(measure)
+        self.overwrite_last_area(area)
+        if distances[0] is not None:
+            self.overwrite_last_dist_from_arena(distances)
+

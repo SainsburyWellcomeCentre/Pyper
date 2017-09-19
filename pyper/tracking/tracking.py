@@ -103,12 +103,10 @@ class Tracker(object):
 
         self.results = TrackingResults()
 
-        self.arena = None
-
         self.silhouette = None
-
         self.current_frame_idx = 0
 
+        self.arena = None
         self.roi = None
         self.tracking_region_roi = None
         self.measure_roi = None
@@ -137,7 +135,6 @@ class Tracker(object):
             mask = self.bg.to_mask(self.threshold)
             cnt = self._get_biggest_contour(mask)
             arena = Circle(*cv2.minEnclosingCircle(cnt))
-            self.distances_from_arena = []
             self.arena = arena
         
     def _make_bottom_square(self):  # FIXME: extract
@@ -195,7 +192,7 @@ class Tracker(object):
             except EOFError:
                 return self.results.positions
 
-    def track_frame(self, pbar=None, record=False, requested_output='raw'):
+    def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to if record: self._stream.save(frame)
         try:
             frame = self._stream.read()
             self._set_default_results()
@@ -249,8 +246,8 @@ class Tracker(object):
         :returns: silhouette
         :rtype: binary mask or None
         """
-        treated_frame = self._pre_process_frame(frame)
-        silhouette, diff = self._get_silhouette(treated_frame)
+        processed_frame = self._pre_process_frame(frame)
+        silhouette, diff = self._get_silhouette(processed_frame)
         biggest_contour = self._get_biggest_contour(silhouette)
 
         if IS_PI and self.fast:
@@ -266,12 +263,8 @@ class Tracker(object):
                 mouse.draw()  # even if wrong size to held spot issues
                 self._draw_subregion_roi(plot_silhouette)
             if self.min_area < area < self.max_area:
-                self.results.overwrite_last_pos(mouse.centre)  # TODO:: group to overwrite_last_result ?
-                self.results.overwrite_last_measure(self.measure_callback(frame))
-                self.results.overwrite_last_area(area)
-                if self.extract_arena:
-                    distances = (self._get_distance_from_arena_center(), self._get_distance_from_arena_border())
-                    self.results.overwrite_last_dist_from_arena(distances)
+                distances = (self._get_distance_from_arena_center(), self._get_distance_from_arena_border())
+                self.results.update(mouse.centre, area, self.measure_callback(frame), distances)
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
@@ -339,7 +332,7 @@ class Tracker(object):
 
     def measure_callback(self, frame):
         if self.measure_roi is not None:
-            mask = frame.copy()
+            mask = frame.copy()  # TODO: extract to roi.to_mask
             mask.fill(0)
             cv2.drawContours(mask, [self.measure_roi.points], 0, 255, cv2.cv.CV_FILLED)
             values = np.extract(mask, frame)
@@ -395,7 +388,7 @@ class Tracker(object):
         if not self.fast:
             print(in_str)
         
-    def _check_teleportation(self, frame, silhouette):  # FIXME: add check that one non defautl position exists
+    def _check_teleportation(self, frame, silhouette):  # FIXME: add check that one non default position exists
         """
         Check if the mouse moved too much, which would indicate an issue with the tracking
         notably the fitting in the past. If so, call self._stream.stopRecording() and raise
