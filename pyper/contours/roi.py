@@ -52,6 +52,13 @@ class Roi(object):
         :param tuple point: the (x, y) point to check
         """
         return norm(self.center, point)
+
+    def to_mask(self, frame):
+        mask = frame.copy()  # TODO: extract to roi.to_mask
+        mask.fill(0)
+        cv2.drawContours(mask, [self.points], 0, 255, cv2.cv.CV_FILLED)
+        return mask
+
         
 
 class Circle(Roi):

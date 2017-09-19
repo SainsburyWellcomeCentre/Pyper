@@ -137,7 +137,7 @@ class Tracker(object):
             arena = Circle(*cv2.minEnclosingCircle(cnt))
             self.arena = arena
         
-    def _make_bottom_square(self):  # FIXME: extract
+    def _make_bottom_square(self):  # TODO: extract
         """
         Creates a set of diagonally opposed points to use as the corners
         of the square displayed by the default callback method.
@@ -192,7 +192,7 @@ class Tracker(object):
             except EOFError:
                 return self.results.positions
 
-    def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to if record: self._stream.save(frame)
+    def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
             self._set_default_results()
@@ -332,9 +332,7 @@ class Tracker(object):
 
     def measure_callback(self, frame):
         if self.measure_roi is not None:
-            mask = frame.copy()  # TODO: extract to roi.to_mask
-            mask.fill(0)
-            cv2.drawContours(mask, [self.measure_roi.points], 0, 255, cv2.cv.CV_FILLED)
+            mask = self.measure_roi.to_mask(frame)
             values = np.extract(mask, frame)
             return values.mean()
         else:
