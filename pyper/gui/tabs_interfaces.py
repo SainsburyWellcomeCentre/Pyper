@@ -19,6 +19,8 @@ from scipy.misc import imsave
 
 from pyper.utilities.utils import qurl_to_str
 
+from pyper.utilities.utils import un_file
+
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
 
@@ -369,6 +371,12 @@ class TrackerIface(BaseInterface):
         else:
             return -1
 
+    @pyqtSlot(str)
+    def save_ref_source(self, dest_path):
+        if self.stream.current_frame is not None:
+            dest_path = un_file(dest_path)
+            imsave(dest_path, self.stream.current_frame)
+
     @pyqtSlot()
     def load(self):
         """
@@ -406,6 +414,7 @@ class TrackerIface(BaseInterface):
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
             self.tracker.track_from = self.params.start_frame_idx
             self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+            self.tracker.bg_source = self.params.ref
 
             self.tracker.threshold = self.params.detection_threshold
             self.tracker.min_area = self.params.objects_min_area

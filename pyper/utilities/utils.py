@@ -107,3 +107,8 @@ def check_fps(prev_time):
     print("{} fps".format(fps))
     return time.time()
 
+def un_file(file_path):
+    if "file://" in file_path:  # Added by QDialog
+        file_path = file_path.replace("file://", "")
+    return file_path
+

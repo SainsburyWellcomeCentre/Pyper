@@ -1,11 +1,14 @@
 import os
 import sys
+from scipy.misc import imread
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
 from PyQt5.QtWidgets import QFileDialog
 
 from pyper.gui.tabs_interfaces import TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
 from pyper.config import conf
+from pyper.utilities.utils import un_file
+
 config = conf.config
 
 
@@ -30,6 +33,8 @@ class ParamsIface(QObject):
 
         self.calib = None
         self.tracker_class = TRACKER_CLASSES["GuiTracker"]
+
+        self.ref = None
 
         self._set_defaults()
 
@@ -60,6 +65,11 @@ class ParamsIface(QObject):
         Reset the standard out on destruction
         """
         sys.stdout = sys.__stdout__
+        
+    @pyqtSlot(str)
+    def set_ref_source(self, ref_path):
+        ref_path = un_file(ref_path)
+        self.ref = imread(ref_path)
 
     @pyqtSlot()
     def write_defaults(self):

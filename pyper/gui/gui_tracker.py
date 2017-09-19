@@ -33,7 +33,6 @@ class GuiTracker(Tracker):
                          callback=callback)
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
-        self.current_frame = None
 
     def read(self):
         """

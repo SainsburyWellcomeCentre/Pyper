@@ -13,11 +13,11 @@ instead of a usb camera by default. It also slightly optimises for speed.
 """
 from __future__ import division
 
-import numpy as np
 import platform
 from progressbar import *
 from time import time
 
+import numpy as np
 import cv2
 
 from pyper.contours.object_contour import ObjectContour
@@ -105,6 +105,7 @@ class Tracker(object):
 
         self.silhouette = None
         self.current_frame_idx = 0
+        self.current_frame = None
 
         self.arena = None
         self.roi = None
@@ -169,6 +170,7 @@ class Tracker(object):
         :param roi: optional roi e.g. Circle((250, 350), 25)
         :type roi: roi sub-class
         :param bool check_fps: Whether to print the current frame per second processing speed
+        :param bool record: Whether to save the frames being processed
         :param bool reset: whether to reset the recording (restart the background and arena ...).\
         If this parameter is False, the recording will continue from the previous frame.
         
@@ -195,6 +197,7 @@ class Tracker(object):
     def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
+            self.current_frame = frame.copy()
             self._set_default_results()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
