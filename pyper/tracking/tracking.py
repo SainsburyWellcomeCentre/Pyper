@@ -664,7 +664,6 @@ class GuiTracker(Tracker):
         try:
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
-            self.current_frame = None
         except EOFError:
             self.ui_iface._stop('End of recording reached')
             return
@@ -676,7 +675,6 @@ class GuiTracker(Tracker):
             img, position, distances = result
             self.ui_iface.positions.append(position)
             self.ui_iface.distances_from_arena.append(distances)
-            self.current_frame = img
             return img
         else:
             self.ui_iface.positions.append(self.default_pos)
@@ -688,6 +686,7 @@ class GuiTracker(Tracker):
         """
         try:
             frame = self._stream.read()
+            self.current_frame = frame.copy()
             self.measures.append(float('NaN'))
             self.areas.append(0.)
             if self.camera_calibration is not None:
