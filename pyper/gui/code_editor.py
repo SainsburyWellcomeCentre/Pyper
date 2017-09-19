@@ -1,6 +1,7 @@
 import imp
 import os
 
+import sys
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
@@ -33,7 +34,7 @@ class EditorIface(QObject):
 
         self.plugin_dir = os.path.abspath("config/plugins/")  # FIXME: improve (currently dependant on start folder)
         self.plugins = TRACKER_CLASSES
-        # FIXME: for file found in self.plugins_dir -> extract class -> self.plugins[class_name] = class
+        # self.scrape_plugins_dir()
 
     @pyqtSlot(result=str)
     def open_plugin_code(self):
@@ -65,10 +66,7 @@ class EditorIface(QObject):
             with open(dest_path, 'w') as out_file:
                 out_file.write(src_code)
 
-    @pyqtSlot(str, result=str)
-    def export_code_to_plugins(self, code):
-        if PYGMENTS_IMPORTED:
-            code = strip_html_tags(code)
+    def get_class_name(self, code):
         code_lines = code.split("\n")
         if [l.startswith('class') for l in code_lines].count(True) > 1:  # We don't know how to handle more than one
             return ''
@@ -76,15 +74,56 @@ class EditorIface(QObject):
             if l.startswith('class'):
                 class_name = l.split(' ')[1]
                 class_name = class_name.split('(')[0].strip()
-                break
+                return class_name
         else:
             return ''
 
+    def code_to_plugin(self, class_name, code):  # FIXME: add SyntaxError except or similar
         plugin = imp.new_module(class_name)
-        exec code in plugin.__dict__
+        try:
+            exec code in plugin.__dict__
+        except SyntaxError as err:
+            print("Could not load plugin {}, because of syntax error\n\t{}".format(class_name, err))
+            raise SyntaxError  # TODO: specific exception
         cls = getattr(plugin, class_name)
-        self.plugins[class_name] = cls
-        return class_name
+        sys.modules[class_name.lower()] = plugin
+        exec("from {} import {} as cls".format(class_name.lower(), class_name))
+        self.plugins[class_name] = cls  # FIXME: need to pass np ?
+
+    @pyqtSlot()
+    def scrape_plugins_dir(self):
+        for fname in os.listdir(self.plugin_dir):
+            if not fname.endswith('.py'):
+                continue
+            if fname in ("__init__.py", "template.py"):
+                continue
+            file_path = os.path.join(self.plugin_dir, fname)
+            with open(file_path, 'r') as module_file:
+                code = module_file.read()
+            class_name = self.get_class_name(code)
+            if not class_name:
+                continue
+            else:
+                try:
+                    self.code_to_plugin(class_name, code)
+                except SyntaxError:
+                    continue
+                algo_menu = self.win.findChild(QObject, "trackingAlgorithmMenu")
+                algo_menu.setProperty("lastAddedEndtry", class_name)
+
+    @pyqtSlot(str, result=str)
+    def export_code_to_plugins(self, code):
+        if PYGMENTS_IMPORTED:
+            code = strip_html_tags(code)
+        class_name = self.get_class_name(code)
+        if not class_name:
+            return ''
+        else:
+            try:
+                self.code_to_plugin(class_name, code)
+            except SyntaxError:
+                return ''
+            return class_name
 
     @pyqtSlot(result=str)
     def load_plugin_template(self):

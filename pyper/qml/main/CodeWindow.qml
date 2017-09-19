@@ -41,9 +41,7 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("Export")
                 onTriggered: {
-//                    var cls_name = py_editor.export_code_to_plugins(document.getText(0, document.text.length));
                     var cls_name = py_editor.export_code_to_plugins(document.text);
-
                     var menuComponent = Qt.createComponent("AlgorithmMenuItem.qml");
                     if(menuComponent.status === Component.Ready) {
                         menuComponent.className = cls_name;
@@ -53,7 +51,7 @@ ApplicationWindow {
                         menuItem.text = cls_name;
                         menuItem.exclusiveGroup = algorithmsExclusiveGroup;
                         menuItem.checked = true;
-                        algorithmsMenu.insertItem(5, menuItem);
+                        algorithmsMenu.insertItem(algorithmsMenu.items.length, menuItem);
                     } else {
                         console.log("Tracking menu item error, status:", menuComponent.status, menuComponent.errorString());
                     }

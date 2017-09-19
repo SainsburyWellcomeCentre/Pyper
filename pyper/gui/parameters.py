@@ -29,6 +29,7 @@ class ParamsIface(QObject):
         self.dest_path = ''
 
         self.calib = None
+        self.tracker_class = TRACKER_CLASSES["GuiTracker"]
 
         self._set_defaults()
 
@@ -70,8 +71,7 @@ class ParamsIface(QObject):
     @pyqtSlot(str)
     def set_tracker_type(self, tracker_type):
         try:
-            tracker_class = TRACKER_CLASSES[tracker_type]
-            globals()["Tracker"] = tracker_class
+            self.tracker_class = TRACKER_CLASSES[tracker_type]
         except KeyError:
             print("Type must be one of {}, got: {}".format(TRACKER_CLASSES.keys(), tracker_type))
 

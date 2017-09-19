@@ -376,10 +376,10 @@ class TrackerIface(BaseInterface):
         Also registers the analysis image providers (for the analysis tab) with QT
         """
         try:
-            self.tracker = Tracker(self, src_file_path=self.params.src_path, dest_file_path=None,
-                                   n_background_frames=1, plot=True,
-                                   fast=True, camera_calibration=self.params.calib,
-                                   callback=None)
+            self.tracker = self.params.tracker_class(self, src_file_path=self.params.src_path, dest_file_path=None,
+                                                     n_background_frames=1, plot=True,
+                                                     fast=True, camera_calibration=self.params.calib,
+                                                     callback=None)
         except VideoStreamIOException:
             self.tracker = None
             error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
@@ -703,15 +703,15 @@ class RecorderIface(TrackerIface):
         normalise = self.params.normalise
         extract_arena = self.params.extract_arena
 
-        self.tracker = Tracker(self, src_file_path=None, dest_file_path=self.params.dest_path,
-                               threshold=threshold, min_area=min_area, max_area=max_area,
-                               teleportation_threshold=teleportation_threshold,
-                               bg_start=bg_start, track_from=track_from, track_to=track_to,
-                               n_background_frames=n_background_frames, n_sds=n_sds,
-                               clear_borders=clear_borders, normalise=normalise,
-                               plot=True, fast=True, extract_arena=extract_arena,
-                               camera_calibration=self.params.calib,
-                               callback=None)
+        self.tracker = self.params.tracker_class(self, src_file_path=None, dest_file_path=self.params.dest_path,
+                                                 threshold=threshold, min_area=min_area, max_area=max_area,
+                                                 teleportation_threshold=teleportation_threshold,
+                                                 bg_start=bg_start, track_from=track_from, track_to=track_to,
+                                                 n_background_frames=n_background_frames, n_sds=n_sds,
+                                                 clear_borders=clear_borders, normalise=normalise,
+                                                 plot=True, fast=True, extract_arena=extract_arena,
+                                                 camera_calibration=self.params.calib,
+                                                 callback=None)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
         self._update_img_provider()

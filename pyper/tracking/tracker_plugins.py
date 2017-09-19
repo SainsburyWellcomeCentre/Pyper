@@ -33,12 +33,12 @@ class PupilGuiTracker(GuiTracker):
             PupilGuiTracker.WHITE_FRAME = np.full(frame.shape, 255, dtype=np.uint8)
 
         if self.normalise:
-            frame = frame.normalise(self.bg_avg_avg)
+            frame = frame.normalise(self.bg.global_avg)
         # diff = Frame(cv2.absdiff(frame, self.bg))
         diff = Frame(PupilGuiTracker.WHITE_FRAME - frame)  # Negative
 
-        if self.bg_std is not None:
-            threshold = self.bg_std * self.n_sds
+        if self.bg.use_sd:
+            threshold = self.bg.get_std_threshold()
             silhouette = diff > threshold
             silhouette = silhouette.astype(np.uint8) * 255
         else:

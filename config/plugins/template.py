@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyper.video.video_frame import Frame
-from pyper.tracking.tracking import GuiTracker
+from pyper.gui.gui_tracker import GuiTracker
 
 
 class TemplateTracker(GuiTracker):

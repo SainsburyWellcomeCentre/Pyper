@@ -57,9 +57,36 @@ ApplicationWindow {
         }
         Menu {
             id: trackingAlgorithmMenu
+            objectName: "trackingAlgorithmMenu"
             title: qsTr("Tracking Method")
+            onPopupVisibleChanged: {
+                py_editor.scrape_plugins_dir();
+            }
+
+            property string lastAddedEndtry
+            onLastAddedEndtryChanged: {
+                var menuComponent = Qt.createComponent("AlgorithmMenuItem.qml");
+                if(menuComponent.status === Component.Ready) {
+                    if (lastAddedEndtry == "") {  // skip missing
+                        return
+                    } // skip if already exists
+                    menuComponent.className = lastAddedEndtry;
+                    var menuItem = menuComponent.createObject(main);
+                    menuItem.className = lastAddedEndtry;
+                    menuItem.text = lastAddedEndtry;
+                    menuItem.exclusiveGroup = trackingAlgorithmExclusiveGroup;
+                    menuItem.checked = false;
+                    menuItem.pythonObject = py_iface;
+                    insertItem(3, menuItem);
+                } else {
+                    console.log("Tracking menu item error, status:", menuComponent.status, menuComponent.errorString());
+                }
+
+            }
+
             AlgorithmMenuItem { id: algo1; checked:true; text: "Open field"; className: "GuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
             AlgorithmMenuItem { id: algo2; text: "Pupil tracking"; className: "PupilGuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
+            MenuSeparator { }  // For plugins
             MenuSeparator { }
             MenuItem {
                 text: qsTr("Add custom")
