@@ -41,8 +41,11 @@ class TrackingResults(object):
         return self.get_last_position(), self.get_last_dist_from_arena_pair()
 
     def get_last_position(self):
-        last_pos = tuple(self.positions[-1])
-        return last_pos
+        if len(self) > 0:
+            last_pos = tuple(self.positions[-1])
+            return last_pos
+        else:
+            return None  # TODO: see if prefer exception
 
     def last_pos_is_default(self):
         return self.get_last_position() == self.default_pos
@@ -98,6 +101,8 @@ class TrackingResults(object):
             self.repeat_last_measure()
             self.repeat_last_area()
             self.repeat_last_distance_from_arena()
+        else:
+            self.append_defaults()
 
     def repeat_last_measure(self):
         self.measures.append(self.measures[-1])
