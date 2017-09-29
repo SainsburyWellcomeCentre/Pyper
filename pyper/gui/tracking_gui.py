@@ -13,9 +13,9 @@ Creates the graphical interface
 import os
 import sys
 
-from pyper.video.transcoder import TranscoderIface
-
 sys.path.append(os.path.abspath("./"))  # FIXME: to be done by setup.py
+
+from pyper.video.transcoder import TranscoderIface
 
 from OpenGL import GL # Hack necessary to get qtQuick working
 
