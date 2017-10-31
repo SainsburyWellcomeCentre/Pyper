@@ -16,6 +16,17 @@ ApplicationWindow {
     property variant algorithmsMenu
     property variant pythonObject
 
+    onVisibleChanged: {
+        if (visible) {
+            if (py_editor.load_plugin_template().search("PreprocFile") === -1) {
+                document.textFormat = Text.PlainText;
+                document.text = py_editor.load_plugin_template();
+            }
+        }
+    }
+
+
+
     menuBar: MenuBar {
         Menu {
             title: qsTr("File")
