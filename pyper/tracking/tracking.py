@@ -359,12 +359,12 @@ class Tracker(object):
         color_is_default = False
         if self.plot:
             if requested_output == 'raw':
-                plot_silhouette = (frame.color()).copy()
+                plot_silhouette = frame.color()
             elif requested_output == 'mask':
-                plot_silhouette = silhouette.copy()
+                plot_silhouette = silhouette
                 color_is_default = True
             elif requested_output == 'diff':
-                plot_silhouette = (diff.color()).copy()
+                plot_silhouette = diff.color()
             else:
                 raise NotImplementedError("Expected one of ('raw', 'mask', 'diff') "
                                           "for requested_output, got: {}".format(requested_output))
