@@ -103,9 +103,9 @@ class Tracker(object):
 
         self.results = TrackingResults()
 
-        self.silhouette = None
         self.current_frame_idx = 0
-        self.current_frame = None
+        self.current_frame = None  # Give shape np.empty_like()
+        self.silhouette = None  # np.empty_like()
 
         self.arena = None
         self.roi = None
@@ -197,7 +197,10 @@ class Tracker(object):
     def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
-            self.current_frame = frame.copy()  # OPTIMISE:
+            if self.current_frame_idx == 0:
+                self.current_frame = frame.copy()
+            else:
+                self.current_frame[:] = frame  # OPTIMISE:
             self._set_default_results()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
@@ -205,7 +208,7 @@ class Tracker(object):
             if self.is_after_frame(fid):
                 raise EOFError("End of tracking reached")
 
-            result_frame = frame.color()
+            result_frame = None
             if self.is_before_frame(fid):
                 pass
             elif self._stream.is_bg_frame():
@@ -217,7 +220,10 @@ class Tracker(object):
             else:  # Tracked frame
                 if fid == self.track_from: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
-                self.silhouette = sil.copy()  # OPTIMISE:
+                if self.silhouette is None:  # First tracked frame
+                    self.silhouette = sil.copy()
+                else:
+                    self.silhouette[:] = sil  # OPTIMISE:
                 if not contour_found:
                     if record: self._stream.save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
@@ -227,6 +233,8 @@ class Tracker(object):
                     if record: self._stream.save(self.silhouette)
                 result_frame = self.silhouette
             if pbar is not None: pbar.update(self._stream.current_frame_idx)
+            if result_frame is None:
+                result_frame = frame.color()
             return result_frame, self.results.get_last_position(), self.results.get_last_dist_from_arena_pair()
         except VideoStreamFrameException as e:
             print('Error with video_stream at frame {}: \n{}'.format(fid, e))
@@ -342,7 +350,7 @@ class Tracker(object):
             return float('NaN')
     
     def _pre_process_frame(self, frame):
-        treated_frame = frame.gray()
+        treated_frame = frame.gray()  # OPTIMISE:
         if not self.fast:
             treated_frame = treated_frame.denoise().blur()
         return treated_frame
