@@ -4,12 +4,13 @@ import numpy as np
 
 class TrackingResults(object):
     def __init__(self):
-        self.positions = []
+        self.positions = []  # TODO: see if use array for efficiency in has_non_default_position
         self.measures = []
         self.areas = []  # The area of the tracked object
         self.distances_from_arena = []
 
         self.default_pos = (-1, -1)
+        self.only_defaults = True
         self.default_measure = float('NaN')
         self.default_area = 0.
         self.default_distance_from_arena = (float('NaN'), float('NaN'))
@@ -55,6 +56,8 @@ class TrackingResults(object):
 
     def overwrite_last_pos(self, position):
         self.positions[-1] = position
+        if position != self.default_pos:
+            self.only_defaults = False
 
     def overwrite_last_measure(self, measure):
         self.measures[-1] = measure
@@ -68,7 +71,7 @@ class TrackingResults(object):
     def get_last_movement_vector(self):
         if len(self.positions) < 2:
             return
-        last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))
+        last_vector = np.abs(np.array(self.positions[-1]) - np.array(self.positions[-2]))  # OPTIMISE:
         return last_vector
 
     def get_last_pos_pair(self):
@@ -121,7 +124,5 @@ class TrackingResults(object):
             self.overwrite_last_dist_from_arena(distances)
 
     def has_non_default_position(self):
-        if len(self) == 0:
-            return
-        return (np.array(self.positions) != self.default_pos).any()
+        return not self.only_defaults
 
