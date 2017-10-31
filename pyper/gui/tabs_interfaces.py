@@ -444,7 +444,8 @@ class TrackerIface(BaseInterface):
                     self.tracker.set_measure_roi(self.__get_roi_from_points(*self.roi_params['measurement']))
 
     def _reset_measures(self):
-        self.tracker.results.reset()   # reset between runs
+        if self.tracker is not None:
+            self.tracker.results.reset()   # reset between runs
 
     @pyqtSlot()
     def start(self):
