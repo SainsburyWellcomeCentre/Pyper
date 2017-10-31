@@ -66,7 +66,7 @@ class Frame(np.ndarray):
         """
         return Frame(cv2.medianBlur(self.copy(), kernel_size))
         
-    def gray(self):
+    def gray(self):  # OPTIMISE:
         """
         Converts a frame to grayscale
         
@@ -80,7 +80,7 @@ class Frame(np.ndarray):
                                       "This type is not supported yet")
         return Frame(cv2.cvtColor(self.copy(), cv2.COLOR_BGR2GRAY))
         
-    def color(self):
+    def color(self):  # OPTIMISE:
         """
         Converts a frame to a 3*8bits color frame
         
@@ -163,12 +163,12 @@ class Frame(np.ndarray):
         """
         misc.imsave(path, self)
         
-    def paint(self, text='', curve=(), text_color=(255, 255, 255), curve_color=(0, 255, 0)):
+    def paint(self, text='', curve=(), text_color=(255, 255, 255), curve_color=(0, 255, 0)):  # OPTIMISE:
         if text:
             text_origin = (5, 30)
             cv2.putText(self, text, text_origin, 2, 1, text_color)
         if len(curve) > 1:
-            curve = np.int32([curve])
+            curve = np.int32([curve])  # OPTIMISE: probably slow function could be already in TrackingResults
             cv2.polylines(self, curve, 0, curve_color)
         
     def display(self, win_name='', text='', curve=(), delay=1, get_code=False):

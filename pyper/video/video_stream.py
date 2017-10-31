@@ -196,7 +196,7 @@ class RecordedVideoStream(VideoStream):
         else:
             return n_frames
     
-    def read(self):
+    def read(self):  # OPTIMISE: (cast)
         """
         Returns the next frame after updating the count
         

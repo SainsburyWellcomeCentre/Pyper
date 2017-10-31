@@ -197,7 +197,7 @@ class Tracker(object):
     def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
-            self.current_frame = frame.copy()
+            self.current_frame = frame.copy()  # OPTIMISE:
             self._set_default_results()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
@@ -217,7 +217,7 @@ class Tracker(object):
             else:  # Tracked frame
                 if fid == self.track_from: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
-                self.silhouette = sil.copy()
+                self.silhouette = sil.copy()  # OPTIMISE:
                 if not contour_found:
                     if record: self._stream.save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
@@ -289,7 +289,7 @@ class Tracker(object):
                 return
             if self.roi.contains_point(self.results.get_last_position()):
                 self.handle_object_in_tracking_roi()
-                self.silhouette = self.silhouette.copy()
+                self.silhouette = self.silhouette.copy()  # OPTIMISE:
             
     def _get_distance_from_arena_border(self):  # FIXME: merge and move
         if self.results.last_pos_is_default():
@@ -347,7 +347,7 @@ class Tracker(object):
             treated_frame = treated_frame.denoise().blur()
         return treated_frame
 
-    def _get_plot_silhouette(self, requested_output, frame, diff, silhouette):
+    def _get_plot_silhouette(self, requested_output, frame, diff, silhouette):  # OPTIMISE:
         color_is_default = False
         if self.plot:
             if requested_output == 'raw':
@@ -463,7 +463,7 @@ class Tracker(object):
             silhouette = diff > threshold
             silhouette = silhouette.astype(np.uint8) * 255
         else:
-            diff = diff.astype(np.uint8)
+            diff = diff.astype(np.uint8)  # OPTIMISE
             silhouette = diff.threshold(self.threshold)
         if self.clear_borders:
             silhouette.clear_borders()
