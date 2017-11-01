@@ -66,7 +66,7 @@ class Frame(np.ndarray):
         """
         return Frame(cv2.medianBlur(self.copy(), kernel_size))
         
-    def gray(self):  # OPTIMISE:
+    def gray(self, in_place=False):
         """
         Converts a frame to grayscale
         
@@ -78,9 +78,13 @@ class Frame(np.ndarray):
         elif self.ndim == 3 and self.shape[2] == 1:
             raise NotImplementedError("Image is color but has only one channel."
                                       "This type is not supported yet")
-        return Frame(cv2.cvtColor(self.copy(), cv2.COLOR_BGR2GRAY))
+        else:
+            if in_place:
+                return Frame(cv2.cvtColor(self, cv2.COLOR_BGR2GRAY))
+            else:
+                return Frame(cv2.cvtColor(self.copy(), cv2.COLOR_BGR2GRAY))
         
-    def color(self):  # OPTIMISE:
+    def color(self, in_place=False):
         """
         Converts a frame to a 3*8bits color frame
         
@@ -88,9 +92,17 @@ class Frame(np.ndarray):
         :rtype: video_frame.Frame
         """
         if self.ndim == 3 and self.shape[2] in (3, 4):  # Already color
-            return Frame(self.copy().astype(np.uint8))
+            if in_place:
+                result = self
+            else:
+                result = self.copy()
+            if result.dtype != np.uint8:
+                return Frame(result.astype(np.uint8))
+            else:
+                return Frame(result)
 #        return Frame(np.dstack([self.gray().astype(np.uint8)]*3))
-        return Frame(self.gray())
+        else:
+            return Frame(self.gray(in_place))
         
     def threshold(self, threshold): #  TODO: autothreshold
         """
@@ -167,8 +179,10 @@ class Frame(np.ndarray):
         if text:
             text_origin = (5, 30)
             cv2.putText(self, text, text_origin, 2, 1, text_color)
-        if len(curve) > 1:
-            curve = np.int32([curve])  # OPTIMISE: probably slow function could be already in TrackingResults
+        if len(curve) > 1 or isinstance(curve, np.ndarray):  # REFACTOR: clean up
+            # OPTIMISE: probably slow function could be already in TrackingResults
+            if not isinstance(curve, np.ndarray):
+                curve = np.int32([curve])
             cv2.polylines(self, curve, 0, curve_color)
         
     def display(self, win_name='', text='', curve=(), delay=1, get_code=False):
