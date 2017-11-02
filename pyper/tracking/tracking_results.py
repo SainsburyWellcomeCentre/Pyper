@@ -21,6 +21,15 @@ class TrackingResults(object):
         self.areas = []  # The area of the tracked object
         self.distances_from_arena = []
 
+    def trim_positions(self):  # OPTIMISE:
+        # pos = np.int32(self.positions)
+        # pos = pos[pos != self.default_pos]
+        return [p for p in self.positions if p != self.default_pos]
+
+    def plot_positions(self):
+        pos = self.trim_positions()  # FIXME: put trimming as option
+        return np.int32([pos])
+
     def __len__(self):
         return len(self.positions)
 
