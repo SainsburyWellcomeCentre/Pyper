@@ -24,6 +24,7 @@ from pyper.contours.object_contour import ObjectContour
 from pyper.contours.roi import Circle
 from pyper.tracking.tracking_background import Background
 from pyper.tracking.tracking_results import TrackingResults
+from pyper.utilities import utils
 from pyper.utilities.utils import write_structure_not_found_msg, write_structure_size_incorrect_msg
 from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
@@ -200,7 +201,7 @@ class Tracker(object):
             if self.current_frame_idx == 0:
                 self.current_frame = frame.copy()
             else:
-                self.current_frame[:] = frame  # OPTIMISE:
+                self.current_frame[::] = frame  # FIXME: check dimensions
             self._set_default_results()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
@@ -208,7 +209,7 @@ class Tracker(object):
             if self.is_after_frame(fid):
                 raise EOFError("End of tracking reached")
 
-            result_frame = None
+            result_frame = frame  # image_provider colorises and copies
             if self.is_before_frame(fid):
                 pass
             elif self._stream.is_bg_frame():
@@ -223,7 +224,7 @@ class Tracker(object):
                 if self.silhouette is None:  # First tracked frame
                     self.silhouette = sil.copy()
                 else:
-                    self.silhouette[:] = sil  # OPTIMISE:
+                    self.silhouette[::] = sil  # FIXME: check dimensions
                 if not contour_found:
                     if record: self._stream.save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
@@ -233,8 +234,6 @@ class Tracker(object):
                     if record: self._stream.save(self.silhouette)
                 result_frame = self.silhouette
             if pbar is not None: pbar.update(self._stream.current_frame_idx)
-            if result_frame is None:
-                result_frame = frame.color()
             return result_frame, self.results.get_last_position(), self.results.get_last_dist_from_arena_pair()
         except VideoStreamFrameException as e:
             print('Error with video_stream at frame {}: \n{}'.format(fid, e))
@@ -350,7 +349,7 @@ class Tracker(object):
             return float('NaN')
     
     def _pre_process_frame(self, frame):
-        treated_frame = frame.gray()  # OPTIMISE:
+        treated_frame = frame.gray(self.fast)   # TODO: check if we should separate setting
         if not self.fast:
             treated_frame = treated_frame.denoise().blur()
         return treated_frame
@@ -359,12 +358,12 @@ class Tracker(object):
         color_is_default = False
         if self.plot:
             if requested_output == 'raw':
-                plot_silhouette = frame.color()
+                plot_silhouette = frame.color(in_place=True)
             elif requested_output == 'mask':
                 plot_silhouette = silhouette
                 color_is_default = True
             elif requested_output == 'diff':
-                plot_silhouette = diff.color()
+                plot_silhouette = diff.color(in_place=True)
             else:
                 raise NotImplementedError("Expected one of ('raw', 'mask', 'diff') "
                                           "for requested_output, got: {}".format(requested_output))
