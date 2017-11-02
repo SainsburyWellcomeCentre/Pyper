@@ -111,8 +111,11 @@ class CvImageProvider(TrackingImageProvider):
         if not self.reuse_on_next_load:
             if self._stream is not None:
                 img = self._stream.read()
-                if img is not None:
-                    img = img.color().copy()
+                if img is not None and self._stream.should_update_vid():
+                    img = img.color()
+                    size = img.shape[:2]
+                elif self.img is not None:
+                    img = self.img
                     size = img.shape[:2]
                 else:
                     img = self.getRndmImg(size)

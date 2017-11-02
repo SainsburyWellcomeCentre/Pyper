@@ -1,5 +1,5 @@
 import cv2
-
+import numpy as np
 from pyper.tracking.tracking import Tracker
 
 
@@ -33,6 +33,8 @@ class GuiTracker(Tracker):
                          callback=callback)
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
+        self.plt_curve = None
+        self.curve_update_period = 5  # FIXME: add to config, default to 1
 
     def read(self):
         """
@@ -56,6 +58,15 @@ class GuiTracker(Tracker):
             self.current_frame = img
             return img
 
-    def _plot(self):
+    def _plot(self):  # FIXME: document that not for each frame
         self.paint(self.silhouette, 'c')
-        self.silhouette.paint(curve=self.results.positions)
+        if self.plt_curve is None or self.is_update_frame() or (not self.fast):  # do only every x pnts in fast mode
+            self.plt_curve = self.results.plot_positions()
+        self.silhouette.paint(curve=self.plt_curve)
+
+    def is_update_frame(self):
+        return self.current_frame_idx % self.curve_update_period == 0
+
+    def should_update_vid(self):  # FIXME: document that not for each frame, + put as fast_fast
+        return self.is_update_frame() or (not self.fast)
+
