@@ -195,13 +195,21 @@ class Tracker(object):
             except EOFError:
                 return self.results.positions
 
+    def update_img(self, dest_img, src_img):
+        if dest_img is None or dest_img.ndim != src_img.ndim:
+            dest_img = src_img.copy()
+        if src_img.ndim == 2:
+            dest_img[:] = src_img
+        elif src_img.ndim == 3:
+            dest_img[::] = src_img
+        else:
+            raise NotImplementedError("Images must be 1 or 2 color 2D images")
+        return dest_img
+
     def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
-            if self.current_frame_idx == 0:
-                self.current_frame = frame.copy()
-            else:
-                self.current_frame[::] = frame  # FIXME: check dimensions
+            self.current_frame = self.update_img(self.current_frame, frame)
             self._set_default_results()
             if self.camera_calibration is not None:
                 frame = Frame(self.camera_calibration.remap(frame))
@@ -221,10 +229,8 @@ class Tracker(object):
             else:  # Tracked frame
                 if fid == self.track_from: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
-                if self.silhouette is None:  # First tracked frame
-                    self.silhouette = sil.copy()
-                else:
-                    self.silhouette[::] = sil  # FIXME: check dimensions
+                self.after_frame_track()
+                self.silhouette = self.update_img(self.silhouette, sil)
                 if not contour_found:
                     if record: self._stream.save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
