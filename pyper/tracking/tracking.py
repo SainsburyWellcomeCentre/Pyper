@@ -186,7 +186,7 @@ class Tracker(object):
         elif IS_PI:
             self._stream.restart_recording(reset)
             pbar = None
-        if check_fps: prev_time = time.time()
+        if check_fps: prev_time = time()
         while True:
             try:
                 if check_fps: prev_time = utils.check_fps(prev_time)
