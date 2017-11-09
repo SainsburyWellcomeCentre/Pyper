@@ -39,6 +39,28 @@ class VideoWriter(object):
     def release(self):
         self.writer.release()
 
+    def save_frame(self, frame):
+        """
+        Saves the frame supplied as argument to self.video_writer
+
+        :param frame: The frame to save
+        :type frame: An image as an array with 1 or 3 color channels
+        """
+        if frame is not None and self.save_path is not None:
+            n_colors = frame.shape[2]
+            if n_colors == 3:
+                tmp_color_frame = frame
+            elif n_colors == 1:
+                tmp_color_frame = np.dstack([frame] * 3)
+            else:
+                err_msg = 'Wrong number of color channels, expected 1 or 3, got {}'.format(n_colors)
+                raise VideoWriterFrameShapeError(err_msg)
+            if not tmp_color_frame.dtype == np.uint8:
+                tmp_color_frame = tmp_color_frame.astype(np.uint8)
+            self.write(tmp_color_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
+        else:
+            print("skipping save because {} is None".format("frame" if frame is None else "save_path"))
+
     # FIXME: deal with data type too
     def write(self, frame):  # FIXME: see for dynamic array (a.copy() to .write())
         """

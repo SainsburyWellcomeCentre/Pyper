@@ -62,7 +62,7 @@ class VideoStream(object):
         
         self.current_frame_idx = -1  # We start out since we increment upon frame loading
 
-    def save(self, frame):  # FIXME: fix video_writer calls
+    def save(self, frame):  # FIXME: fix video_writer calls (put most in VideoWriter)
         """
         Saves the frame supplied as argument to self.video_writer
         
@@ -80,7 +80,7 @@ class VideoStream(object):
                 raise VideoStreamTypeException(err_msg)
             if not tmp_color_frame.dtype == np.uint8:
                 tmp_color_frame = tmp_color_frame.astype(np.uint8)
-            self.video_writer.write(tmp_color_frame.copy())  # copy because of dynamic arrays
+            self.video_writer.write(tmp_color_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
         else:
             print("skipping save because {} is None".format("frame" if frame is None else "save_path"))
             

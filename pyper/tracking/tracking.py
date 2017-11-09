@@ -28,6 +28,7 @@ from pyper.utilities import utils
 from pyper.utilities.utils import write_structure_not_found_msg, write_structure_size_incorrect_msg
 from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
+from pyper.cv_wrappers.video_writer import VideoWriter
 
 IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
@@ -75,11 +76,19 @@ class Tracker(object):
 
         if callback is not None: self.handle_object_in_tracking_roi = callback
         track_range_params = (bg_start, n_background_frames)
+        self.raw_out_stream = None
         if src_file_path is None:
             if IS_PI:
                 self._stream = PiVideoStream(dest_file_path, *track_range_params)
             else:
-                self._stream = UsbVideoStream(dest_file_path, *track_range_params)
+                self._stream = UsbVideoStream(dest_file_path, *track_range_params)  # FIXME: fix fps
+                base_path, ext = os.path.splitext(dest_file_path)
+                raw_out_path = "{}_raw{}".format(base_path, ext)
+                self.raw_out_stream = VideoWriter(raw_out_path,
+                                                  self._stream.video_writer.codec,
+                                                  self._stream.video_writer.fps,
+                                                  self._stream.video_writer.frame_shape,
+                                                  is_color=True)  # FIXME: make optional
         else:
             self._stream = RecordedVideoStream(src_file_path, *track_range_params)
         
@@ -218,6 +227,8 @@ class Tracker(object):
                 raise EOFError("End of tracking reached")
 
             result_frame = frame  # image_provider colorises and copies
+            if self.raw_out_stream is not None:
+                self.raw_out_stream.save_frame(frame)
             if self.is_before_frame(fid):
                 pass
             elif self._stream.is_bg_frame():
