@@ -16,6 +16,7 @@ import os
 import re
 from scipy.io import loadmat
 from scipy.misc import imsave
+from time import time
 
 from pyper.utilities.utils import qurl_to_str
 
@@ -353,6 +354,9 @@ class TrackerIface(BaseInterface):
         self.current_frame_idx = 0
         self.output_type = "Raw"
 
+        self.start_track_time = None
+        self.end_track_time = None
+
     @pyqtSlot()
     def prevent_video_update(self):
         if hasattr(self, 'image_provider'):
@@ -447,6 +451,18 @@ class TrackerIface(BaseInterface):
         if self.tracker is not None:
             self.tracker.results.reset()   # reset between runs
 
+    def pre_track(self):
+        self.start_track_time = time()
+
+    def post_track(self):
+        self.end_track_time = time()
+        if self.start_track_time is not None:
+            n_frames = self.tracker._stream.current_frame_idx
+            duration = float(self.end_track_time - self.start_track_time)
+            fps = n_frames / duration
+            print("Acquired {0} frames in {1:.2f} seconds (fps={2:.2f})".format(n_frames, duration, fps))
+
+
     @pyqtSlot()
     def start(self):
         """
@@ -455,6 +471,7 @@ class TrackerIface(BaseInterface):
         if self.tracker is not None:
             self._reset_measures()
             self.set_tracker_params()
+            self.pre_track()
             self.timer.start(self.timer_speed)
 
     @pyqtSlot()
@@ -471,6 +488,7 @@ class TrackerIface(BaseInterface):
         :param string msg: The message to print upon stoping
         """
         self.timer.stop()
+        self.post_track()
         self.tracker._stream.stop_recording(msg)
         self.image_provider.reuse_on_next_load = True  # Prevents loading on next resize
 
@@ -727,7 +745,8 @@ class RecorderIface(TrackerIface):
         self._update_img_provider()
         
         self.tracker.set_roi(self.rois['tracking'])
-        
+
+        self.pre_track()
         self.timer.start(self.timer_speed)
         return True
         
