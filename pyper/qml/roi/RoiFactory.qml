@@ -44,6 +44,14 @@ Item {
         console.log("Saving ROI");
         tracker_py_iface.save_roi(roiType);
     }
+    function sourceFileFromString(srcString) {
+        srcString = srcString.replace(/^\s+|\s+$/g, '');
+        if (srcString == "ellipse") {
+            return "EllipseRoi.qml";
+        } else {
+            console.log(srcString + " != ellipse");
+        }
+    }
 
     function load() {
         console.log("Loading ROI");
@@ -53,18 +61,15 @@ Item {
         } else if (roiData === undefined){
             return;
         } else {
-            roiType = roiData[0];  // FIXME: do binding for loading
-            source = roiData[1];  // FIXME: do binding for loading
-            roiX = roiData[2];
-            roiY= roiData[3];
-            roiWidth = roiData[4];
-            roiHeight = roiData[5];
+            roi.source = sourceFileFromString(roiData[0]);
+            roiX = roiData[1];
+            roiY= roiData[2];
+            roiWidth = roiData[3];
+            roiHeight = roiData[4];
             var points;
             if (getType() === "freehand") {
-                for (var i=0; i < roiData.length(); i++) {  // FIXME: simplyify syntax
-                    if (i > 5) {
-                        points[i-5] = roiData[i];
-                    }
+                for (var i=5; i < roiData.length(); i++) {
+                    points[i-5] = roiData[i];  // FIXME:
                 }
             }
         }

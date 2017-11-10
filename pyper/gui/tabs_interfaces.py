@@ -602,7 +602,7 @@ class TrackerIface(BaseInterface):
     def load_roi(self):
         diag = QFileDialog()
         default_src = os.getenv('HOME')
-        src_path = diag.getSaveFileName(parent=diag,
+        src_path = diag.getOpenFileName(parent=diag,
                                         caption='Load file',
                                         directory=default_src,
                                         filter="ROI (*.roi)")

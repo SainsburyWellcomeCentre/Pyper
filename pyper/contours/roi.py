@@ -76,10 +76,6 @@ class Roi(object):
             lines = in_file.readlines()
         return lines
 
-class Bs(object):
-    def __init__(self):
-        pass
-
 
 class Circle(Roi):
     """
