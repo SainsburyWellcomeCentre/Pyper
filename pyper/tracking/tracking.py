@@ -260,6 +260,9 @@ class Tracker(object):
             self._stream.stop_recording(msg)
             raise EOFError
 
+    def after_frame_track(self):
+        pass
+
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
         Get the position of the mouse in frame and append to self.results
