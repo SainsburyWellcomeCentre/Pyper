@@ -20,9 +20,17 @@ Item {
     property real roiWidth: 0
     property real roiHeight: 0
 
-    onRoiHeightChanged: {
-        console.log("Roi height changed");  // DEBUG
+    function redraw() {
+        if (roiActive) {
+            roiActive = false;
+            roiActive = true;
+        }
     }
+
+    onRoiXChanged: { redraw(); }
+    onRoiYChanged: { redraw(); }
+    onRoiWidthChanged: { redraw(); }
+    onRoiHeightChanged: { redraw(); }
 
     property variant tracker_py_iface
 
@@ -45,8 +53,8 @@ Item {
         } else if (roiData === undefined){
             return;
         } else {
-            roiType = roiData[0];
-            source = roiData[1];
+            roiType = roiData[0];  // FIXME: do binding for loading
+            source = roiData[1];  // FIXME: do binding for loading
             roiX = roiData[2];
             roiY= roiData[3];
             roiWidth = roiData[4];
@@ -119,6 +127,10 @@ Item {
             binding1.target = roi.item;
             binding2.target = roi.item;
             binding3.target = roi.item;
+            b4.target = roi.item;
+            b5.target = roi.item;
+            b6.target = roi.item;
+            b7.target = roi.item;
             connections.target = roi.item;
         }
     }
@@ -138,6 +150,31 @@ Item {
             }
         }
     }
+    Binding {
+        id: b4
+
+        property: "roiX"
+        value: root.roiX
+    }
+    Binding {
+        id: b5
+
+        property: "roiY"
+        value: root.roiY
+    }
+    Binding {
+        id: b6
+
+        property: "roiWidth"
+        value: root.roiWidth
+    }
+    Binding {
+        id: b7
+
+        property: "roiHeight"
+        value: root.roiHeight
+    }
+
     Binding {
         id: binding1
 

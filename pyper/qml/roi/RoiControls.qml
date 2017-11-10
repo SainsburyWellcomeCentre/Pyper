@@ -68,7 +68,7 @@ Frame {
         anchors.margins: 10
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 25
+        spacing: 15
 
         Row {
             spacing: 5
@@ -176,35 +176,49 @@ Frame {
                 }
             }
         }
-        Column {
+        Grid {
             anchors.left: parent.left
             anchors.right: parent.right
 
-//            columns: 2
-//            rows: 2
+            columns: 2
+            rows: 2
 
             spacing: 5
             IntInput {
                 label: "x:"
-//                value: sourceRoi.roiX  //  FIXME: make update
-                value: roi.x
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi x position"
+                value: sourceRoi.roiX
+                onValueChanged: sourceRoi.roiX = value
             }
             IntInput {
                 label: "y:"
-                value: sourceRoi.roiX  //  FIXME: make update
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi x position"
+                value: sourceRoi.roiY
+                onValueChanged: sourceRoi.roiY = value
             }
             IntInput {
-                label: "width:"
-                value: sourceRoi.roiWidth  //  FIXME: make update
+                label: "w:"
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi width"
+                value: sourceRoi.roiWidth
+                onValueChanged: sourceRoi.roiWidth = value
             }
             IntInput {
-                label: "height:"
-                value: sourceRoi.roiHeight  //  FIXME: make update
+                label: "h:"
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi height"
+                value: sourceRoi.roiHeight
+                onValueChanged: sourceRoi.roiHeight = value
             }
         }
         Row {
             spacing: 5
-//            anchors.horizontalCenter: parent.horizontalCenter
             property int btnsWidth: 45
             CustomButton {
                 id: saveRoiBtn

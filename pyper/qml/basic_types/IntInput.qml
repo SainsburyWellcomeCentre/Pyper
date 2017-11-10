@@ -19,6 +19,8 @@ Item {
     property alias suffix: spinBox.suffix
     property alias decimals: spinBox.decimals
 
+    property alias boxWidth: spinBox.width
+
     signal edited()
 
     Row {
