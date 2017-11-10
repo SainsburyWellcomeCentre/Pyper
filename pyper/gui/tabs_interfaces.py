@@ -32,7 +32,7 @@ from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi
+from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
@@ -582,6 +582,37 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def remove_roi(self, roi_type):
         self.__assign_roi(roi_type, None)
+
+    @pyqtSlot(str)
+    def save_roi(self, roi_type):
+        diag = QFileDialog()
+        default_dest = os.getenv('HOME')
+        dest_path = diag.getSaveFileName(parent=diag,
+                                         caption='Save file',
+                                         directory=default_dest,
+                                         filter="ROI (*.roi)")
+        dest_path = dest_path[0]
+        if dest_path:
+            roi = self.rois[roi_type]
+            if roi is not None:
+                roi.save(dest_path)
+            else:
+                print("No ROI to save")
+
+    @pyqtSlot(result=QVariant)
+    def load_roi(self):
+        diag = QFileDialog()
+        default_src = os.getenv('HOME')
+        src_path = diag.getSaveFileName(parent=diag,
+                                        caption='Load file',
+                                        directory=default_src,
+                                        filter="ROI (*.roi)")
+        src_path = src_path[0]
+        if src_path:
+            return Roi.load(src_path)
+        else:
+            return -1
+
 
     @pyqtSlot(QVariant)
     def save(self, default_dest):

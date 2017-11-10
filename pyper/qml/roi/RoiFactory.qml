@@ -20,6 +20,10 @@ Item {
     property real roiWidth: 0
     property real roiHeight: 0
 
+    onRoiHeightChanged: {
+        console.log("Roi height changed");  // DEBUG
+    }
+
     property variant tracker_py_iface
 
     property string roiType
@@ -28,14 +32,58 @@ Item {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
-    function setPyIfaceRoi() {
-        var src = String(source);
-        if (endsWith(src, "EllipseRoi.qml") || endsWith(src, "RectangleRoi.qml")) {
-            tracker_py_iface.set_roi(roiType, source, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
+    function save() {
+        console.log("Saving ROI");
+        tracker_py_iface.save_roi(roiType);
+    }
+
+    function load() {
+        console.log("Loading ROI");
+        var roiData = tracker_py_iface.load_roi(roiType);
+        if (roiData === -1){
+            return;
+        } else if (roiData === undefined){
+            return;
+        } else {
+            roiType = roiData[0];
+            source = roiData[1];
+            roiX = roiData[2];
+            roiY= roiData[3];
+            roiWidth = roiData[4];
+            roiHeight = roiData[5];
+            var points;
+            if (getType() === "freehand") {
+                for (var i=0; i < roiData.length(); i++) {  // FIXME: simplyify syntax
+                    if (i > 5) {
+                        points[i-5] = roiData[i];
+                    }
+                }
+            }
+        }
+    }
+
+    function getTypeFromString(src) {
+        if (endsWith(src, "EllipseRoi.qml")) {
+            return 'ellipse';
+        } else if (endsWith(src, "RectangleRoi.qml")) {
+            return 'rectangle';
         } else if (endsWith(src, "FreehandRoi.qml")) {
-            tracker_py_iface.set_roi_from_points(roiType, root.width, root.height, pointsToString(roi.item.points));
+            return 'freehand';
         } else {
             console.log("Unrecognised source: " + source);
+        }
+    }
+
+    function getType() {
+        return getTypeFromString(String(source));
+    }
+
+    function setPyIfaceRoi() {
+        var type = getType();
+        if (type === 'ellipse' || type === 'rectangle') {
+            tracker_py_iface.set_roi(roiType, type, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
+        } else if (type === 'freehand') {
+            tracker_py_iface.set_roi_from_points(roiType, root.width, root.height, pointsToString(roi.item.points));
         }
     }
     function unsetPyIfaceRoi() {

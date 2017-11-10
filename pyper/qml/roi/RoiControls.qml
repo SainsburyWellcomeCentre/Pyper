@@ -176,29 +176,57 @@ Frame {
                 }
             }
         }
-        Grid {
+        Column {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            columns: 2
-            rows: 2
+//            columns: 2
+//            rows: 2
 
             spacing: 5
-            IntLabel {
+            IntInput {
                 label: "x:"
-                value: sourceRoi.roiX
+//                value: sourceRoi.roiX  //  FIXME: make update
+                value: roi.x
             }
-            IntLabel {
+            IntInput {
                 label: "y:"
-                value: sourceRoi.roiX
+                value: sourceRoi.roiX  //  FIXME: make update
             }
-            IntLabel {
+            IntInput {
                 label: "width:"
-                value: sourceRoi.roiWidth
+                value: sourceRoi.roiWidth  //  FIXME: make update
             }
-            IntLabel {
+            IntInput {
                 label: "height:"
-                value: sourceRoi.roiHeight
+                value: sourceRoi.roiHeight  //  FIXME: make update
+            }
+        }
+        Row {
+            spacing: 5
+//            anchors.horizontalCenter: parent.horizontalCenter
+            property int btnsWidth: 45
+            CustomButton {
+                id: saveRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+
+                iconSource: "../../../resources/icons/document-open.png"
+                tooltip: "Save ROI"
+
+                onClicked: sourceRoi.save();
+            }
+            CustomButton {
+                id: loadRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+
+                iconSource: "../../../resources/icons/document-save-as.png"
+                tooltip: "Load ROI"
+
+                onClicked: sourceRoi.load();
             }
         }
     }

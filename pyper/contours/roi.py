@@ -8,7 +8,7 @@ This module is used to check the position of the mouse relative to a region of i
 
 :author: crousse
 """
-
+import csv
 import numpy as np
 from math import radians, cos, sin, sqrt
 import cv2
@@ -59,7 +59,27 @@ class Roi(object):
         cv2.drawContours(mask, [self.points], 0, 255, cv2.cv.CV_FILLED)
         return mask
 
-        
+    def save(self, dest):  # FIXME: deal with image size
+        t = str(type(self)).strip("'<>").split('.')[-1].lower()
+        with open(dest, 'w') as out_file:
+            out_file.write("{}\n".format(t))
+            out_file.write("{}\n".format(self.centre[0]))
+            out_file.write("{}\n".format(self.centre[1]))
+            out_file.write("{}\n".format(self.width))
+            out_file.write("{}\n".format(self.height))
+            for pnt in self.points.squeeze():
+                out_file.write("{}, {}\n".format(*pnt))  # TODO: format
+
+    @staticmethod
+    def load(src_path):
+        with open(src_path, 'r') as in_file:
+            lines = in_file.readlines()
+        return lines
+
+class Bs(object):
+    def __init__(self):
+        pass
+
 
 class Circle(Roi):
     """
