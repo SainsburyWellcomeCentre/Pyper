@@ -358,6 +358,7 @@ class Tracker(object):
         The method called when the mouse is found in the roi.
         This method is meant to be overwritten in subclasses of Tracker.
         """
+        self.results.overwrite_last_in_tracking_roi(True)
         cv2.rectangle(self.silhouette, self.bottom_square[0], self.bottom_square[1], (0, 255, 255), -1)
 
     def measure_callback(self, frame):

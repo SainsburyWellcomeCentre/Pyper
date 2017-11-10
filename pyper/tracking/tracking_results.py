@@ -8,18 +8,21 @@ class TrackingResults(object):
         self.measures = []
         self.areas = []  # The area of the tracked object
         self.distances_from_arena = []
+        self.in_tracking_roi = []
 
         self.default_pos = (-1, -1)
         self.only_defaults = True
         self.default_measure = float('NaN')
         self.default_area = 0.
         self.default_distance_from_arena = (float('NaN'), float('NaN'))
+        self.default_in_tracking_roi = False
 
     def reset(self):
         self.positions = []
         self.measures = []
         self.areas = []  # The area of the tracked object
         self.distances_from_arena = []
+        self.in_tracking_roi = []
 
     def trim_positions(self):  # OPTIMISE:
         # pos = np.int32(self.positions)
@@ -45,6 +48,7 @@ class TrackingResults(object):
         row.append(self.areas[idx])
         row.extend(self.distances_from_arena[idx])
         row.append(self.measures[idx])
+        row.append(self.in_tracking_roi[idx])
         return row
 
     def get_frame_results(self):
@@ -77,6 +81,14 @@ class TrackingResults(object):
     def overwrite_last_dist_from_arena(self, distances):
         self.distances_from_arena[-1] = distances
 
+    def overwrite_last_in_tracking_roi(self, val):
+        """
+
+        :param bool val:
+        :return:
+        """
+        self.in_tracking_roi[-1] = val
+
     def get_last_movement_vector(self):
         if len(self.positions) < 2:
             return
@@ -88,6 +100,9 @@ class TrackingResults(object):
 
     def get_last_dist_from_arena_pair(self):
         return self.distances_from_arena[-1]
+
+    def get_last_in_tracking_roi(self):
+        return self.in_tracking_roi[-1]
 
     def append_default_measure(self):
         self.measures.append(self.default_measure)
@@ -101,11 +116,15 @@ class TrackingResults(object):
     def append_default_dist_from_arena(self):
         self.distances_from_arena.append(self.default_distance_from_arena)
 
+    def append_default_in_tracking_roi(self):
+        self.in_tracking_roi.append(self.default_in_tracking_roi)
+
     def append_defaults(self):
         self.append_default_pos()
         self.append_default_area()
         self.append_default_measure()
         self.append_default_dist_from_arena()
+        self.append_default_in_tracking_roi()
 
     def repeat_last(self):
         if len(self) > 0:
@@ -113,6 +132,7 @@ class TrackingResults(object):
             self.repeat_last_measure()
             self.repeat_last_area()
             self.repeat_last_distance_from_arena()
+            self.repeat_last_in_tracking_roi()
         else:
             self.append_defaults()
 
@@ -123,9 +143,12 @@ class TrackingResults(object):
         self.areas.append(self.areas[-1])
 
     def repeat_last_distance_from_arena(self):
-        self.distances_from_arena.append(self.distances_from_arena[-1])
+        self.distances_from_arena.append(self.distances_from_arena[-1])  # FIXME: copy list
 
-    def update(self, position, area, measure, distances):
+    def repeat_last_in_tracking_roi(self):
+        self.in_tracking_roi.append(self.in_tracking_roi[-1])
+
+    def update(self, position, area, measure, distances):  # TODO: see if add in_tracking_roi
         self.overwrite_last_pos(position)
         self.overwrite_last_measure(measure)
         self.overwrite_last_area(area)

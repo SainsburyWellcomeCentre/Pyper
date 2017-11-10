@@ -18,6 +18,7 @@ TableView{
         mod.clear();
         while (true){
             result = getRow(iface, idx);
+            console.log(result[7]);
             if (result === -1){
                 break;
             } else if (result === undefined){
@@ -29,7 +30,9 @@ TableView{
                             "area": parseFloat(result[3]),
                             "centerDist": parseFloat(result[4]),
                             "borderDist": parseFloat(result[5]),
-                            "measure": parseFloat(result[6])}
+                            "measure": parseFloat(result[6]),
+                            "inRoi": result[7] == "True"
+                           }
                            );
                 idx += 1;
             }
@@ -46,6 +49,7 @@ TableView{
             centerDist: -1.0  // signed float
             boderDist: -1.0
             measure: -1.0
+            inRoi: false
         }
     }
     Component.onCompleted: {
@@ -85,6 +89,11 @@ TableView{
     TableViewColumn{
         role: "measure"
         title: "measure"
+        width: 60
+    }
+    TableViewColumn{
+        role: "inRoi"
+        title: "in roi"
         width: 60
     }
 }
