@@ -341,10 +341,7 @@ class TrackerIface(BaseInterface):
         self.rois = {'tracking': None,
                      'restriction': None,
                      'measurement': None}
-
-        self.roi_params = {'tracking': None,
-                           'restriction': None,
-                           'measurement': None}
+        self.roi_params = {k: None for k in self.rois.keys()}
 
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -431,21 +428,26 @@ class TrackerIface(BaseInterface):
             self.tracker.extract_arena = self.params.extract_arena
             self.tracker.infer_location = self.params.infer_location
 
-            if self.rois['tracking'] is not None:  # REFACTOR: refactor tracking.Tracker to use roi dictionnary and extract method
-                self.tracker.set_roi(self.rois['tracking'])
-            else:
-                if self.roi_params['tracking'] is not None:
-                    self.tracker.set_roi(self._get_roi(*self.roi_params['tracking']))
-            if self.rois['restriction'] is not None:
-                self.tracker.set_tracking_region_roi(self.rois['restriction'])
-            else:
-                if self.roi_params['restriction'] is not None:
-                    self.tracker.set_tracking_region_roi(self._get_roi(*self.roi_params['restriction']))
-            if self.rois['measurement'] is not None:
-                self.tracker.set_measure_roi(self.rois['measurement'])
-            else:
-                if self.roi_params['measurement'] is not None:
-                    self.tracker.set_measure_roi(self.__get_roi_from_points(*self.roi_params['measurement']))
+    def _set_tracker_roi(self, roi_type, tracker_method):
+        """
+
+        :param str roi_type:
+        :param method tracker_method:
+        :return:
+        """
+        if self.rois[roi_type] is not None:
+            tracker_method(self.rois[roi_type])
+        else:
+            if self.roi_params[roi_type] is not None:
+                tracker_method(self._get_roi(*self.roi_params[roi_type]))
+
+    @pyqtSlot()
+    def set_tracker_rois(self):  # REFACTOR: refactor tracking.Tracker to use roi dictionary and extract method
+        if self.tracker is not None:
+            # self.tracker.set_rois(self.rois)  # REFACTOR:
+            self._set_tracker_roi('tracking', self.tracker.set_roi)
+            self._set_tracker_roi('restriction', self.tracker.set_tracking_region_roi)
+            self._set_tracker_roi('measurement', self.tracker.set_measure_roi)
 
     def _reset_measures(self):
         if self.tracker is not None:
@@ -471,6 +473,7 @@ class TrackerIface(BaseInterface):
         if self.tracker is not None:
             self._reset_measures()
             self.set_tracker_params()
+            self.set_tracker_rois()
             self.pre_track()
             self.timer.start(self.timer_speed)
 

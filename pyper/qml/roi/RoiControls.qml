@@ -166,7 +166,7 @@ Frame {
                     if (isDown) { // already active -> revert
                         roiLayout.pythonObject.restore_cursor();
                         isDown = false;
-
+                        sourceRoi.finalise();
                     } else {  // activate
                         roiLayout.pythonObject.chg_cursor();
                         isDown = true;

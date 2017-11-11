@@ -51,6 +51,10 @@ Item {
         }
         return String(pts);
     }
+    function finalise() {
+        tracker_py_iface.set_tracker_rois();
+    }
+
     onRoiActiveChanged: {
         if (roiActive == false) {
             unsetPyIfaceRoi();
@@ -81,7 +85,7 @@ Item {
                 root.roiWidth = target.roiWidth;
                 root.roiHeight = target.roiHeight;
                 if (target.isActive) {
-                     setPyIfaceRoi();
+                    setPyIfaceRoi();
                 }
             }
         }
