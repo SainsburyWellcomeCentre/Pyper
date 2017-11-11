@@ -14,6 +14,7 @@ import matplotlib
 import numpy as np
 import os
 import re
+import uuid
 from scipy.io import loadmat
 from scipy.misc import imsave
 from time import time
@@ -342,6 +343,7 @@ class TrackerIface(BaseInterface):
                      'restriction': None,
                      'measurement': None}
         self.roi_params = {k: None for k in self.rois.keys()}
+        self.rois_vault = {k: {} for k in self.rois.keys()}
 
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -581,6 +583,20 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def remove_roi(self, roi_type):
         self.__assign_roi(roi_type, None)
+
+    @pyqtSlot(result=QVariant)
+    def get_uuid(self):
+        return uuid.uuid4().hex[:10]
+
+    @pyqtSlot(QVariant, QVariant)
+    def store_roi(self, roi_type, uuid):
+        self.rois_vault[roi_type][uuid] = self.rois[roi_type]  # FIXME: check if exists first
+
+    @pyqtSlot(QVariant, QVariant, result=QVariant)
+    def retrieve_roi(self, roi_type, uuid):
+        roi = self.rois_vault[roi_type][uuid]
+        self.rois[roi_type] = roi
+        return roi.get_data()
 
     @pyqtSlot(str)
     def save_roi(self, roi_type):

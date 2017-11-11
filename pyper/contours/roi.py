@@ -76,6 +76,14 @@ class Roi(object):
             lines = in_file.readlines()
         return lines
 
+    def get_data(self):
+        t = str(type(self)).strip("'<>").split('.')[-1].lower()
+        # Uses string to have same interface as save
+        roi_data = [t, str(self.centre[0]), str(self.centre[1]), str(self.width), str(self.height)]
+        for pnt in self.points.squeeze():
+            roi_data.append('{}, {}'.format(*pnt))
+        return roi_data
+
 
 class Circle(Roi):
     """

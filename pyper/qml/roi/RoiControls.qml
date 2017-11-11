@@ -242,6 +242,32 @@ Frame {
 
                 onClicked: sourceRoi.load();
             }
+            CustomButton {
+                id: storeRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+
+                iconSource: "../../../resources/icons/ram.png"
+                tooltip: "Store the ROI in memory"
+
+                onClicked: {
+                    var uuid = sourceRoi.store()
+                    cbItems.append({text: uuid})
+                    // FIXME: add to drop down
+                }
+            }
+        }
+        ComboBox {
+            model: ListModel {
+                id: cbItems
+//                ListElement { uuid: "2ef26a6689" }  // FIXME: deal with missing initialy for onCurrentIndexChanged
+            }
+            width: 170
+            onCurrentIndexChanged: {
+                var uuid = cbItems.get(currentIndex).text
+                sourceRoi.retrieve(uuid)
+            }
         }
     }
 }

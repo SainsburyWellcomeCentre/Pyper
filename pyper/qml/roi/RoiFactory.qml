@@ -35,6 +35,25 @@ Item {
     property variant tracker_py_iface
 
     property string roiType
+    property string uuid
+
+    function getRandomUuid() {
+        return tracker_py_iface.get_uuid();
+    }
+    // Store the ROI by uuid in a list
+    function store() {
+        var _uuid = getRandomUuid();
+        uuid = _uuid;
+        tracker_py_iface.store_roi(roiType, _uuid);  // FIXME: add
+        return _uuid;
+    }
+    // Retrieve the ROI by uuid
+    function retrieve(_uuid) {
+        var roiData = tracker_py_iface.retrieve_roi(roiType, _uuid);
+        uuid = _uuid;
+        loadFromRoiData(roiData);
+    }
+
 
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
@@ -53,9 +72,7 @@ Item {
         }
     }
 
-    function load() {
-        console.log("Loading ROI");
-        var roiData = tracker_py_iface.load_roi(roiType);
+    function loadFromRoiData(roiData) {
         if (roiData === -1){
             return;
         } else if (roiData === undefined){
@@ -73,6 +90,11 @@ Item {
                 }
             }
         }
+    }
+
+    function load() {
+        var roiData = tracker_py_iface.load_roi(roiType);
+        loadFromRoiData(roiData);
     }
 
     function getTypeFromString(src) {
@@ -145,7 +167,7 @@ Item {
 
         onReleased: {
             if (target.isDrawn) {
-                root.roiX = target.roiX;
+                root.roiX = target.roiX;  // FIXME: creates binding loop
                 root.roiY = target.roiY;
                 root.roiWidth = target.roiWidth;
                 root.roiHeight = target.roiHeight;
