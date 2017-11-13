@@ -65,10 +65,14 @@ Item {
     }
     function sourceFileFromString(srcString) {
         srcString = srcString.replace(/^\s+|\s+$/g, '');
-        if (srcString == "ellipse") {
+        if (srcString === "ellipse") {
             return "EllipseRoi.qml";
+        } else if (srcString === "rectangle") {
+            return "RectangleRoi.qml";
+        } else if (srcString === "freehand") {
+            return ("FreehandRoi.qml");
         } else {
-            console.log(srcString + " != ellipse");
+            console.log("Unknown ROI type: " + srcString);
         }
     }
 
