@@ -54,7 +54,7 @@ class ObjectContour(object):
         
     def _fit(self):
         """
-        Finds the center of the object and potentially other parameters based on type
+        Finds the centre of the object and potentially other parameters based on type
         
         :raise NotImplementedError: if self.contourType not supported
         """

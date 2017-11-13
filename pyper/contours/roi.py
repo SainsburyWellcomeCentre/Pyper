@@ -45,13 +45,13 @@ class Roi(object):
         """
         return cv2.pointPolygonTest(self.points, point, True)
         
-    def dist_from_center(self, point):
+    def dist_from_centre(self, point):
         """
-        Returns the distance from the point to the center of mass of the ROI
+        Returns the distance from the point to the centre of mass of the ROI
         
         :param tuple point: the (x, y) point to check
         """
-        return norm(self.center, point)
+        return norm(self.centre, point)
 
     def to_mask(self, frame):
         mask = frame.copy()  # TODO: extract to roi.to_mask
@@ -91,21 +91,21 @@ class Circle(Roi):
     
     Use as follows:
     
-    >>> roi = Circle((256, 256), 30) # creates a circle of radius 30 at center 256, 256
+    >>> roi = Circle((256, 256), 30) # creates a circle of radius 30 at centre 256, 256
     >>> mouse_position = (250, 242)
     >>> if roi.contains_point(mouse_position):
     >>>     print('The mouse entered the ROI')
     """
 
-    def __init__(self, center, radius):
+    def __init__(self, centre, radius):
         """
         Initialises a circle
         
-        :param tuple center: the center of the circle
+        :param tuple centre: the centre of the circle
         :param int radius: the radius in pixels
         """
         Roi.__init__(self)
-        self.center = center
+        self.centre = centre
         self.radius = radius
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
@@ -116,10 +116,10 @@ class Circle(Roi):
         
         :param angle: the angle in radians
         """
-        center = self.center
+        centre = self.centre
         radius = self.radius
-        x = center[0] + radius * cos(angle)
-        y = center[1] + radius * sin(angle)
+        x = centre[0] + radius * cos(angle)
+        y = centre[1] + radius * sin(angle)
         return x, y
 
     def get_points(self):
@@ -142,7 +142,7 @@ class Rectangle(Roi):
         self.top_left_point = (top_left_x, top_left_y)
         self.width = width
         self.height = height
-        self.center = (int(top_left_x + (width / 2)), int(top_left_y + (height / 2)))
+        self.centre = (int(top_left_x + (width / 2)), int(top_left_y + (height / 2)))
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
 

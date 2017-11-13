@@ -547,8 +547,8 @@ class TrackerIface(BaseInterface):
         :param str source_type: The string representing the source type
         :param float img_width: The width of the image representation in the GUI
         :param float img_height: The height of the image representation in the GUI
-        :param float roi_x: The center of the roi in the first dimension
-        :param float roi_y: The center of the roi in the second dimension
+        :param float roi_x: The centre of the roi in the first dimension
+        :param float roi_y: The centre of the roi in the second dimension
         :param float roi_width: The width of the ROI
         :param float roi_height: The height of the ROI
         """

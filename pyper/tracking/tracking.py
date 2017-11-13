@@ -330,7 +330,7 @@ class Tracker(object):
             return
         if self.extract_arena:
             last_pos = self.results.get_last_position()
-            return self.arena.dist_from_center(last_pos)
+            return self.arena.dist_from_centre(last_pos)
             
     def paint(self, frame, roi_color='y', arena_color='m'):
         if self.roi is not None:
