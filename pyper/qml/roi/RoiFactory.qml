@@ -90,6 +90,9 @@ Item {
                 }
             }
         }
+        if (roiActive) {  // FIXME: does not seem to work (call inside works)
+            tracker_py_iface.set_tracker_rois();
+        }
     }
 
     function load() {
