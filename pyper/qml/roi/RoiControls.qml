@@ -226,7 +226,7 @@ Frame {
                 width: parent.btnsWidth
                 height: width
 
-                iconSource: "../../../resources/icons/document-open.png"
+                iconSource: "../../../resources/icons/document-save-as.png"
                 tooltip: "Save ROI"
 
                 onClicked: sourceRoi.save();
@@ -237,7 +237,7 @@ Frame {
                 width: parent.btnsWidth
                 height: width
 
-                iconSource: "../../../resources/icons/document-save-as.png"
+                iconSource: "../../../resources/icons/document-open.png"
                 tooltip: "Load ROI"
 
                 onClicked: sourceRoi.load();

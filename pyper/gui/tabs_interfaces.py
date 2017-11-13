@@ -629,7 +629,6 @@ class TrackerIface(BaseInterface):
         else:
             return -1
 
-
     @pyqtSlot(QVariant)
     def save(self, default_dest):
         """
