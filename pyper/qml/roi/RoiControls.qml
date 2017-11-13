@@ -254,7 +254,6 @@ Frame {
                 onClicked: {
                     var uuid = sourceRoi.store()
                     cbItems.append({text: uuid})
-                    // FIXME: add to drop down
                 }
             }
         }

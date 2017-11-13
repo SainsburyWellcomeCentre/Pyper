@@ -76,6 +76,25 @@ Item {
         }
     }
 
+    function scaleCoordinates(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height) {
+        var horizontal_scaling_factor = width / img_width;  // TODO: check if not contrary
+        var vertical_scaling_factor = height / img_height;
+        var scaled_x;
+        var scaled_y;
+        if (source_type === 'ellipse') {// Center based
+            scaled_x = (roi_x + roi_width / 2.) * horizontal_scaling_factor;
+            scaled_y = (roi_y + roi_height / 2.) * vertical_scaling_factor;
+        } else if (source_type === 'rectangle') {  // Top left based
+            scaled_x = roi_x * horizontal_scaling_factor;
+            scaled_y = roi_y * vertical_scaling_factor;
+        } else {
+            console.log("Unknown ROI shape: " + source_type);
+        }
+        var scaled_width = roi_width * horizontal_scaling_factor;
+        var scaled_height = roi_height * vertical_scaling_factor;
+        return [scaled_x, scaled_y, scaled_width, scaled_height];  // FIXME: use array
+    }
+
     function loadFromRoiData(roiData) {
         if (roiData === -1){
             return;
@@ -83,14 +102,22 @@ Item {
             return;
         } else {
             roi.source = sourceFileFromString(roiData[0]);
-            roiX = roiData[1];
-            roiY= roiData[2];
-            roiWidth = roiData[3];
-            roiHeight = roiData[4];
+            var rawRoiX = roiData[1];
+            var rawRoiY = roiData[2];
+            var rawRoiWidth = roiData[3];
+            var rawRoiHeight = roiData[4];
+            var img_width = roiData[5];
+            var img_height = roiData[6];
+            var scaledCoords = scaleCoordinates(roiData[0], img_width, img_height, rawRoiX, rawRoiY, rawRoiWidth, rawRoiHeight);
+            roiX = scaledCoords[0];
+            roiY= scaledCoords[1];
+            roiWidth = scaledCoords[2];
+            roiHeight = scaledCoords[3];
+
             var points;
             if (getType() === "freehand") {
-                for (var i=5; i < roiData.length(); i++) {
-                    points[i-5] = roiData[i];  // FIXME:
+                for (var i=7; i < roiData.length(); i++) {
+                    points[i-7] = roiData[i];  // FIXME:
                 }
             }
         }
