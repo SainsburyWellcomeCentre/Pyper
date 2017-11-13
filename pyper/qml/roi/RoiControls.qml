@@ -261,12 +261,14 @@ Frame {
         ComboBox {
             model: ListModel {
                 id: cbItems
-//                ListElement { uuid: "2ef26a6689" }  // FIXME: deal with missing initialy for onCurrentIndexChanged
             }
             width: 170
             onCurrentIndexChanged: {
-                var uuid = cbItems.get(currentIndex).text
-                sourceRoi.retrieve(uuid)
+                var currentItem = cbItems.get(currentIndex);
+                if (currentItem != undefined) {
+                    var uuid = currentItem.text;
+                    sourceRoi.retrieve(uuid);
+                }
             }
         }
     }
