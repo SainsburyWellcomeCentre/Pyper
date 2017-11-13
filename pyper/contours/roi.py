@@ -8,11 +8,68 @@ This module is used to check the position of the mouse relative to a region of i
 
 :author: crousse
 """
-import csv
+import os
+import shutil
+import tarfile
+import tempfile
+
 import numpy as np
 from math import radians, cos, sin, sqrt
 import cv2
-from cv2 import norm, moments
+from cv2 import norm
+
+
+class RoiCollection(object):
+    def __init__(self, rois_list=None):
+        self.rois = [] if rois_list is None else rois_list
+
+    def __len__(self):
+        return len(self)
+
+    def __iter__(self):
+        for roi in self.rois:
+            yield roi
+
+    def __getitem__(self, item):  # TODO: implement dict version too with uuid as key
+        return self.rois[item]
+
+    def append(self, item):
+        self.rois.append(item)
+
+    def fmt_is_available(self, fmt):
+        fmts = (fmt for fmt, _ in shutil.get_archive_formats())
+        return fmt in fmts
+
+    def compress(self, dest_file_path):
+        dest_file_path_no_ext, ext = os.path.splitext(dest_file_path)
+        tmp_dir = tempfile.mkdtemp()
+        for i, roi in enumerate(self.rois):
+            roi.save(os.path.join(tmp_dir, "roi_{}.roi".format(i)))
+
+        for _fmt in ('bztar', 'gztar', 'zip', 'tar'):
+            if self.fmt_is_available(_fmt):
+                fmt = _fmt
+                break
+        old_dir = os.curdir
+        os.chdir(tmp_dir)  # To prevent having subdirectories
+        shutil.make_archive(dest_file_path_no_ext, fmt)
+        os.chdir(old_dir)
+        if os.path.exists(dest_file_path):
+            shutil.rmtree(tmp_dir)
+
+    def decompress(self, archive_file_path):
+        tmp_dir = tempfile.mkdtemp()
+        archive_name = os.path.split(archive_file_path)[1]
+        tmp_archive_file_path = os.path.join(tmp_dir, archive_name)
+        shutil.copy(archive_file_path, tmp_archive_file_path)
+        with tarfile.open(tmp_archive_file_path) as tar:
+            tar.extractall(path=tmp_dir)
+        archive_dir = os.path.join(tmp_dir, '.')
+        for file_name in os.listdir(archive_dir):
+            if file_name.endswith('.roi'):
+                file_path = os.path.join(archive_dir, file_name)
+                self.append(Roi.from_data(Roi.load(file_path)))
+        shutil.rmtree(tmp_dir)
 
 
 class Roi(object):
@@ -83,6 +140,22 @@ class Roi(object):
         for pnt in self.points.squeeze():
             roi_data.append('{}, {}'.format(*pnt))
         return roi_data
+
+    @staticmethod
+    def from_data(data):
+        roi_class = data[0].strip()
+        centre_x, centre_y, width, height = [float(l.strip()) for l in data[1:5]]
+        points = [[(float(p.strip())) for p in l.split(',')] for l in data[5:]]
+        if roi_class == 'ellipse':
+            return Ellipse(centre_x, centre_y, width, height)
+        elif roi_class == 'rectangle':
+            top_left_x = centre_x - width / 2.
+            top_left_y = centre_y - height / 2.
+            return Rectangle(top_left_x, top_left_y, width, height)
+        elif roi_class == 'freehand':
+            return FreehandRoi(points)
+        else:
+            raise ValueError('Expected one of ("ellipse", "rectangle", "freehand"), got "{}"'.format(roi_class))
 
 
 class Circle(Roi):

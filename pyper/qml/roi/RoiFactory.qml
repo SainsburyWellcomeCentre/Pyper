@@ -37,9 +37,41 @@ Item {
     property string roiType
     property string uuid
 
+    // utils
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
     function getRandomUuid() {
         return tracker_py_iface.get_uuid();
     }
+    function sourceFileFromString(srcString) {
+        srcString = srcString.replace(/^\s+|\s+$/g, '');
+        if (srcString === "ellipse") {
+            return "EllipseRoi.qml";
+        } else if (srcString === "rectangle") {
+            return "RectangleRoi.qml";
+        } else if (srcString === "freehand") {
+            return ("FreehandRoi.qml");
+        } else {
+            console.log("Unknown ROI type: " + srcString);
+        }
+    }
+    function getTypeFromString(src) {
+        if (endsWith(src, "EllipseRoi.qml")) {
+            return 'ellipse';
+        } else if (endsWith(src, "RectangleRoi.qml")) {
+            return 'rectangle';
+        } else if (endsWith(src, "FreehandRoi.qml")) {
+            return 'freehand';
+        } else {
+            console.log("Unrecognised source: " + source);
+        }
+    }
+
+    function getType() {
+        return getTypeFromString(String(source));
+    }
+
     // Store the ROI by uuid in a list
     function store() {
         var _uuid = getRandomUuid();
@@ -54,28 +86,33 @@ Item {
         loadFromRoiData(roiData);
     }
 
-
-    function endsWith(str, suffix) {
-        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    // Batch load/save
+    function loadRoisBatch() {
+        tracker_py_iface.load_roi_vault(roiType);
+    }
+    function retrieveNext() {
+        var roiData = tracker_py_iface.retrieve_next(roiType);
+        if (roiData === -1) {
+            return -1;
+        } else {
+            uuid = roiData[0];
+            loadFromRoiData(roiData.slice(1));
+            return uuid;
+        }
+    }
+    function saveRoisBatch() {
+        tracker_py_iface.save_roi_vault(roiType)
     }
 
+    // Single load/save
     function save() {
         console.log("Saving ROI");
         tracker_py_iface.save_roi(roiType);
     }
-    function sourceFileFromString(srcString) {
-        srcString = srcString.replace(/^\s+|\s+$/g, '');
-        if (srcString === "ellipse") {
-            return "EllipseRoi.qml";
-        } else if (srcString === "rectangle") {
-            return "RectangleRoi.qml";
-        } else if (srcString === "freehand") {
-            return ("FreehandRoi.qml");
-        } else {
-            console.log("Unknown ROI type: " + srcString);
-        }
+    function load() {
+        var roiData = tracker_py_iface.load_roi(roiType);
+        loadFromRoiData(roiData);
     }
-
     function scaleCoordinates(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height) {
         var horizontal_scaling_factor = width / img_width;  // TODO: check if not contrary
         var vertical_scaling_factor = height / img_height;
@@ -94,7 +131,6 @@ Item {
         var scaled_height = roi_height * vertical_scaling_factor;
         return [scaled_x, scaled_y, scaled_width, scaled_height];  // FIXME: use array
     }
-
     function loadFromRoiData(roiData) {
         if (roiData === -1){
             return;
@@ -124,27 +160,6 @@ Item {
         if (roiActive) {  // FIXME: does not seem to work (call inside works)
             tracker_py_iface.set_tracker_rois();
         }
-    }
-
-    function load() {
-        var roiData = tracker_py_iface.load_roi(roiType);
-        loadFromRoiData(roiData);
-    }
-
-    function getTypeFromString(src) {
-        if (endsWith(src, "EllipseRoi.qml")) {
-            return 'ellipse';
-        } else if (endsWith(src, "RectangleRoi.qml")) {
-            return 'rectangle';
-        } else if (endsWith(src, "FreehandRoi.qml")) {
-            return 'freehand';
-        } else {
-            console.log("Unrecognised source: " + source);
-        }
-    }
-
-    function getType() {
-        return getTypeFromString(String(source));
     }
 
     function setPyIfaceRoi() {
