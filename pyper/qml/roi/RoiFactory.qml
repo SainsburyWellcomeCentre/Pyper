@@ -64,7 +64,7 @@ Item {
         } else if (endsWith(src, "FreehandRoi.qml")) {
             return 'freehand';
         } else {
-            console.log("Unrecognised source: " + source);
+            console.log("Unknown source: " + src);
         }
     }
 
