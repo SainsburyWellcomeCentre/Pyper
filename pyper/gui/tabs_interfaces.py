@@ -33,7 +33,7 @@ from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi
+from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
@@ -343,7 +343,7 @@ class TrackerIface(BaseInterface):
                      'restriction': None,
                      'measurement': None}
         self.roi_params = {k: None for k in self.rois.keys()}
-        self.rois_vault = {k: {} for k in self.rois.keys()}
+        self.rois_vault = {k: {} for k in self.rois.keys()}  # FIXME: inner is ordered dict
 
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -408,6 +408,48 @@ class TrackerIface(BaseInterface):
         self._set_display()
         self._set_display_max()
         self._update_img_provider()
+
+    @pyqtSlot(QVariant)
+    def save_roi_vault(self, roi_type):
+        diag = QFileDialog()
+        default_dir = os.getenv('HOME')
+        dest_file_path = diag.getSaveFileName(parent=diag,
+                                              caption='Choose data file',
+                                              directory=default_dir,
+                                              filter="Archive (*.tar *.bz2 *.gzip *.zip)",
+                                              initialFilter="Archive (*.bz2)")
+        dest_file_path = dest_file_path[0]
+        vault = RoiCollection(self.rois_vault[roi_type].values())
+        vault.compress(dest_file_path)
+
+    @pyqtSlot(QVariant)
+    def load_roi_vault(self, roi_type):
+        diag = QFileDialog()
+        default_dir = os.getenv('HOME')
+        src_file_path = diag.getOpenFileName(parent=diag,
+                                             caption='Choose data file',
+                                             directory=default_dir,
+                                             filter="Archive (*.tar *.bz2 *.gzip *.zip)",
+                                             initialFilter="Archive (*.bz2)")
+        src_file_path = src_file_path[0]
+        vault = RoiCollection()
+        vault.decompress(src_file_path)
+        self.loaded_uuids = []
+        for roi in vault:
+            _uuid = self.get_uuid()
+            self.rois_vault[roi_type][_uuid] = roi
+            self.loaded_uuids.append(_uuid)
+
+    @pyqtSlot(QVariant, result=QVariant)
+    def retrieve_next(self, roi_type):
+        try:
+            _uuid = self.loaded_uuids.pop()
+        except IndexError:
+            return -1
+        roi = self.rois_vault[roi_type][_uuid]
+        self.rois[roi_type] = roi
+        roi_data = [_uuid] + list(self.tracker._stream.size) + roi.get_data()
+        return roi_data
 
     @pyqtSlot()
     def set_tracker_params(self):
@@ -597,7 +639,7 @@ class TrackerIface(BaseInterface):
         roi = self.rois_vault[roi_type][uuid]
         self.rois[roi_type] = roi
         self.set_tracker_rois()
-        return roi.get_data() + list(self.tracker._stream.size)
+        return list(self.tracker._stream.size) + roi.get_data()
 
     @pyqtSlot(str)
     def save_roi(self, roi_type):

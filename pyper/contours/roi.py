@@ -8,11 +8,68 @@ This module is used to check the position of the mouse relative to a region of i
 
 :author: crousse
 """
-import csv
+import os
+import shutil
+import tarfile
+import tempfile
+
 import numpy as np
 from math import radians, cos, sin, sqrt
 import cv2
-from cv2 import norm, moments
+from cv2 import norm
+
+
+class RoiCollection(object):
+    def __init__(self, rois_list=None):
+        self.rois = [] if rois_list is None else rois_list
+
+    def __len__(self):
+        return len(self)
+
+    def __iter__(self):
+        for roi in self.rois:
+            yield roi
+
+    def __getitem__(self, item):  # TODO: implement dict version too with uuid as key
+        return self.rois[item]
+
+    def append(self, item):
+        self.rois.append(item)
+
+    def fmt_is_available(self, fmt):
+        fmts = (fmt for fmt, _ in shutil.get_archive_formats())
+        return fmt in fmts
+
+    def compress(self, dest_file_path):
+        dest_file_path_no_ext, ext = os.path.splitext(dest_file_path)
+        tmp_dir = tempfile.mkdtemp()
+        for i, roi in enumerate(self.rois):
+            roi.save(os.path.join(tmp_dir, "roi_{}.roi".format(i)))
+
+        for _fmt in ('bztar', 'gztar', 'zip', 'tar'):
+            if self.fmt_is_available(_fmt):
+                fmt = _fmt
+                break
+        old_dir = os.curdir
+        os.chdir(tmp_dir)  # To prevent having subdirectories
+        shutil.make_archive(dest_file_path_no_ext, fmt)
+        os.chdir(old_dir)
+        if os.path.exists(dest_file_path):
+            shutil.rmtree(tmp_dir)
+
+    def decompress(self, archive_file_path):
+        tmp_dir = tempfile.mkdtemp()
+        archive_name = os.path.split(archive_file_path)[1]
+        tmp_archive_file_path = os.path.join(tmp_dir, archive_name)
+        shutil.copy(archive_file_path, tmp_archive_file_path)
+        with tarfile.open(tmp_archive_file_path) as tar:
+            tar.extractall(path=tmp_dir)
+        archive_dir = os.path.join(tmp_dir, '.')
+        for file_name in os.listdir(archive_dir):
+            if file_name.endswith('.roi'):
+                file_path = os.path.join(archive_dir, file_name)
+                self.append(Roi.from_data(Roi.load(file_path)))
+        shutil.rmtree(tmp_dir)
 
 
 class Roi(object):
@@ -59,7 +116,7 @@ class Roi(object):
         cv2.drawContours(mask, [self.points], 0, 255, cv2.cv.CV_FILLED)
         return mask
 
-    def save(self, dest):  # FIXME: deal with image size
+    def save(self, dest):  # FIXME: should be class specific
         t = str(type(self)).strip("'<>").split('.')[-1].lower()
         with open(dest, 'w') as out_file:
             out_file.write("{}\n".format(t))
@@ -70,19 +127,35 @@ class Roi(object):
             for pnt in self.points.squeeze():
                 out_file.write("{}, {}\n".format(*pnt))  # TODO: format
 
-    @staticmethod
-    def load(src_path):
-        with open(src_path, 'r') as in_file:
-            lines = in_file.readlines()
-        return lines
-
-    def get_data(self):
+    def get_data(self):  # default method to be overwritten
         t = str(type(self)).strip("'<>").split('.')[-1].lower()
         # Uses string to have same interface as save
         roi_data = [t, str(self.centre[0]), str(self.centre[1]), str(self.width), str(self.height)]
         for pnt in self.points.squeeze():
             roi_data.append('{}, {}'.format(*pnt))
         return roi_data
+
+    @staticmethod
+    def load(src_path):
+        with open(src_path, 'r') as in_file:
+            lines = in_file.readlines()
+        return lines
+
+    @staticmethod
+    def from_data(data):
+        roi_class = data[0].strip()
+        centre_x, centre_y, width, height = [float(l.strip()) for l in data[1:5]]
+        points = [[(float(p.strip())) for p in l.split(',')] for l in data[5:]]
+        if roi_class == 'ellipse':
+            return Ellipse(centre_x, centre_y, width, height)
+        elif roi_class == 'rectangle':
+            top_left_x = centre_x - width / 2.
+            top_left_y = centre_y - height / 2.
+            return Rectangle(top_left_x, top_left_y, width, height)
+        elif roi_class == 'freehand':
+            return FreehandRoi(points)
+        else:
+            raise ValueError('Expected one of ("ellipse", "rectangle", "freehand"), got "{}"'.format(roi_class))
 
 
 class Circle(Roi):
@@ -156,11 +229,20 @@ class Rectangle(Roi):
         points[3] = (top_x, top_y + self.height)
         return points
 
+    def get_data(self):
+        t = 'rectangle'
+        # Uses string to have same interface as save
+        roi_data = [t, str(self.top_left_point[0]), str(self.top_left_point[1]), str(self.width), str(self.height)]
+        for pnt in self.points.squeeze():
+            roi_data.append('{}, {}'.format(*pnt))
+        return roi_data
+
 
 class Ellipse(Roi):
     def __init__(self, centre_x, centre_y, width, height):
         Roi.__init__(self)
         self.centre = (centre_x, centre_y)
+        self.top_left_point = (centre_x - width / 2., centre_y - height / 2.)
         self.width = width
         self.height = height
         points = self.get_points().astype(np.int32)
@@ -179,6 +261,14 @@ class Ellipse(Roi):
         xs = np.hstack((xs, xs[::-1])) + self.centre[0]
         points = np.array(zip(xs, ys), dtype=np.float32)
         return points
+
+    def get_data(self):
+        t = 'ellipse'
+        # Uses string to have same interface as save
+        roi_data = [t, str(self.top_left_point[0]), str(self.top_left_point[1]), str(self.width), str(self.height)]
+        for pnt in self.points.squeeze():
+            roi_data.append('{}, {}'.format(*pnt))
+        return roi_data
 
 
 class FreehandRoi(Roi):

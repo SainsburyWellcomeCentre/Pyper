@@ -68,7 +68,7 @@ Frame {
         anchors.margins: 10
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 15
+        spacing: 10
 
         Row {
             spacing: 5
@@ -190,6 +190,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi x position"
                 value: sourceRoi.roiX
+                decimals: 1
                 onValueChanged: sourceRoi.roiX = value
             }
             IntInput {
@@ -198,6 +199,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi x position"
                 value: sourceRoi.roiY
+                decimals: 1
                 onValueChanged: sourceRoi.roiY = value
             }
             IntInput {
@@ -206,6 +208,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi width"
                 value: sourceRoi.roiWidth
+                decimals: 1
                 onValueChanged: sourceRoi.roiWidth = value
             }
             IntInput {
@@ -214,17 +217,19 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi height"
                 value: sourceRoi.roiHeight
+                decimals: 1
                 onValueChanged: sourceRoi.roiHeight = value
             }
         }
         Row {
-            spacing: 5
-            property int btnsWidth: 45
+//            spacing: 5
+            property int btnsWidth: 40
             CustomButton {
                 id: saveRoiBtn
 
                 width: parent.btnsWidth
                 height: width
+                anchors.verticalCenter: parent.verticalCenter
 
                 iconSource: "../../../resources/icons/document-save-as.png"
                 tooltip: "Save ROI"
@@ -236,6 +241,7 @@ Frame {
 
                 width: parent.btnsWidth
                 height: width
+                anchors.verticalCenter: parent.verticalCenter
 
                 iconSource: "../../../resources/icons/document-open.png"
                 tooltip: "Load ROI"
@@ -247,6 +253,7 @@ Frame {
 
                 width: parent.btnsWidth
                 height: width
+                anchors.verticalCenter: parent.verticalCenter
 
                 iconSource: "../../../resources/icons/ram.png"
                 tooltip: "Store the ROI in memory"
@@ -254,6 +261,46 @@ Frame {
                 onClicked: {
                     var uuid = sourceRoi.store()
                     cbItems.append({text: uuid})
+                }
+            }
+            Column {
+                property int btnsWidth: 55
+                property int btnsHeight: 25
+                CustomLabeledButton {
+                    id: loadRoiBatchBtn  // make menu?
+
+                    width: parent.btnsWidth
+                    height: parent.btnsHeight
+
+                    label: "load all"
+                    tooltip: "Load batch of ROI from file to memory"
+
+                    onClicked: {
+                        sourceRoi.loadRoisBatch();
+                        while (true) {
+                            var uuid = sourceRoi.retrieveNext();
+                            if (uuid == undefined) {
+                                break;
+                            } else if (uuid === -1) {
+                                break;
+                            } else {
+                                cbItems.append({text: uuid})
+                            }
+                        }
+                    }
+                }
+                CustomLabeledButton {
+                    id: saveRoiBatchBtn  // make menu?
+
+                    width: parent.btnsWidth
+                    height: parent.btnsHeight
+
+                    label: "save all"
+                    tooltip: "Save all ROIs in manager to memory"
+
+                    onClicked: {
+                        sourceRoi.saveRoisBatch();
+                    }
                 }
             }
         }
