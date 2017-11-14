@@ -12,6 +12,8 @@ class TrackingResults(object):
         self.distances_from_arena = []
         self.in_tracking_roi = []
 
+        self.start_time = None
+
         self.default_pos = (-1, -1)
         self.only_defaults = True
         self.default_measure = float('NaN')
@@ -57,11 +59,11 @@ class TrackingResults(object):
 
     def _get_row(self, idx):
         row = [idx]
-        row.append(self.times[idx])
-        row.extend(self.positions[idx])
-        row.append(self.areas[idx])
-        row.extend(self.distances_from_arena[idx])
-        row.append(self.measures[idx])
+        row.append("{0:.3f}".format(self.times[idx]))
+        row.extend(["{0:.2f}".format(p) for p in self.positions[idx]])
+        row.append("{0:.2f}".format(self.areas[idx]))
+        row.extend(["{0:.1f}".format(p) for p in self.distances_from_arena[idx]])
+        row.append("{0:.3f}".format(self.measures[idx]))
         row.append(self.in_tracking_roi[idx])
         return row
 
@@ -143,7 +145,11 @@ class TrackingResults(object):
         self.in_tracking_roi.append(self.default_in_tracking_roi)
 
     def append_default_time(self):
-        self.times.append(time())
+        if self.start_time is not None:
+            self.times.append(time() - self.start_time)
+        else:
+            self.times.append(0.0)
+            self.start_time = time()
 
     def _append_defaults(self):
         self.append_default_pos()

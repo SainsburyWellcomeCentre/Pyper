@@ -499,6 +499,7 @@ class TrackerIface(BaseInterface):
 
     def pre_track(self):
         self.start_track_time = time()
+        self.tracker.results.start_time = time()
 
     def post_track(self):
         self.end_track_time = time()
