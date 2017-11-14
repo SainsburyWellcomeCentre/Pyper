@@ -1,9 +1,11 @@
 import csv
 import numpy as np
+from time import time
 
 
 class TrackingResults(object):
     def __init__(self):
+        self.times = []
         self.positions = []  # TODO: see if use array for efficiency in has_non_default_position
         self.measures = []
         self.areas = []  # The area of the tracked object
@@ -17,12 +19,16 @@ class TrackingResults(object):
         self.default_distance_from_arena = (float('NaN'), float('NaN'))
         self.default_in_tracking_roi = False
 
-    def reset(self):
+    def _reset(self):
+        self.times = []
         self.positions = []
         self.measures = []
         self.areas = []  # The area of the tracked object
         self.distances_from_arena = []
         self.in_tracking_roi = []
+
+    def reset(self):
+        self._reset()
 
     def trim_positions(self):  # OPTIMISE:
         # pos = np.int32(self.positions)
@@ -36,20 +42,31 @@ class TrackingResults(object):
     def __len__(self):
         return len(self.positions)
 
-    def to_csv(self, dest):
+    def _get_title(self):
+        return ["frame", "time", "x", "y", "area", "x to arena", "y to arena", "measure", "in trakcing roi"]
+
+    def get_title(self):
+        return self._get_title()
+
+    def to_csv(self, dest):  # FIXME: add title
         with open(dest, 'w') as out_file:
             writer = csv.writer(out_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(self.get_title())
             for i in range(len(self)):
                 writer.writerow(self.get_row(i))
 
-    def get_row(self, idx):
+    def _get_row(self, idx):
         row = [idx]
+        row.append(self.times[idx])
         row.extend(self.positions[idx])
         row.append(self.areas[idx])
         row.extend(self.distances_from_arena[idx])
         row.append(self.measures[idx])
         row.append(self.in_tracking_roi[idx])
         return row
+
+    def get_row(self, idx):
+        return self._get_row(idx)
 
     def get_frame_results(self):
         return self.get_last_position(), self.get_last_dist_from_arena_pair()
@@ -89,6 +106,9 @@ class TrackingResults(object):
         """
         self.in_tracking_roi[-1] = val
 
+    def overwrite_last_time(self, t):
+        self.times[-1] = t
+
     def get_last_movement_vector(self):
         if len(self.positions) < 2:
             return
@@ -103,6 +123,9 @@ class TrackingResults(object):
 
     def get_last_in_tracking_roi(self):
         return self.in_tracking_roi[-1]
+
+    def get_last_time(self):
+        return self.times[-1]
 
     def append_default_measure(self):
         self.measures.append(self.default_measure)
@@ -119,12 +142,19 @@ class TrackingResults(object):
     def append_default_in_tracking_roi(self):
         self.in_tracking_roi.append(self.default_in_tracking_roi)
 
-    def append_defaults(self):
+    def append_default_time(self):
+        self.times.append(time())
+
+    def _append_defaults(self):
         self.append_default_pos()
         self.append_default_area()
         self.append_default_measure()
         self.append_default_dist_from_arena()
         self.append_default_in_tracking_roi()
+        self.append_default_time()
+
+    def append_defaults(self):
+        self._append_defaults()
 
     def repeat_last(self):
         if len(self) > 0:
@@ -133,6 +163,7 @@ class TrackingResults(object):
             self.repeat_last_area()
             self.repeat_last_distance_from_arena()
             self.repeat_last_in_tracking_roi()
+            self.append_default_time()  # Time is always current
         else:
             self.append_defaults()
 
