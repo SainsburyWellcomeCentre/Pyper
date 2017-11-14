@@ -190,6 +190,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi x position"
                 value: sourceRoi.roiX
+                decimals: 1
                 onValueChanged: sourceRoi.roiX = value
             }
             IntInput {
@@ -198,6 +199,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi x position"
                 value: sourceRoi.roiY
+                decimals: 1
                 onValueChanged: sourceRoi.roiY = value
             }
             IntInput {
@@ -206,6 +208,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi width"
                 value: sourceRoi.roiWidth
+                decimals: 1
                 onValueChanged: sourceRoi.roiWidth = value
             }
             IntInput {
@@ -214,6 +217,7 @@ Frame {
                 boxWidth: 65
                 tooltip: "Set roi height"
                 value: sourceRoi.roiHeight
+                decimals: 1
                 onValueChanged: sourceRoi.roiHeight = value
             }
         }

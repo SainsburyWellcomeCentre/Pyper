@@ -145,10 +145,10 @@ Item {
             var img_width = roiData[5];
             var img_height = roiData[6];
             var scaledCoords = scaleCoordinates(roiData[0], img_width, img_height, rawRoiX, rawRoiY, rawRoiWidth, rawRoiHeight);
-            roiX = scaledCoords[0];
-            roiY= scaledCoords[1];
-            roiWidth = scaledCoords[2];
-            roiHeight = scaledCoords[3];
+            root.roiX = Math.round(scaledCoords[0]);
+            root.roiY= Math.round(scaledCoords[1]);
+            root.roiWidth = Math.round(scaledCoords[2]);
+            root.roiHeight = Math.round(scaledCoords[3]);
 
             var points;
             if (getType() === "freehand") {
