@@ -116,7 +116,7 @@ class Roi(object):
         cv2.drawContours(mask, [self.points], 0, 255, cv2.cv.CV_FILLED)
         return mask
 
-    def save(self, dest):  # FIXME: deal with image size
+    def save(self, dest):  # FIXME: should be class specific
         t = str(type(self)).strip("'<>").split('.')[-1].lower()
         with open(dest, 'w') as out_file:
             out_file.write("{}\n".format(t))
@@ -127,19 +127,19 @@ class Roi(object):
             for pnt in self.points.squeeze():
                 out_file.write("{}, {}\n".format(*pnt))  # TODO: format
 
-    @staticmethod
-    def load(src_path):
-        with open(src_path, 'r') as in_file:
-            lines = in_file.readlines()
-        return lines
-
-    def get_data(self):
+    def get_data(self):  # default method to be overwritten
         t = str(type(self)).strip("'<>").split('.')[-1].lower()
         # Uses string to have same interface as save
         roi_data = [t, str(self.centre[0]), str(self.centre[1]), str(self.width), str(self.height)]
         for pnt in self.points.squeeze():
             roi_data.append('{}, {}'.format(*pnt))
         return roi_data
+
+    @staticmethod
+    def load(src_path):
+        with open(src_path, 'r') as in_file:
+            lines = in_file.readlines()
+        return lines
 
     @staticmethod
     def from_data(data):
@@ -229,11 +229,20 @@ class Rectangle(Roi):
         points[3] = (top_x, top_y + self.height)
         return points
 
+    def get_data(self):
+        t = 'rectangle'
+        # Uses string to have same interface as save
+        roi_data = [t, str(self.top_left_point[0]), str(self.top_left_point[1]), str(self.width), str(self.height)]
+        for pnt in self.points.squeeze():
+            roi_data.append('{}, {}'.format(*pnt))
+        return roi_data
+
 
 class Ellipse(Roi):
     def __init__(self, centre_x, centre_y, width, height):
         Roi.__init__(self)
         self.centre = (centre_x, centre_y)
+        self.top_left_point = (centre_x - width / 2., centre_y - height / 2.)
         self.width = width
         self.height = height
         points = self.get_points().astype(np.int32)
@@ -252,6 +261,14 @@ class Ellipse(Roi):
         xs = np.hstack((xs, xs[::-1])) + self.centre[0]
         points = np.array(zip(xs, ys), dtype=np.float32)
         return points
+
+    def get_data(self):
+        t = 'ellipse'
+        # Uses string to have same interface as save
+        roi_data = [t, str(self.top_left_point[0]), str(self.top_left_point[1]), str(self.width), str(self.height)]
+        for pnt in self.points.squeeze():
+            roi_data.append('{}, {}'.format(*pnt))
+        return roi_data
 
 
 class FreehandRoi(Roi):

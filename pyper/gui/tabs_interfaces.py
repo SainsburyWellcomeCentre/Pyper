@@ -448,7 +448,7 @@ class TrackerIface(BaseInterface):
             return -1
         roi = self.rois_vault[roi_type][_uuid]
         self.rois[roi_type] = roi
-        roi_data = [_uuid] + roi.get_data() + list(self.tracker._stream.size)
+        roi_data = [_uuid] + list(self.tracker._stream.size) + roi.get_data()
         return roi_data
 
     @pyqtSlot()
@@ -639,7 +639,7 @@ class TrackerIface(BaseInterface):
         roi = self.rois_vault[roi_type][uuid]
         self.rois[roi_type] = roi
         self.set_tracker_rois()
-        return roi.get_data() + list(self.tracker._stream.size)
+        return list(self.tracker._stream.size) + roi.get_data()
 
     @pyqtSlot(str)
     def save_roi(self, roi_type):
