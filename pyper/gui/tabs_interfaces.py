@@ -369,8 +369,13 @@ class TrackerIface(BaseInterface):
         :param int idx: The index of the row to return
         """
         idx = int(idx)
-        if 0 <= idx < len(self.tracker.results):
-            return map(str, self.tracker.results.get_row(idx))
+        try:
+            results = self.tracker.results
+        except AttributeError as err:
+            print("No tracker instance, make sure you have selected the correct result type; {}".format(err))
+            return -1
+        if 0 <= idx < len(results):
+            return map(str, results.get_row(idx))
         else:
             return -1
 
