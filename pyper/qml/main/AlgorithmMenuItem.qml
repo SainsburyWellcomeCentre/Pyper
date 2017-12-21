@@ -1,4 +1,4 @@
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 
 MenuItem {
     text: qsTr("Unknown algorithm")
