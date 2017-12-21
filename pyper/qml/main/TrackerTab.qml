@@ -1,5 +1,5 @@
+import QtQml 2.2
 import QtQuick 2.3
-import QtQml 2.0
 import QtQuick.Controls 1.2
 
 import "../popup_messages"
