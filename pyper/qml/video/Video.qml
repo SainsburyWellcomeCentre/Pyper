@@ -69,6 +69,8 @@ Item {
                 id: progressBar
 
                 width: previewImage.width - pBarLabel.width
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 minimumValue: 0
 
                 enabled: root.enabled
