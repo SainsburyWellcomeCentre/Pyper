@@ -80,7 +80,7 @@ ApplicationWindow {
                 currentRoi.drawingColor = colorDialog.color;
                 visible = false;
             }
-            visible: false
+//            visible: false  // breaks on OsX
         }
 
         ExclusiveGroup {
