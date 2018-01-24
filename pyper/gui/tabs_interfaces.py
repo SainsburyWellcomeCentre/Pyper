@@ -486,6 +486,8 @@ class TrackerIface(BaseInterface):
         :param method tracker_method:
         :return:
         """
+        if roi_type not in self.rois.keys():
+            return
         if self.rois[roi_type] is not None:
             tracker_method(self.rois[roi_type])
         else:
