@@ -436,6 +436,9 @@ class TrackerIface(BaseInterface):
                                              filter="Archive (*.tar *.bz2 *.gzip *.zip)",
                                              initialFilter="Archive (*.bz2)")
         src_file_path = src_file_path[0]
+        self.load_roi_vault_from_path(roi_type, src_file_path)
+
+    def load_roi_vault_from_path(self, roi_type, src_file_path):
         vault = RoiCollection()
         vault.decompress(src_file_path)
         self.loaded_uuids = []
