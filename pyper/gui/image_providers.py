@@ -111,7 +111,13 @@ class CvImageProvider(TrackingImageProvider):
         if not self.reuse_on_next_load:
             if self._stream is not None:
                 img = self._stream.read()
-                if img is not None and self._stream.should_update_vid():
+                # FIXME: check is hacky and implies dependency
+                if hasattr(self._stream, 'should_update_vid'):  # It is a tracker (not viewer)
+                    do_update = self._stream.should_update_vid()
+                else:
+                    do_update = True
+
+                if img is not None and do_update:
                     img = img.color()
                     size = img.shape[:2]
                 elif self.img is not None:
