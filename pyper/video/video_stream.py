@@ -61,6 +61,7 @@ class VideoStream(object):
         self.bg_end_frame = self.bg_start_frame + n_background_frames - 1
         
         self.current_frame_idx = -1  # We start out since we increment upon frame loading
+        self.seekable = False
 
     def save(self, frame):  # FIXME: fix video_writer calls (put most in VideoWriter)
         """
@@ -145,6 +146,7 @@ class RecordedVideoStream(VideoStream):
         self.duration = self.n_frames / float(self.fps)
 
         VideoStream.__init__(self, file_path, bg_start, n_background_frames)
+        self.seekable = self.stream.seekable
         
     def _start_video_capture_session(self, file_path):  # TODO: refactor name
         """
@@ -195,6 +197,10 @@ class RecordedVideoStream(VideoStream):
             raise VideoStreamIOException("Could not read video")
         else:
             return n_frames
+
+    def seek(self, frame_id):
+        self.stream.seek(frame_id)  # FIXME: because of read
+        self.current_frame_idx = frame_id
     
     def read(self):  # OPTIMISE: (cast)
         """

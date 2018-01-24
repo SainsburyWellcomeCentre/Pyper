@@ -115,6 +115,14 @@ class VideoCapture(object):
         """Synonym to fourcc"""
         return int(self.get('fourcc'))
 
+    @property
+    def seekable(self):  # FIXME: make cached property or attribute for speed
+        return self.n_frames >= 1
+
+    def seek(self, frame_id):
+        if self.seekable and 0 <= frame_id < self.n_frames:
+            self.set('pos_frames', frame_id)
+
     def get(self, propid):
         if not try_int(propid):
             propid = getattr(cv2.cv, "CV_CAP_PROP_" + propid.upper())

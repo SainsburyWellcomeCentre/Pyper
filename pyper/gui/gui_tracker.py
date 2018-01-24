@@ -44,6 +44,10 @@ class GuiTracker(Tracker):
         It also updates the uiIface positions accordingly
         """
         try:
+            if self._stream.seekable:  # Jump to tracking start frame if possible
+                if self._stream.current_frame_idx == self._stream.bg_end_frame:
+                    self._stream.seek(self.track_from)  # TODO: see if all params updated (including results)
+
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
             self.current_frame = None

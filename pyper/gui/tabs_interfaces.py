@@ -30,7 +30,7 @@ from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
-from pyper.video.video_stream import QuickRecordedVideoStream as VStream
+from pyper.video.video_stream import QuickRecordedVideoStream as VStream, RecordedVideoStream
 from pyper.video.video_stream import ImageListVideoStream
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
 from pyper.analysis import video_analysis
@@ -157,8 +157,7 @@ class PlayerInterface(BaseInterface):
         target_frame = self.stream.current_frame_idx
         target_frame -= 1  # reset
         target_frame += int(step_size)
-        self.stream.current_frame_idx = self._validate_frame_idx(target_frame)
-        self.get_img()
+        self.seek_to(target_frame)
 
     @pyqtSlot(QVariant)
     def seek_to(self, frame_idx):
@@ -168,6 +167,8 @@ class PlayerInterface(BaseInterface):
         :param int frame_idx: The frame to get to
         """
         self.stream.current_frame_idx = self._validate_frame_idx(frame_idx)
+        if self.stream.seekable:
+            self.stream.seek(frame_idx)
         self.get_img()
     
     def _validate_frame_idx(self, frame_idx):
@@ -196,7 +197,12 @@ class ViewerIface(PlayerInterface):
         Loads the video into memory
         """
         try:
-            self.stream = VStream(self.params.src_path, 0, 1)
+            recorded_stream = RecordedVideoStream(self.params.src_path, 0, 1)
+            self.seekable = recorded_stream.stream.seekable  # FIXME: add to init
+            if self.seekable:
+                self.stream = recorded_stream
+            else:  # Wee need a low definition of video to mimic seeking
+                self.stream = VStream(self.params.src_path, 0, 1)
         except VideoStreamIOException:
             self.stream = None
             error_screen = self.win.findChild(QObject, 'viewerVideoLoadingErrorScreen')
