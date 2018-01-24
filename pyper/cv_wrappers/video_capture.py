@@ -104,7 +104,7 @@ class VideoCapture(object):
 
     @property
     def n_frames(self):
-        return self.get('frame_count')  # FIXME: add check for n_frames < 0
+        return self.get('frame_count')
 
     @property
     def fourcc(self):

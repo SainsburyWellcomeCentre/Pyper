@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+
 from pyper.tracking.tracking import Tracker
 
 

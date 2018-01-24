@@ -59,6 +59,7 @@ class Logger(QObject):
             output_text = '{}\n>>>{}'.format(previous_text, text)
             self.log.setProperty('text', output_text)
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     

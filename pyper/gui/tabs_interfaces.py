@@ -20,7 +20,6 @@ from scipy.misc import imsave
 from time import time
 
 from pyper.utilities.utils import qurl_to_str
-
 from pyper.utilities.utils import un_file
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
