@@ -21,7 +21,7 @@ from cv2 import cv
 
 import cv2
 
-from video_frame import Frame
+from pyper.video.video_frame import Frame
 from pyper.utilities.utils import spin_progress_bar
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
 from pyper.cv_wrappers.video_writer import VideoWriter
