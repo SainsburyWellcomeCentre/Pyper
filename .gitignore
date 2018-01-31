@@ -12,3 +12,4 @@ resources/teleporter/*
 src/qml/MouseTracker.creator*
 .idea
 resources/recording.avi
+*.qmlproject.user
