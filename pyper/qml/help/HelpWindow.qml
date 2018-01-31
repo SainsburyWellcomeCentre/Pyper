@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtWebKit 3.0
+//import QtWebEngine 1.5
 
 
 ApplicationWindow {
@@ -14,6 +15,7 @@ ApplicationWindow {
     visible: false
 
     WebView {
+//    WebEngineView {
         id: webview
 
         anchors.fill: parent
