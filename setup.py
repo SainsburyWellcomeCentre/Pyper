@@ -71,6 +71,8 @@ def get_files_list(src_dir, extensions=(), filenames=()):  # TODO: rename
     :param list extensions:
     :return: list of tuples of the form (directory, [files, in , directory, matching, extension])
     """
+    if platform.system() == 'Windows':
+        src_dir = src_dir.replace('/', '\\')
     if extensions:
         files_list = [(d, filter_exts(d, files, extensions)) for d, folders, files in os.walk(src_dir)]
     elif filenames:
