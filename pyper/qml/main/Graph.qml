@@ -13,6 +13,7 @@ Rectangle {
     color: theme.background
     
     property string points
+
     onPointsChanged: {
         setPath(points);
     }
@@ -78,25 +79,27 @@ Rectangle {
             graphCanvas.path = [];
         }
         function drawPath() {
-            var currentPoint = path[0];
-            lastX = currentPoint.x;
-            lastY = currentPoint.y;
-            
-            var ctx = getContext('2d');
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = drawingColor;
-            ctx.beginPath();
-            
-            for (var i=1; i < path.length; i++) {
-                currentPoint = path[i];
-                
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(currentPoint.x, currentPoint.y);
-                
+            if (available) {
+                var currentPoint = path[0];
                 lastX = currentPoint.x;
                 lastY = currentPoint.y;
+
+                var ctx = getContext('2d');
+                ctx.lineWidth = 3.0;
+                ctx.strokeStyle = drawingColor;
+                ctx.beginPath();
+
+                for (var i=1; i < path.length; i++) {
+                    currentPoint = path[i];
+
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(currentPoint.x, currentPoint.y);
+
+                    lastX = currentPoint.x;
+                    lastY = currentPoint.y;
+                }
+                ctx.stroke();
             }
-            ctx.stroke();
         }
         function clearCanvas() {
             var ctx = getContext("2d");
