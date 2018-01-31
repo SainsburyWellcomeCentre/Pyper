@@ -75,15 +75,18 @@ if __name__ == '__main__':
     appEngine.addImageProvider("analysisprovider", analysis_image_provider)
     analysis_image_provider2 = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider2", analysis_image_provider2)
-    appEngine.load(QUrl('./pyper/qml/main/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
+
+    qml_source_path = os.path.join(conf.shared_directory, 'qml', 'main', 'MouseTracker.qml')
+#    appEngine.load(QUrl(qml_source_path))
+    appEngine.load(qml_source_path)
 
     try:
         win = appEngine.rootObjects()[0]
     except IndexError:
         raise PyperGUIError("Could not start the QT GUI")
 
-    ico = QIcon('./resources/icons/pyper.png')
-    win.setIcon(ico)
+    icon = QIcon(os.path.join(conf.shared_directory, 'resources', 'icons', 'pyper.png'))
+    win.setIcon(icon)
     
     if not DEBUG:
         logger = Logger(context, win, "log")
