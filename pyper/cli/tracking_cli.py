@@ -24,6 +24,7 @@ def coords(string):
     except:
         raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(string))
 
+
 def get_parser():
     config = conf.config
 
@@ -84,6 +85,7 @@ def get_parser():
                         help='The image format to save the figures in.')
     parser.add_argument('--prefix', type=str, help='A prefix to append to the saved figures and data.')
     return parser
+
 
 if __name__ == '__main__':
     parser = get_parser()

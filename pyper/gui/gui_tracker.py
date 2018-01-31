@@ -1,5 +1,5 @@
 import cv2
-import numpy as np
+import numpy as np  # required for dynamic subclassing
 
 from pyper.tracking.tracking import Tracker
 

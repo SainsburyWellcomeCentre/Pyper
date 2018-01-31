@@ -26,7 +26,8 @@ class VideoWriter(object):
 
         self.writer = cv2.VideoWriter(save_path, codec, fps, frame_shape, is_color)
         if not self.is_opened():
-            raise VideoWriterOpenError("Could not open video writer. Codec {} probably unsupported.".format(codec))
+            raise VideoWriterOpenError("Could not open video writer. Codec {} probably unsupported.".format(codec))  # TODO do reverse of number
+        # TODO: try other formats to guess and offer solution
 
     def open(self):
         self.writer.open(self.save_path, self.codec, self.fps, self.frame_shape, self.is_color)
