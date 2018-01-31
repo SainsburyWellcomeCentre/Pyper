@@ -9,7 +9,6 @@ from setuptools.command.install import install
 
 SUPPORTED_PYTHON_VERSION = '2.7'
 
-# FIXME: check that works on all platforms
 libs_directory = os.path.join(sys.prefix, 'lib', 'python{}'.format(SUPPORTED_PYTHON_VERSION), 'site-packages')
 shared_directory = os.path.join(sys.prefix, 'share')  # Where resources should go
 global_config_directory = os.path.join(sys.prefix, 'etc', 'pyper')
@@ -123,7 +122,6 @@ def patch_macos_help():
     """
     if platform.system() == 'Darwin':
         shutil.copy('pyper/qml/help/HelpWindowMacOs', 'pyper/qml/help/pyper/qml/help/')
-
 
 
 class CopyResources(install):

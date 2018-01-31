@@ -6,7 +6,14 @@ MenuItem {
     property variant pythonObject
     checkable: true
 
+    property bool objectSet: false
+    onPythonObjectChanged: {
+        objectSet = true;
+    }
+
     onTriggered: {
-        pythonObject.set_tracker_type(className)
+        if (objectSet) {
+            pythonObject.set_tracker_type(className);
+        }
     }
 }

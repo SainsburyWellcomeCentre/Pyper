@@ -61,6 +61,8 @@ ApplicationWindow {
             objectName: "trackingAlgorithmMenu"
             title: qsTr("Tracking &Method")
             onPopupVisibleChanged: {
+                algo1.pythonObject = py_iface;  // Needs to be put here to remove warnings as it does not exist on init
+                algo2.pythonObject = py_iface;  // Needs to be put here to remove warnings
                 py_editor.scrape_plugins_dir();
             }
 
@@ -85,8 +87,9 @@ ApplicationWindow {
 
             }
 
-            AlgorithmMenuItem { id: algo1; checked:true; text: "Open field"; className: "GuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
-            AlgorithmMenuItem { id: algo2; text: "Pupil tracking"; className: "PupilGuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup; pythonObject: py_iface}
+            AlgorithmMenuItem { id: algo1; checked:true; text: "Open field"; className: "GuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup}
+            AlgorithmMenuItem { id: algo2; text: "Pupil tracking"; className: "PupilGuiTracker"; exclusiveGroup: trackingAlgorithmExclusiveGroup}
+
             MenuSeparator { }  // For plugins
             MenuSeparator { }
             MenuItem {
