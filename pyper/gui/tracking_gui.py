@@ -6,16 +6,13 @@ The GUI module
 
 Creates the graphical interface
 
-.. note:: This module depends on importing OpenGL.GL although it doens't uses it directly
+.. note:: This module depends on importing OpenGL.GL although it doesn't uses it directly but it
+is used by the Qt interface.
 
 :author: crousse
 """
 import os
 import sys
-
-sys.path.append(os.path.abspath("./"))  # FIXME: to be done by setup.py
-
-from pyper.video.transcoder import TranscoderIface
 
 from OpenGL import GL # Hack necessary to get qtQuick working
 
@@ -24,10 +21,12 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtGui import QIcon
 
+from pyper.video.transcoder import TranscoderIface
 from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface
 from pyper.gui.code_editor import EditorIface
 from pyper.gui.parameters import ParamsIface
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
+from pyper.config import conf
 
 from pyper.exceptions.exceptions import PyperGUIError
 
@@ -62,10 +61,9 @@ class Logger(QObject):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    
     appEngine = QQmlApplicationEngine()
-    
     context = appEngine.rootContext()
+
     # ALL THE ADDIMAGEPROVIDER LINES BELOW ARE REQUIRED TO MAKE QML BELIEVE THE PROVIDER IS VALID BEFORE ITS CREATION
     appEngine.addImageProvider('viewerprovider', CvImageProvider())
     appEngine.addImageProvider('trackerprovider', CvImageProvider())
