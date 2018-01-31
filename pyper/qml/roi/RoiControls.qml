@@ -8,6 +8,7 @@ import QtQuick.Dialogs 1.2
 
 import "../basic_types"
 import "../style"
+import "../config"
 
 Frame {
     id: roiLayout
@@ -39,7 +40,8 @@ Frame {
     property ExclusiveGroup exclusiveGroup: null
 
     onDrawingTypeChanged: {
-        shapeBtn.iconSource = "../../../resources/icons/" + drawingType + ".png";
+        shapeBtn.iconSource = "../../resources/icons/" + drawingType + ".png";  // different folder root
+//        shapeBtn.iconSource = iconHandler.getPath(drawingType + ".png");
         changeRoiClass(sourceRoi, drawingType);
     }
     onDrawingColorChanged: {
@@ -110,7 +112,8 @@ Frame {
 
                 tooltip: "Select ROI color"
 
-                iconSource: "../../../resources/icons/pick_color.png"  // FIXME: change upon selection
+//                iconSource: "../../../resources/icons/pick_color.png"  // FIXME: change upon selection
+                iconSource: iconHandler.getPath("pick_color.png");  // FIXME: change upon selection
 
                 function paint() {
                     canvas.requestPaint();
@@ -142,7 +145,8 @@ Frame {
                 height: width
                 label: ""
 
-                iconSource: "../../../resources/icons/ellipse.png"
+//                iconSource: "../../resources/icons/ellipse.png"
+                iconSource: iconHandler.getPath("ellipse.png");
 
                 onClicked: {
                     roiLayout.checked = true;
@@ -231,7 +235,8 @@ Frame {
                 height: width
                 anchors.verticalCenter: parent.verticalCenter
 
-                iconSource: "../../../resources/icons/document-save-as.png"
+//                iconSource: "../../../resources/icons/document-save-as.png"
+                iconSource: iconHandler.getPath("document-save-as.png");
                 tooltip: "Save ROI"
 
                 onClicked: sourceRoi.save();
@@ -243,7 +248,8 @@ Frame {
                 height: width
                 anchors.verticalCenter: parent.verticalCenter
 
-                iconSource: "../../../resources/icons/document-open.png"
+//                iconSource: "../../../resources/icons/document-open.png"
+                iconSource: iconHandler.getPath("document-open.png");
                 tooltip: "Load ROI"
 
                 onClicked: sourceRoi.load();
@@ -255,7 +261,8 @@ Frame {
                 height: width
                 anchors.verticalCenter: parent.verticalCenter
 
-                iconSource: "../../../resources/icons/ram.png"
+//                iconSource: "../../../resources/icons/ram.png"
+                iconSource: iconHandler.getPath("ram.png");
                 tooltip: "Store the ROI in memory"
 
                 onClicked: {

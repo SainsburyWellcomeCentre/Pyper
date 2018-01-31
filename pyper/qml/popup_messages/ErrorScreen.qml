@@ -20,7 +20,7 @@ InfoScreen{
         anchors.left: parent.left
         anchors.leftMargin: 10
         anchors.verticalCenter: parent.verticalCenter
-        source: "../../../resources/icons/error.png"
+        source: "../../resources/icons/error.png"
         width: 30
         height: width
     }

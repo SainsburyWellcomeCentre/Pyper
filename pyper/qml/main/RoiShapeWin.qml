@@ -10,6 +10,7 @@ import "../basic_types"
 import "../roi"
 import "../popup_messages"
 import "../style"
+import "../config"
 
 ApplicationWindow {
     id: roiShapeWin
@@ -37,19 +38,19 @@ ApplicationWindow {
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/ellipse.png"
+            iconSource: iconHandler.getPath("ellipse.png");
             onClicked: { roiShapeWin.shapeSelected('ellipse'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/rectangle.png"
+            iconSource: iconHandler.getPath("rectangle.png");
             onClicked: { roiShapeWin.shapeSelected('rectangle'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/freehand.png"
+            iconSource: iconHandler.getPath("freehand.png");
             onClicked: { roiShapeWin.shapeSelected('freehand'); }
         }
     }

@@ -2,6 +2,8 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Private 1.0
 
+import "../style"
+
 CustomLabeledButton{
     width: 60
     height: 70
