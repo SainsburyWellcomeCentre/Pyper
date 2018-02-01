@@ -53,6 +53,7 @@ Rectangle {
         anchors.topMargin: 10
         anchors.top: parent.top
         anchors.horizontalCenter: trackerDisplay.horizontalCenter
+        height: 20
 
         color: theme.text
         text: py_iface.get_file_name()

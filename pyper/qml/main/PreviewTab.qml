@@ -51,6 +51,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.topMargin: 10
         anchors.horizontalCenter: previewImage.horizontalCenter
+        height: 20
 
         color: theme.text
         text: py_iface.get_file_name()

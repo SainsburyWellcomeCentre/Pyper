@@ -165,6 +165,8 @@ Rectangle {
         id: pathControls
         spacing: 10
 
+        height: 120
+
         anchors.margins: 10
         anchors.left: controlsLayout.right
         anchors.top: parent.top
