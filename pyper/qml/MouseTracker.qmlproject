@@ -13,7 +13,7 @@ Project {
         directory: "."
     }
     ImageFiles {
-        directory: "../icons/"
+        directory: "../../resources/icons/"
     }
     /* List of plugin directories passed to QML runtime */
     // importPaths: [ "../exampleplugin" ]
