@@ -38,13 +38,7 @@ The *Preview* tab
 The preview tab enables you to have a look at of your video to select your start and end point
 for the analysis as well as the frame that will serve as a reference.
 
-.. warning:: As not all video will allow seeking, for files which cannot be seeked
-    (e.g. .h264 files acquired with a Raspberry Pi camera), the preview is achieved by loading a downscaled
-    version of the video in memory before playing it.
-    The consequence is that the size of the video you will be able to preview depends on the amount of memory
-    on you computer. For large videos with seek information missing, a workaround may be
-    to use the *transcoding* tab to export your video to a different format.
-    THIS DOES NOT AFFECT THE TRACKING WHICH ALWAYS LOADS THE VIDEO ONE FRAME AT A TIME.
+.. include:: preview_non_seekable_warning.rst
 
 The reference frame must appear before the data frames or be loaded from an image file.
 You can navigate in your video using the controls on the left of the progress bar at the bottom.

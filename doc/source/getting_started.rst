@@ -27,15 +27,8 @@ You can now go to the *Preview* tab and navigate through the file.
 
 These frames will be used in the *Track* tab.
 
-.. warning::
-    Not all video files are indexable. Therefore, for the preview,
-    the programs loads a downscaled version of the video in memory.
-    This has 2 downsides.:
+.. include:: preview_non_seekable_warning.rst
 
-    #. The video is of lower resolution
-    #. The size of the video is limited by the amount of RAM in the machine.
-
-    Please note this does not affect the tracking which loads the original video frame by frame.
     
 Tracking
 ^^^^^^^^
