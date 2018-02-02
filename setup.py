@@ -121,7 +121,7 @@ def patch_macos_help():
     :return:
     """
     if platform.system() == 'Darwin':
-        shutil.copy('pyper/qml/help/HelpWindowMacOs', 'pyper/qml/help/pyper/qml/help/')
+        shutil.copy('pyper/qml/help/HelpWindowMacOs', 'pyper/qml/help/HelpWindow.qml')
 
 
 class CopyResources(install):
