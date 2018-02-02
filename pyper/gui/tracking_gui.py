@@ -6,8 +6,10 @@ The GUI module
 
 Creates the graphical interface
 
-.. note:: This module depends on importing OpenGL.GL although it doesn't uses it directly but it
-is used by the Qt interface.
+
+.. note::
+    This module depends on importing OpenGL.GL although it doesn't uses it directly but it
+    is used by the Qt interface.
 
 :author: crousse
 """

@@ -4,6 +4,10 @@ Welcome to Pyper's documentation!
 
 News : Pyper v2 is here.
 ------------------------
+.. figure:: https://github.com/SainsburyWellcomeCentre/pyper/raw/dev/doc/source/track_tab_ui.png
+    :align: center
+    :alt: UI of Pyper
+    :figwidth: 500
 
 This new version draws on user feedback to implement most of the requested features.
 
