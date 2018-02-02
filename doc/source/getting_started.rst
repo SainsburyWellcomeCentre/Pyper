@@ -9,25 +9,9 @@ tutorial in the :doc:`installation` section.
 Starting the program
 ^^^^^^^^^^^^^^^^^^^^
 To get a quick feel for the software, some example files have been included in the resources folder of the program.
-Start by opening the program, in a terminal:
 
-* Change your working directory to that of the source of the program.
-   This must fit your installation folder. For example you downloaded on the desktop:
+.. include:: starting_pyper.rst
 
-.. code-block:: bash
-    
-    cd ~/Desktop/pyper/
-    
-* Then actually launch the program:
-
-.. code-block:: bash
-
-    python pyper/gui/tracking_gui.py
-    
-.. note::
-    You may want to use brewPython if you followed the mac instructions or a full path on windows.
-        
-The graphical interface should now be started.
 
 Preview
 ^^^^^^^

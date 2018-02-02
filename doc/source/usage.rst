@@ -9,12 +9,7 @@ Using the Graphical interface:
 ------------------------------
 To use the Graphical interface, start a terminal window (the Anaconda Command Prompt on Windows) and then:
 
-.. code-block:: bash
-
-    source activate pyper_env
-    python -m pyper.gui.tracking_gui
-
-.. warning:: On Windows, replace *source activate pyper_env* by *activate pyper_env*
+.. include:: starting_pyper.rst
     
 
 You are greeted by the *welcome* tab. To navigate between functions, please select a corresponding tab on the left.
