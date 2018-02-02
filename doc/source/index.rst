@@ -30,7 +30,7 @@ Example
 Documentation
 =============
 
-After installing the software, you can step through the tutorial of the *Getting started* section.
+After installing the software, you can step through the tutorial of the *Quick start* section.
 
 .. toctree::
    :maxdepth: 2
