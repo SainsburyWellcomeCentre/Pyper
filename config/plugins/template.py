@@ -16,7 +16,7 @@ class TemplateTracker(GuiTracker):
 
     def _get_silhouette(self, frame):
         """
-        Get the binary mask (8bits) of the mouse
+        Get the binary mask (8bits) of the specimen
         from the thresholded difference between frame and the background
 
         :param frame: The current frame to analyse

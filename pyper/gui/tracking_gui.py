@@ -76,7 +76,7 @@ if __name__ == '__main__':
     analysis_image_provider2 = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider2", analysis_image_provider2)
 
-    qml_source_path = os.path.join(conf.shared_directory, 'qml', 'main', 'MouseTracker.qml')
+    qml_source_path = os.path.join(conf.shared_directory, 'qml', 'main', 'Pyper.qml')
     if not os.path.isfile(qml_source_path):
         raise PyperGUIError("Qml code not found at {}, please verify your installation".format(qml_source_path))
     appEngine.load(qml_source_path)

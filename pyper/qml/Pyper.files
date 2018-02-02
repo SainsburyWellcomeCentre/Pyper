@@ -1,3 +1,4 @@
+Pyper.qml
 AnalysisTab.qml
 BoolLabel.qml
 CustomButton.qml
@@ -11,7 +12,6 @@ IntLabel.qml
 LabeledSlider.qml
 LabeledText.qml
 LabelWTooltip.qml
-MouseTracker.qml
 PreviewTab.qml
 RecorderTab.qml
 Roi.qml

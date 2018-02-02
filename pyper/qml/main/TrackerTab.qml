@@ -87,7 +87,7 @@ Rectangle {
         }
 
         RoiFactory {
-            id: mouseRoi
+            id: callbackRoi
 
             width: parent.imgWidth
             height: parent.imgHeight
@@ -252,7 +252,7 @@ Rectangle {
         visible: false
 
         roisControlsModelsList: [
-            RoiControlsModel { sourceRoi: mouseRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: callbackRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
             RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
         ]

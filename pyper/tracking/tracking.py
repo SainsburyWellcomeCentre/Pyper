@@ -35,7 +35,7 @@ IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspber
 
 class Tracker(object):
     """
-    A tracker object to track a mouse in a video stream
+    A tracker object to track a specimen in a video stream
     """
     def __init__(self, src_file_path=None, dest_file_path=None,
                  threshold=20, min_area=100, max_area=5000,
@@ -50,8 +50,8 @@ class Tracker(object):
         :param str src_file_path: The source file path to read from (camera if None)
         :param str dest_file_path: The destination file path to save the video
         :param int threshold: The numeric threshold for the masks (0<t<256)
-        :param int min_area: The minimum area in pixels to be considered a valid mouse
-        :param teleportation_threshold: The maximum number of pixels the mouse can \
+        :param int min_area: The minimum area in pixels to be considered a valid specimen
+        :param teleportation_threshold: The maximum number of pixels the specimen can \
         move in either dimension (x,y) between 2 frames.
         :param int bg_start: The frame to use as first background frame
         :param int n_background_frames: The number of frames to use for the background\
@@ -69,7 +69,7 @@ class Tracker(object):
         the sake of acquisition speed.
         :param bool extract_arena: Whether to detect the arena (it should be brighter than\
         the surrounding) from the background as an ROI.
-        :param callback: The function to be executed upon finding the mouse in the ROI \
+        :param callback: The function to be executed upon finding the specimen in the ROI \
         during tracking.
         :type callback: `function`
         """
@@ -246,7 +246,7 @@ class Tracker(object):
                     if record: self._stream.save(frame)
                     write_structure_not_found_msg(self.silhouette, self.silhouette.shape[:2], self.current_frame_idx)
                 else:
-                    self._check_mouse_in_roi()
+                    self._check_specimen_in_roi()
                     self._plot()
                     if record: self._stream.save(self.silhouette)
                 result_frame = self.silhouette
@@ -265,8 +265,8 @@ class Tracker(object):
 
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
-        Get the position of the mouse in frame and append to self.results
-        Returns the mask of the current frame with the mouse potentially drawn
+        Get the position of the specimen in frame and append to self.results
+        Returns the mask of the current frame with the specimen potentially drawn
 
         :param frame: The video frame to use.
         :type: video_frame.Frame
@@ -288,13 +288,13 @@ class Tracker(object):
         contour_found = False
         if biggest_contour is not None:
             area = cv2.contourArea(biggest_contour)
-            mouse = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
+            specimen = ObjectContour(biggest_contour, plot_silhouette, contour_type='raw', color=color)
             if self.plot:
-                mouse.draw()  # even if wrong size to held spot issues
+                specimen.draw()  # even if wrong size to held spot issues
                 self._draw_subregion_roi(plot_silhouette)
             if self.min_area < area < self.max_area:
                 distances = (self._get_distance_from_arena_center(), self._get_distance_from_arena_border())
-                self.results.update(mouse.centre, area, self.measure_callback(frame), distances)
+                self.results.update(specimen.centre, area, self.measure_callback(frame), distances)
                 self._check_teleportation(frame, silhouette)
                 contour_found = True
             else:
@@ -306,9 +306,9 @@ class Tracker(object):
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
 
-    def _check_mouse_in_roi(self):
+    def _check_specimen_in_roi(self):
         """
-        Checks whether the mouse is within the specified ROI and
+        Checks whether the specimen is within the specified ROI and
         calls the specified callback method if so.
         """
         if self.roi is not None:
@@ -344,7 +344,7 @@ class Tracker(object):
 
     def _plot(self):
         """
-        Displays the current frame with the mouse trajectory and potentially the ROI and the
+        Displays the current frame with the trajectory of the specimen and potentially the ROI and the
         Arena ROI if these have been specified.
         """
         if self.plot:
@@ -355,7 +355,7 @@ class Tracker(object):
 
     def handle_object_in_tracking_roi(self):
         """
-        The method called when the mouse is found in the roi.
+        The method called when the specimen is found in the roi.
         This method is meant to be overwritten in subclasses of Tracker.
         """
         self.results.overwrite_last_in_tracking_roi(True)
@@ -419,7 +419,7 @@ class Tracker(object):
         
     def _check_teleportation(self, frame, silhouette):
         """
-        Check if the mouse moved too much, which would indicate an issue with the tracking
+        Check if the specimen moved too much, which would indicate an issue with the tracking
         notably the fitting in the past. If so, call self._stream.stopRecording() and raise
         EOFError.
         
@@ -429,7 +429,7 @@ class Tracker(object):
          (to be saved for troubleshooting if teleportation occurred)
         :type silhouette: video_frame.Frame
         
-        :raises: EOFError if the mouse teleported
+        :raises: EOFError if the specimen teleported
         """
         if not self.results.has_non_default_position():  # No tracking yet
             return
@@ -440,7 +440,7 @@ class Tracker(object):
             # else:
             silhouette.save('teleporting_silhouette.tif')  # Used for debugging
             frame.save('teleporting_frame.tif')
-            err_msg = 'Frame: {}, mouse teleported from {} to {}\n'\
+            err_msg = 'Frame: {}, specimen teleported from {} to {}\n'\
                 .format(self._stream.current_frame_idx, *self.results.get_last_pos_pair())
             err_msg += 'Please see teleporting_silhouette.tif and teleporting_frame.tif for debugging'
             self._stream.stop_recording(err_msg)
@@ -474,7 +474,7 @@ class Tracker(object):
         
     def _get_silhouette(self, frame):
         """
-        Get the binary mask (8bits) of the mouse 
+        Get the binary mask (8bits) of the specimen
         from the thresholded difference between frame and the background
         
         :param frame: The current frame to analyse

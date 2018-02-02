@@ -4,7 +4,7 @@
 The roi module
 **************
 
-This module is used to check the position of the mouse relative to a region of interest (ROI)
+This module is used to check the position of the tracked specimen relative to a region of interest (ROI)
 
 :author: crousse
 """
@@ -165,9 +165,9 @@ class Circle(Roi):
     Use as follows:
     
     >>> roi = Circle((256, 256), 30) # creates a circle of radius 30 at centre 256, 256
-    >>> mouse_position = (250, 242)
-    >>> if roi.contains_point(mouse_position):
-    >>>     print('The mouse entered the ROI')
+    >>> specimen_position = (250, 242)
+    >>> if roi.contains_point(specimen_position):
+    >>>     print('The specimen entered the ROI')
     """
 
     def __init__(self, centre, radius):
