@@ -7,20 +7,14 @@ or import the modules from a python interpreter.
 
 Using the Graphical interface:
 ------------------------------
-To use the Graphical interface, start a terminal window and then:
-
-Change your working directory to that of the source of the program.
-This must fit your installation folder. For example if you downloaded pyper on the desktop:
-
-.. code-block:: bash
-    
-    cd ~/Desktop/pyper
-    
-Then actually launch the program:
+To use the Graphical interface, start a terminal window (the Anaconda Command Prompt on Windows) and then:
 
 .. code-block:: bash
 
-    python pyper/tracking_gui.py
+    source activate pyper_env
+    python -m pyper.gui.tracking_gui
+
+.. warning:: On Windows, replace *source activate pyper_env* by *activate pyper_env*
     
 
 You are greeted by the *welcome* tab. To navigate between functions, please select a corresponding tab on the left.
