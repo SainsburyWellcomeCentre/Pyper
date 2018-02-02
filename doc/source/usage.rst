@@ -37,7 +37,12 @@ Getting help
 ^^^^^^^^^^^^
 When using the graphical interface, hovering over buttons and other elements should display tooltips explaining
 what these do. Also, the help menu brings you to the section of this manual corresponding to the tab you
-are currently using.
+are currently using. See below for an example of the help for the *Track* tab.
+
+.. figure:: track_tab_help.png
+    :align: center
+    :alt: An example of the track tab help
+    :figwidth: 500
 
 The *Preview* tab
 ^^^^^^^^^^^^^^^^^
@@ -55,6 +60,11 @@ Then, when on the desired frame select **Ref**, **Start** or **End** accordingly
 An end of -1 corresponds to the end of the file.
 It is advised to select a frame that is not the first one (e.g. 5 onwards) for the **Ref** as the camera may take a few
 frames to auto-adjust some parameters and the video CODEC may also alter the very first frames.
+
+.. figure:: preview_tab_ui.png
+    :align: center
+    :alt: An example of the *preview* tab user interface
+    :figwidth: 500
 
 The *Track* Tab
 ^^^^^^^^^^^^^^^
@@ -97,6 +107,11 @@ the ignored portion will just be displayed as the source (i.e. *raw*).
 
 If you cannot detect your sample successfully, please refer to the :doc:`troubleshooting` section.
 
+.. figure:: track_tab_ui.png
+    :align: center
+    :alt: An example of the *track* tab user interface
+    :figwidth: 500
+
 The *Record* Tab
 ^^^^^^^^^^^^^^^^
 This tab essentially reproduces the behaviour of the *Track* tab but for videos that are currently
@@ -108,6 +123,11 @@ The extension of the output path will determine the format.
 The available formats will dependent on the codecs available to FFMPEG in you installation.
 In tests, best results (highest likelihood of having the CODECS working) were obtained
 with the .avi and .mpg containers.
+
+.. figure:: record_tab_ui.png
+    :align: center
+    :alt: An example of the *record* tab user interface
+    :figwidth: 500
 
 The *Calibration* tab
 ^^^^^^^^^^^^^^^^^^^^^
@@ -125,6 +145,11 @@ Once done, the controls will become available and allow you to browse through th
 the images with the features drawn and the *undistorted* images. You can also save the camera matrix for reference.
 In the future, it is planned to have controls to load a calibration file from the *Track* and *Record* tabs.
 
+.. figure:: calibration_tab_ui.png
+    :align: center
+    :alt: An example of the *calibration* tab user interface
+    :figwidth: 500
+
 The *Analyse* tab
 ^^^^^^^^^^^^^^^^^
 This tab provides simple analysis and graphing features as well as the ability to save the list of coordinates.
@@ -133,6 +158,11 @@ This tab provides simple analysis and graphing features as well as the ability t
 #. Then, click **Update** and you can finally save your coordinates and plot graphs
    of distance made by the specimen between frames and change of directions at each frame.
 #. To save the graphs, right click on them and a menu will prompt you for a destination path.
+
+.. figure:: analyse_tab_ui.png
+    :align: center
+    :alt: An example of the *analyse* tab user interface
+    :figwidth: 500
 
 The *Transcoding* tab
 ^^^^^^^^^^^^^^^^^^^^^
@@ -149,6 +179,11 @@ This tab allows you to change the file format of your video, extract parts of it
 
 .. warning:: Currently, other ROI shapes are available in the ROI manager in this tab but you should make sure
     that you only select the rectangle ROI shape.
+
+.. figure:: transcoding_tab_ui.png
+    :align: center
+    :alt: An example of the *transcoding* tab user interface
+    :figwidth: 500
 
 Using the Command Line Interface:
 ---------------------------------

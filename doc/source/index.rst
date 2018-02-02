@@ -2,6 +2,11 @@
 Welcome to Pyper's documentation!
 =================================
 
+.. figure:: track_tab_ui.png
+    :align: center
+    :alt: An example of the user interface
+    :figwidth: 500
+
 .. include:: v2_changes.rst
 
 .. include:: introduction.rst

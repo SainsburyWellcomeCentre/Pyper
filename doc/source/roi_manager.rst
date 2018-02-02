@@ -15,3 +15,8 @@ Roi manager:
 
         You can modify the shape and color of these ROIs at will. Only ROIs marked *active* will be taken into
         account during tracking.
+
+.. figure:: roi_manager_ui.png
+    :align: center
+    :alt: An example of ROI manager user interface
+    :figwidth: 500
