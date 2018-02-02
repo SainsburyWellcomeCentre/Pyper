@@ -46,20 +46,24 @@ are currently using. See below for an example of the help for the *Track* tab.
 
 The *Preview* tab
 ^^^^^^^^^^^^^^^^^
-The preview tab enables you to have a look at a downscaled version of your video to select your start and end point
+The preview tab enables you to have a look at of your video to select your start and end point
 for the analysis as well as the frame that will serve as a reference.
 
-.. warning:: As not all video will allow seeking, the preview is achieved by loading a downscaled version of the
-    video in memory before playing it. The consequence is that the size of the video you will be able to preview
-    depends on the amount of memory on you computer. THIS DOES NOT AFFECT THE TRACKING WHICH LOADS THE VIDEO ONE
-    FRAME AT A TIME.
+.. warning:: As not all video will allow seeking, for files which cannot be seeked
+    (e.g. .h264 files acquired with a Raspberry Pi camera), the preview is achieved by loading a downscaled
+    version of the video in memory before playing it.
+    The consequence is that the size of the video you will be able to preview depends on the amount of memory
+    on you computer. For large videos with seek information missing, a workaround may be
+    to use the *transcoding* tab to export your video to a different format.
+    THIS DOES NOT AFFECT THE TRACKING WHICH ALWAYS LOADS THE VIDEO ONE FRAME AT A TIME.
 
 The reference frame must appear before the data frames or be loaded from an image file.
 You can navigate in your video using the controls on the left of the progress bar at the bottom.
 Then, when on the desired frame select **Ref**, **Start** or **End** accordingly.
 An end of -1 corresponds to the end of the file.
-It is advised to select a frame that is not the first one (e.g. 5 onwards) for the **Ref** as the camera may take a few
-frames to auto-adjust some parameters and the video CODEC may also alter the very first frames.
+It is advised to select a frame that is not the first one (e.g. 5 onwards) for the **Ref** as the camera
+will typically take a few frames to auto-adjust some parameters
+and the video CODEC may also alter the very first frames.
 
 .. figure:: preview_tab_ui.png
     :align: center
@@ -77,7 +81,7 @@ as well as the methods used to extract information.
 The **Ref**, **Start** and **End** parameters set in the *preview* tab apply to the *Track* tab.
 
 You should then set a threshold **Thrsh** for the brightness of you sample in the difference image.
-You can get an idea for this parameter by using the *diff* option from the drop down menu at the bottom.
+You can get an idea for this parameter by using the **diff** option from the drop down menu at the bottom.
 The **min** and **max** parameters refer the minimum and maximum areas of the sample respectively.
 These are expressed in pixels^2. The **Mvmt** parameter refers to the maximum displacement **in either dimension**
 of the specimen between two consecutive frames.
@@ -89,6 +93,12 @@ to use variation in the current frame relative to the standard deviation of the 
 * The **Clear** option will clear object touching the border of the image.
 * The **Extract** parameter is used if the arena is white on a dark background,
   this option will automatically detect it as an ROI.
+
+.. deprecated:: 2.0
+    This option will be removed in future versions of Pyper. It will be replaced by *Use arena*
+    to still allow users to gather information about the distance from the border and center of the arena
+    but the autodetection will be replaced by a new ROI in the ROI manager to allow arbitrary arena shapes.
+
 * The **Norm** option removes the slight variations in global brightness between frames.
   This control normalises each frame to the brightness of the reference.
 * The **Infer** option allows you to assume that the object is still in the same location if the tracking is lost.
@@ -121,6 +131,8 @@ external equipment based on the live tracking results.
 Before starting you must supply a destination path to save the video.
 The extension of the output path will determine the format.
 The available formats will dependent on the codecs available to FFMPEG in you installation.
+Unfortunately, OpenCV does not allow the listing of codes available on the system to select the most appropriate one.
+This has to be done through trial and error by the user.
 In tests, best results (highest likelihood of having the CODECS working) were obtained
 with the .avi and .mpg containers.
 
@@ -135,7 +147,8 @@ This menu computes the parameters of the lens used to acquire the videos. Once t
 they will be automatically used to *undistort* the images in the *Track* and the *Record* tabs.
 To use this functionality, you must provide a folder containing a series (e.g. 10) of images acquired
 with the same lens and parameters as the video and containing a reference chessboard.
-For each image, the location and angle of the pattern must be altered to provide a good sampling of the space.
+For each image, the location and angle of the pattern must be altered (by placing the board differently
+under the lens) to provide a good sampling of the space.
 Also, the whole pattern must reside within the image as it will be automatically detected.
 A printable template which will work with the default parameters can be found at
 http://docs.opencv.org/2.4/_downloads/pattern.png. Please make sure that the pattern is printed on a flat and
@@ -175,7 +188,8 @@ This tab allows you to change the file format of your video, extract parts of it
 #. If you want to extract a region of the video, draw a rectangular ROI on the video as desired.
 #. Specify a CODEC for the output video.
 
-.. note:: Not all codecs will work on all platforms. This depends on your FFMPEG installation.
+.. note:: Not all codecs will work on all platforms. This depends on your FFMPEG installation, see the *record* tab
+    section above.
 
 .. warning:: Currently, other ROI shapes are available in the ROI manager in this tab but you should make sure
     that you only select the rectangle ROI shape.
