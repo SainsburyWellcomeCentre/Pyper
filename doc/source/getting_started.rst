@@ -88,9 +88,8 @@ specified by a ROI. You can also scale the output independently in each axis.
 This is sometimes useful for several reasons:
 
 #. Your recording CODEC might not allow frame indexing.
-#. Some recording devices create frames with a few pixels of NaN data on the border that confuse most video readers
-    like VLC ...
-   This can easily be solved by cropping the image using the ROI.
+#. Some recording devices create frames with a few pixels of NaN data on the border that confuse most video readers like VLC.
+    This can easily be solved by cropping the image using the ROI.
 #. Most of your video does not contain useful data and you want to reduce it's size to the interesting region.
 
 For more on the *transcoding* tab, see :doc:`usage`

@@ -45,8 +45,7 @@ You can navigate in your video using the controls on the left of the progress ba
 Then, when on the desired frame select **Ref**, **Start** or **End** accordingly.
 An end of -1 corresponds to the end of the file.
 It is advised to select a frame that is not the first one (e.g. 5 onwards) for the **Ref** as the camera
-will typically take a few frames to auto-adjust some parameters
-and the video CODEC may also alter the very first frames.
+will typically take a few frames to auto-adjust.
 
 .. figure:: preview_tab_ui.png
     :align: center
