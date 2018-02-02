@@ -30,6 +30,7 @@ requirements = [
     # 'opencv=2.4.13.4',
     # 'pyqt=5.6'
 ]
+# for documentation: sphinx-argparse
 
 
 def mkdir_p(path):
