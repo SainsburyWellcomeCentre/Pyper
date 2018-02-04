@@ -94,6 +94,9 @@ def copy_data(data_list, dest_dir_base, strip_prefix=''):
     :return:
     """
 
+    if platform.system() == 'Windows' and '/' in strip_prefix:
+        strip_prefix = strip_prefix.replace('/', '\\')
+
     def left_strip(instr, prefix):
         if not instr.startswith(prefix):
             return instr
