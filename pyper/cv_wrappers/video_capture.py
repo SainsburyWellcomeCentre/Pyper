@@ -54,8 +54,13 @@ class VideoCapture(object):
     def open(self):
         if self.filename is not None:
             self.capture.open(self.filename)
+            if not self.is_opened():
+                raise VideoCaptureOpenError("Could not open file {} for reading, CODEC may not be supported"
+                                            .format(self.filename))
         else:
             self.capture.open(self.cam_idx)
+            if not self.is_opened():
+                raise VideoCaptureOpenError("Could not open camera number {} for reading".format(self.cam_idx))
 
     def is_opened(self):
         return self.capture.isOpened()
