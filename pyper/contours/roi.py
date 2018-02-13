@@ -18,6 +18,12 @@ from math import radians, cos, sin, sqrt
 import cv2
 from cv2 import norm
 
+try:
+    from cv2 import cv
+    FILLED = cv.CV_FILLED
+except ImportError:  # removes dependency to cv2.cv outside of video_writer
+    FILLED = -1
+
 
 class RoiCollection(object):
     def __init__(self, rois_list=None):
@@ -113,7 +119,7 @@ class Roi(object):
     def to_mask(self, frame):
         mask = frame.copy()  # TODO: extract to roi.to_mask
         mask.fill(0)
-        cv2.drawContours(mask, [self.points], 0, 255, cv2.cv.CV_FILLED)
+        cv2.drawContours(mask, [self.points], 0, 255, FILLED)
         return mask
 
     def save(self, dest):  # FIXME: should be class specific

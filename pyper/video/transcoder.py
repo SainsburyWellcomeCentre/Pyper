@@ -13,7 +13,6 @@ import numpy as np
 import os
 from scipy.misc import imresize
 import cv2
-from cv2 import cv
 
 import math
 from PyQt5.QtCore import pyqtSlot, QVariant
@@ -182,7 +181,7 @@ class GuiTranscoder(GuiTracker):
         self.dest_file_path = dest_file_path
 
         self.video_writer = VideoWriter(self.dest_file_path,
-                                        cv.CV_FOURCC(*self.codec),
+                                        self.codec,
                                         float(self._stream.fps),
                                         output_size[::-1],  # invert size with openCV
                                         True)
@@ -191,7 +190,7 @@ class GuiTranscoder(GuiTracker):
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
         self.video_writer = VideoWriter(self.dest_file_path,
-                                        cv.CV_FOURCC(*self.codec),
+                                        self.codec,
                                         float(self._stream.fps),
                                         output_size[::-1],  # invert size with openCV
                                         True)
@@ -294,7 +293,7 @@ class Transcoder(RecordedVideoStream):
         self.scale_params = np.array(scale_params)
         size = self.get_final_size()
         self.video_writer = VideoWriter(dest_file_path,
-                                        cv.CV_FOURCC(*'mp4v'),  # FIXME: Format as argument
+                                        'mp4v',  # FIXME: Format as argument
                                         self.fps,
                                         size[::-1],
                                         True)

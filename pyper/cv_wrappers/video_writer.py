@@ -18,6 +18,8 @@ class VideoWriter(object):
     """
     def __init__(self, save_path, codec, fps, frame_shape, is_color=False, transpose=False):  # FIXME: use n_color_channels
         self.save_path = save_path
+        if isinstance(codec, str):
+            codec = cv2.cv.CV_FOURCC(*codec)
         self.codec = codec
         self.fps = fps
         self.frame_shape = frame_shape

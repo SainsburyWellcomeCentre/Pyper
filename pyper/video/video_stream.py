@@ -17,7 +17,6 @@ import os
 import platform
 import scipy
 import sys
-from cv2 import cv
 
 import cv2
 
@@ -34,7 +33,7 @@ if IS_PI:
 
     
 DEFAULT_CAM = 0
-CODEC = cv.CV_FOURCC(*'mp4v')  # TODO: check which codecs are available
+CODEC = 'mp4v'  # TODO: check which codecs are available
 FPS = 30
 DEFAULT_FRAME_SIZE = (256, 256)
 
@@ -96,7 +95,7 @@ class VideoStream(object):
     
     def _start_video_capture_session(self, src_path):
         """ Should return a stream of frames to be used by read()
-        and a cv2.VideoWriter object to be used by save()
+        and a VideoWriter object to be used by save()
         This is one of the methods that are expected to change the most between 
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
@@ -153,19 +152,19 @@ class RecordedVideoStream(VideoStream):
         
     def _start_video_capture_session(self, file_path):  # TODO: refactor name
         """
-        Initiates a cv2.VideoCapture object to supply the frames to read
-        and a cv2.VideoWriter object to save a potential output
+        Initiates a VideoCapture object to supply the frames to read
+        and a VideoWriter object to save a potential output
         
         :param str file_path: the source file path
         
         :return: capture and video_writer object
-        :rtype: (cv2.VideoCapture, cv2.VideoWriter)
+        :rtype: (VideoCapture, VideoWriter)
         """
         capture = VideoCapture(file_path)
         dirname, filename = os.path.split(file_path)
         # basename, ext = os.path.splitext(filename)
         save_path = os.path.join(dirname, 'recording.avi')  # Fixme: should use argument
-        video_writer = VideoWriter(save_path, cv.CV_FOURCC(*'mp4v'), 15, self.size, True)
+        video_writer = VideoWriter(save_path, 'mp4v', 15, self.size, True)
         return capture, video_writer
         
     def _get_n_frames(self, stream):
@@ -268,14 +267,14 @@ class UsbVideoStream(VideoStream):
         
     def _start_video_capture_session(self, save_path):
         """
-        Initiates a cv2.VideoCapture object to supply the frames to read
+        Initiates a VideoCapture object to supply the frames to read
         (from the default usb camera)
-        and a cv2.VideoWriter object to save a potential output
+        and a VideoWriter object to save a potential output
         
-        :param str filePath: the destination file path
+        :param str save_path: the destination file path
         
         :return: capture and video_writer object
-        :type: (cv2.VideoCapture, cv2.VideoWriter)
+        :type: (VideoCapture, VideoWriter)
         """
         capture = VideoCapture(DEFAULT_CAM)
         try:
@@ -363,12 +362,12 @@ class PiVideoStream(VideoStream):
         """
         Initiates a picamera.array.PiRGBArray object to store
         the frames from the picamera when reading 
-        and a cv2.VideoWriter object to save a potential output
+        and a VideoWriter object to save a potential output
         
         :param str save_path: the destination file path
         
         :return: array and video_writer object
-        :type: (picamera.array.PiRGBArray, cv2.VideoWriter)
+        :type: (picamera.array.PiRGBArray, VideoWriter)
         """
         video_writer = VideoWriter(save_path, CODEC, FPS, DEFAULT_FRAME_SIZE)
         stream = picamera.array.PiRGBArray(self._cam)
