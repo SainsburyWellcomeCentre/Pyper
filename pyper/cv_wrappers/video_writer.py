@@ -3,6 +3,12 @@ import numpy as np
 
 from pyper.exceptions.exceptions import PyperError
 
+try:
+    from cv2 import cv
+    fourcc = cv.CV_FOURCC
+except ImportError:
+    fourcc = cv2.VideoWriter_fourcc
+
 
 class VideoWriterFrameShapeError(PyperError):
     pass
@@ -18,9 +24,7 @@ class VideoWriter(object):
     """
     def __init__(self, save_path, codec, fps, frame_shape, is_color=False, transpose=False):  # FIXME: use n_color_channels
         self.save_path = save_path
-        if isinstance(codec, str):
-            codec = cv2.cv.CV_FOURCC(*codec)
-        self.codec = codec
+        self.codec = fourcc(*codec)
         self.fps = fps
         self.frame_shape = frame_shape
         self.is_color = is_color
@@ -50,7 +54,7 @@ class VideoWriter(object):
         :type frame: An image as an array with 1 or 3 color channels
         """
         if frame is not None and self.save_path is not None:
-            n_colors = frame.shape[2]
+            n_colors = frame.shape[2]  # FIXME: extract from here and put in other class
             if n_colors == 3:
                 tmp_color_frame = frame
             elif n_colors == 1:
