@@ -32,6 +32,10 @@ requirements = [
 ]
 # for documentation: sphinx-argparse
 
+is_raspberry_pi = platform.machine().startswith('arm')
+if is_raspberry_pi:
+    requirements.append('picamera')
+
 
 def mkdir_p(path):
     """
