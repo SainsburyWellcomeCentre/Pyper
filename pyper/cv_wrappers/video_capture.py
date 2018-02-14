@@ -1,7 +1,11 @@
+import sys
+
 import cv2
+
 
 from pyper.exceptions.exceptions import PyperError
 from pyper.utilities.utils import un_file
+from pyper.cv_wrappers.props import CV_PROP_IDS
 
 
 class VideoCaptureGrabError(PyperError):
@@ -128,9 +132,19 @@ class VideoCapture(object):
         if self.seekable and 0 <= frame_id < self.n_frames:
             self.set('pos_frames', frame_id)
 
+    def get_prop_id(self, propid):  # TODO: add exception handling for non existing properties (bad spelling)
+        if try_int(propid) is not False:
+            return try_int(propid)
+        else:
+            prop_name = "CV_CAP_PROP_{}".format(propid.upper())
+            if sys.version_info > (3, 0):
+                propid = CV_PROP_IDS[prop_name]
+            else:
+                propid = getattr(cv2.cv, prop_name)
+            return propid
+            
     def get(self, propid):
-        if not try_int(propid):
-            propid = getattr(cv2.cv, "CV_CAP_PROP_" + propid.upper())
+        propid = self.get_prop_id(propid)
         return self.capture.get(propid)
 
     def set(self, propid, value):
@@ -142,8 +156,7 @@ class VideoCapture(object):
         :param value:
         :return:
         """
-        if not try_int(propid):
-            propid = getattr(cv2.cv, "CV_CAP_PROP_" + propid.upper())  # FIXME: add exception handling for non existing properties (bad spelling)
+        propid = self.get_prop_id(propid)
         has_set = self.capture.set(propid, value)
         if not has_set:
             raise VideoCapturePropertySetError("Could not set property {} to {}"
@@ -151,11 +164,19 @@ class VideoCapture(object):
 
     @staticmethod
     def get_cv_attributes():
-        return [attr for attr in dir(cv2.cv) if attr.startswith('CV_CAP_PROP')]
+        if sys.version_info > (3, 0):
+            return CV_PROP_IDS.keys()
+        else:
+            return [attr for attr in dir(cv2.cv) if attr.startswith('CV_CAP_PROP')]
 
     @staticmethod
     def get_cv_attribute_name(propid):
         for attr in VideoCapture.get_cv_attributes():
-            if getattr(cv2.cv, attr) == propid:
-                return attr
+            if sys.version_info > (3, 0):
+                if CV_PROP_IDS[attr] == propid:
+                    return attr
+            else:
+                if getattr(cv2.cv, attr) == propid:
+                    return attr
+
 
