@@ -9,21 +9,21 @@ This may be required if your player doesn't support your format or to fix some v
 :author: crousse
 """
 
-import numpy as np
+import math
 import os
+
+import numpy as np
 from scipy.misc import imresize
+from tqdm import trange
 import cv2
 
-import math
 from PyQt5.QtCore import pyqtSlot, QVariant
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperValueError
-from pyper.gui.tabs_interfaces import TrackerIface
 from pyper.gui.gui_tracker import GuiTracker
+from pyper.gui.tabs_interfaces import TrackerIface
+from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_stream import RecordedVideoStream
-from pyper.cv_wrappers.video_writer import VideoWriter
-
-from tqdm import trange
 
 
 # TODO: see if can avoid to swap axis multiple times for Transcoder below

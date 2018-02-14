@@ -2,10 +2,9 @@ import sys
 
 import cv2
 
-
 from pyper.exceptions.exceptions import PyperError
 from pyper.utilities.utils import un_file
-from pyper.cv_wrappers.props import CV_PROP_IDS
+from pyper.video.cv_wrappers.props import CV_PROP_IDS
 
 
 class VideoCaptureGrabError(PyperError):

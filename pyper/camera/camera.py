@@ -1,5 +1,5 @@
 import platform
-is_pi = (platform.machine()).startswith('arm')
+is_pi = platform.machine().startswith('arm')
 if is_pi:
     from picamera.camera import PiCamera, PiCameraRuntimeError
 """

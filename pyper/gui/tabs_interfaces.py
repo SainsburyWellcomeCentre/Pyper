@@ -10,17 +10,15 @@ It essentially implements a class for each graphical interface tab.
 :author: crousse
 """
 
-import matplotlib
-import numpy as np
 import os
 import re
 import uuid
-from scipy.io import loadmat
-from scipy.misc import imsave
 from time import time
 
-from pyper.utilities.utils import qurl_to_str
-from pyper.utilities.utils import un_file
+import matplotlib
+import numpy as np
+from scipy.io import loadmat
+from scipy.misc import imsave
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
@@ -28,6 +26,8 @@ from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
+from pyper.utilities.utils import qurl_to_str
+from pyper.utilities.utils import un_file
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
 from pyper.video.video_stream import QuickRecordedVideoStream as VStream, RecordedVideoStream
@@ -36,7 +36,7 @@ from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollecti
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
-from pyper.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
+from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf

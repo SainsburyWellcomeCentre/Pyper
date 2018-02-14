@@ -12,19 +12,19 @@ and from Antonio Gonzalez for the RecordedVideoStream class
 :author: crousse
 """
 
-import numpy as np
 import os
 import platform
-import scipy
 import sys
 
+import numpy as np
+import scipy
 import cv2
 
-from pyper.video.video_frame import Frame
-from pyper.utilities.utils import spin_progress_bar
+from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
-from pyper.cv_wrappers.video_writer import VideoWriter
-from pyper.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
+from pyper.utilities.utils import spin_progress_bar
+from pyper.video.cv_wrappers.video_writer import VideoWriter
+from pyper.video.video_frame import Frame
 
 IS_PI = (platform.machine()).startswith('arm')
 if IS_PI:

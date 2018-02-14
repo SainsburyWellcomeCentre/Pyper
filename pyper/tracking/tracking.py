@@ -18,8 +18,8 @@ import platform
 from time import time
 
 import numpy as np
-import cv2
 from tqdm import tqdm
+import cv2
 
 from pyper.contours.object_contour import ObjectContour
 from pyper.contours.roi import Circle
@@ -27,9 +27,9 @@ from pyper.tracking.tracking_background import Background
 from pyper.tracking.tracking_results import TrackingResults
 from pyper.utilities import utils
 from pyper.utilities.utils import write_structure_not_found_msg, write_structure_size_incorrect_msg
+from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
-from pyper.cv_wrappers.video_writer import VideoWriter
 
 IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
 
