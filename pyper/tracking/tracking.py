@@ -13,6 +13,7 @@ instead of a usb camera by default. It also slightly optimises for speed.
 """
 from __future__ import division
 
+import os
 import platform
 from progressbar import *
 from time import time
