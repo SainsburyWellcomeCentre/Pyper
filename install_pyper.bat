@@ -16,13 +16,13 @@ REM Make sure the environment does not exist by hand on windows
 REM conda info --envs | grep %env_name%
 
 echo "Creating environment. This may take some time."
-conda create -y -q -n %env_name% python=2.7 anaconda
+conda create -y -q -n %env_name% python=3.5 anaconda
 activate %env_name%
 echo "Done."
 
 echo "Installing dependencies. This may take some time. "
 conda install -y -q -n pyper_env numpy scipy scikit-image python-dateutil pyparsing matplotlib PyOpenGL progressbar configobj
-conda install -y -q -n pyper_env -c conda-forge ffmpeg opencv=2.4.13 pyqt=5.6
+conda install -y -q -n pyper_env -c conda-forge ffmpeg opencv=3.3.0 pyqt=5.6
 echo "Done."
 
 echo "Installing Pyper."
