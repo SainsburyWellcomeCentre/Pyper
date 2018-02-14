@@ -1,8 +1,10 @@
 import sys
-from HTMLParser import HTMLParser
-
-import cv2
 import time
+try:
+    from HTMLParser import HTMLParser
+except ImportError:
+    from html.parser import HTMLParser
+import cv2
 
 
 def spin_progress_bar(val):

@@ -40,7 +40,7 @@ class TranscoderIface(TrackerIface):
                       # "xvid"
                       # "MJPG"
                       }
-    EXTS_TO_CODECS = {v: k for k, v in CODECS_TO_EXTS.iteritems()}
+    EXTS_TO_CODECS = {v: k for k, v in CODECS_TO_EXTS.items()}
 
     def __init__(self, app, context, parent, params, display_name, provider_name):
         TrackerIface.__init__(self, app, context, parent, params, display_name, provider_name, None, None)

@@ -81,7 +81,7 @@ class EditorIface(QObject):
     def code_to_plugin(self, class_name, code):
         plugin = imp.new_module(class_name)
         try:
-            exec code in plugin.__dict__
+            exec(code, plugin.__dict__)
         except SyntaxError as err:
             print("Could not load plugin {}, because of syntax error\n\t{}".format(class_name, err))
             raise SyntaxError  # TODO: specific exception
