@@ -29,22 +29,22 @@ class VideoCapture(object):
     TODO: See if we could invert dimensions to make feel native
     """
 
-    def __init__(self, filename_or_cam):
+    def __init__(self, filename_or_cam_idx):
         self.cam_idx = None
         self.filename = None
         self.current_frame_idx = 0
-        cam_idx = try_int(filename_or_cam)
+        cam_idx = try_int(filename_or_cam_idx)
         if cam_idx is not False:
             self.cam_idx = cam_idx
             self.capture = cv2.VideoCapture(cam_idx)
         else:
-            filename_or_cam = str(filename_or_cam)
-            filename_or_cam = un_file(filename_or_cam)
+            filename_or_cam_idx = str(filename_or_cam_idx)
+            filename_or_cam_idx = un_file(filename_or_cam_idx)
             try:
-                open(filename_or_cam, 'r')
+                open(filename_or_cam_idx, 'r')
             except IOError as err:
-                raise VideoCaptureOpenError("Could not open file {} for reading; {}".format(filename_or_cam, err))
-            self.filename = filename_or_cam
+                raise VideoCaptureOpenError("Could not open file {} for reading; {}".format(filename_or_cam_idx, err))
+            self.filename = filename_or_cam_idx
             self.capture = cv2.VideoCapture(self.filename)
 
     def reset(self):
@@ -121,7 +121,7 @@ class VideoCapture(object):
         return int(self.get('fourcc'))
 
     @property
-    def seekable(self):  # FIXME: make cached property or attribute for speed
+    def seekable(self):  # FIXME: make cached property or attribute for speed + may not work for acquisition
         return self.n_frames >= 1
 
     def seek(self, frame_id):
