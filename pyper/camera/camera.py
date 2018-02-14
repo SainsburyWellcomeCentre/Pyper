@@ -1,6 +1,6 @@
 import platform
-isPi = (platform.machine()).startswith('arm')
-if isPi:
+is_pi = (platform.machine()).startswith('arm')
+if is_pi:
     from picamera.camera import PiCamera, PiCameraRuntimeError
 """
 *****************
@@ -15,7 +15,7 @@ camera for openCV processing
 :author: crousse
 """
 
-if isPi:
+if is_pi:
     class CvPiCamera(PiCamera):
         """
         A subclass of picamera that keeps a reference of its encoder and doesn't close it between frames.
