@@ -24,7 +24,7 @@ requirements = [
     'pyparsing',
     'matplotlib',
     'PyOpenGL',
-    'progressbar',
+    'tqdm',
     'configobj',
     # 'ffmpeg',
     # 'opencv=2.4.13.4',

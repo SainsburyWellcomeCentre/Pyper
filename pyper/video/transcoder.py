@@ -23,7 +23,8 @@ from pyper.gui.gui_tracker import GuiTracker
 from pyper.video.video_stream import RecordedVideoStream
 from pyper.cv_wrappers.video_writer import VideoWriter
 
-from progressbar import Percentage, Bar, ProgressBar
+from tqdm import trange
+
 
 # TODO: see if can avoid to swap axis multiple times for Transcoder below
 
@@ -310,16 +311,12 @@ class Transcoder(RecordedVideoStream):
     def transcode(self):
         crop_params = self.crop_params
         final_width, final_height = self.get_final_size()
-        widgets = ['Encoding Progress: ', Percentage(), Bar()]  # FIXME: only if CLI (put option in __init__
-        pbar = ProgressBar(widgets=widgets, maxval=self.n_frames).start()
-        for i in range(self.n_frames):
-            pbar.update(i)
+        for i in trange(self.n_frames):  # FIXME: progressbar only if CLI (put option in __init__)
             frame = self.read()
             frame = frame[crop_params[0][0]: -crop_params[0][1], crop_params[1][0]: -crop_params[1][1]]
             scale = np.concatenate((self.scale_params, np.array([1]))) * frame.shape
             frame = imresize(frame, scale.astype(int), interp='bilinear')
             self.video_writer.write(frame)
         # self.video_writer.write(np.uint8(np.dstack([frame]*3)))
-        pbar.finish()
         self.video_writer.release()
         self.video_writer = None

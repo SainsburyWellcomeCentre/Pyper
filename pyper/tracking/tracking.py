@@ -15,11 +15,11 @@ from __future__ import division
 
 import os
 import platform
-from progressbar import *
 from time import time
 
 import numpy as np
 import cv2
+from tqdm import tqdm
 
 from pyper.contours.object_contour import ObjectContour
 from pyper.contours.roi import Circle
@@ -159,8 +159,7 @@ class Tracker(object):
         self.bottom_square = (top_left_pt, bottom_right_pt)
 
     def _create_pbar(self):
-        widgets = ['Tracking frames: ', Percentage(), Bar()]
-        pbar = ProgressBar(widgets=widgets, maxval=self._stream.n_frames).start()
+        pbar = tqdm(desc='Tracking frames: ', total=self._stream.n_frames)
         return pbar
 
     def _set_default_results(self):
@@ -256,7 +255,7 @@ class Tracker(object):
         except VideoStreamFrameException as e:
             print('Error with video_stream at frame {}: \n{}'.format(fid, e))
         except (KeyboardInterrupt, EOFError) as e:
-            if pbar is not None: pbar.finish()
+            if pbar is not None: pbar.close()
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
             self._stream.stop_recording(msg)
             raise EOFError
