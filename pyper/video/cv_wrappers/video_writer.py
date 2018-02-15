@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 
@@ -20,20 +21,26 @@ class VideoWriterOpenError(PyperError):
 
 class VideoWriter(object):
     """
-    This class replicates the behaviour of the OpenCV 2.4 VideoWriter after wrapping it with exception handling
+    This class replicates the behaviour of the OpenCV cv2.VideoWriter after wrapping it with exception handling
     """
-    def __init__(self, save_path, codec, fps, frame_shape, is_color=False, transpose=False):  # FIXME: use n_color_channels
+    def __init__(self, save_path, codec_name, fps, frame_shape, is_color=False, transpose=False):  # FIXME: use n_color_channels
         self.save_path = save_path
-        self.codec = fourcc(*codec)
+        if isinstance(codec_name, int):  # REFACTOR:
+            self.codec = codec_name
+        else:
+            self.codec = fourcc(*codec_name)
         self.fps = fps
         self.frame_shape = frame_shape
         self.is_color = is_color
         self.transpose = transpose  # whether we transpose a frame with the wrong orientation or raise an exception
 
-        self.writer = cv2.VideoWriter(save_path, codec, fps, frame_shape, is_color)
+        self.writer = cv2.VideoWriter(save_path, self.codec, fps, frame_shape, is_color)
         if not self.is_opened():
-            raise VideoWriterOpenError("Could not open video writer. Codec {} probably unsupported.".format(codec))  # TODO do reverse of number
-        # TODO: try other formats to guess and offer solution
+            container = os.path.splitext(self.save_path)[-1]
+            raise VideoWriterOpenError("Could not open video writer."
+                                       "Codec {} ({}) probably unsupported with container {}."
+                                       .format(codec_name, self.codec, container))
+        # TODO: use helpers to find alternative available codec/container pair
 
     def open(self):
         self.writer.open(self.save_path, self.codec, self.fps, self.frame_shape, self.is_color)
