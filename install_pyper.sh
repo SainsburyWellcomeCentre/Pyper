@@ -24,8 +24,8 @@ source activate $env_name
 echo "Done."
 
 echo "Installing dependencies. This may take some time. "
-install_log=`conda install -y -q -n pyper_env numpy scipy scikit-image python-dateutil pyparsing matplotlib PyOpenGL progressbar configobj`
-install_log=$install_log`conda install -y -q -n pyper_env -c conda-forge ffmpeg opencv=2.4.13.4 pyqt=5.6`
+install_log=`conda install -y -q -n pyper_env numpy scipy scikit-image python-dateutil pyparsing matplotlib PyOpenGL configobj`
+install_log=$install_log`conda install -y -q -n pyper_env -c conda-forge tqdm ffmpeg opencv=2.4.13.4 pyqt=5.6`
 echo "Done."
 
 echo "Installing Pyper."

@@ -21,8 +21,8 @@ activate %env_name%
 echo "Done."
 
 echo "Installing dependencies. This may take some time. "
-conda install -y -q -n pyper_env numpy scipy scikit-image python-dateutil pyparsing matplotlib PyOpenGL progressbar configobj
-conda install -y -q -n pyper_env -c conda-forge ffmpeg opencv=3.3.0 pyqt=5.6
+conda install -y -q -n pyper_env numpy scipy scikit-image python-dateutil pyparsing matplotlib PyOpenGL configobj
+conda install -y -q -n pyper_env -c conda-forge tqdm ffmpeg opencv=3.3.0 pyqt=5.6
 echo "Done."
 
 echo "Installing Pyper."
