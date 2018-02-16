@@ -74,7 +74,7 @@ class BaseInterface(QObject):
         self.n_frames = 0
         
         self.timer = QTimer(self)
-        self.timer_speed = timer_speed
+        self.timer_speed = params.timer_period
         self.timer.timeout.connect(self.get_img)
 
     def get_img(self):
@@ -222,7 +222,7 @@ class CalibrationIface(PlayerInterface):
     It uses the CameraCalibration class to compute the camera matrix from a set of images containing a
     chessboard pattern.
     """
-    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=200):
+    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
         self.n_columns = config['calibration']['n_columns']
