@@ -16,11 +16,11 @@ Creates the graphical interface
 import os
 import sys
 
-from OpenGL import GL # Hack necessary to get qtQuick working
+from OpenGL import GL # WARNING: Hack necessary to get qtQuick working
 
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject, QUrl
+from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QIcon
 
 from pyper.video.transcoder import TranscoderIface
