@@ -37,6 +37,7 @@ from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
+from pyper.video.cv_wrappers import helpers as cv_helpers
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
@@ -868,14 +869,7 @@ class RecorderIface(TrackerIface):
         """
         Check if a camera is available
         """
-        default_cam_idx = 0
-        try:
-            cap = VideoCapture(default_cam_idx)
-            detected = True
-            cap.release()  # TODO: see if should be in finally block
-        except VideoCaptureOpenError:
-            detected = False
-        return detected
+        return cv_helpers.camera_available()
 
     def get_img(self):
         self.display.reload()

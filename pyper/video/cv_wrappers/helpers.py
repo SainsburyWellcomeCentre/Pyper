@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
 from pyper.video.cv_wrappers.video_writer import VideoWriter, VideoWriterOpenError
 
 extensions = (
@@ -35,3 +36,15 @@ def list_valid_writer_codecs():
             except VideoWriterOpenError:
                 pass
     return valid_codecs
+
+
+def camera_available():
+    default_cam_idx = 0
+    detected = False
+    try:
+        cap = VideoCapture(default_cam_idx)
+        detected = True
+        cap.release()  # TODO: see if should be in finally block
+    except VideoCaptureOpenError:
+        detected = False
+    return detected
