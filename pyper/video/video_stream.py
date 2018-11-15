@@ -121,10 +121,12 @@ class VideoStream(object):
         """
         print(msg)
         self.video_writer.release()
-        try:
-            cv2.destroyAllWindows()
-        except cv2.error as err:
-            print("Skipping windows destruction: {}".format(err))
+        if not IS_GRAPHICAL:
+            try:
+                cv2.destroyAllWindows()
+            except cv2.error as err:
+                pass
+                # print("Skipping windows destruction: {}".format(err))
 
 
 class RecordedVideoStream(VideoStream):
