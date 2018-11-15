@@ -177,11 +177,11 @@ setup(
     #     'reST': ["docutils>=0.3"],
     # }, e.g. pygments and picamera
     cmdclass={'install': CopyResources},
-    # entry_points={
-    #     'console_scripts': [
-    #         'pyper_cli=pyper:cli:tracking_cli.py',
-    #     ],
-    # },
+    entry_points={
+        'console_scripts': [
+            'pyper_gui=pyper.gui.tracking_gui:main',
+        ],
+    },
     # Use "console_script" entry points to register your script interfaces.
     # You can then let the toolchain handle the work of turning these interfaces into actual scripts [2].
     # The scripts will be generated during the install of your distribution.
