@@ -1,0 +1,17 @@
+name: pyper_env
+channels:
+  - conda-forge
+dependencies:
+  - python>=2.7
+  - numpy
+  - scipy
+  - matplotlib
+  - configobj
+  - PyOpenGL
+  - pyparsing
+  - python-dateutil
+  - scikit-image
+  - tqdm
+  - ffmpeg
+  - opencv=2.4.13.4
+  - pyqt=5.6
