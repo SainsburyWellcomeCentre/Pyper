@@ -56,8 +56,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: iconHandler.getPath("record.png")
-                    pressedSource: iconHandler.getPath("record_pressed.png")
+                    iconSource: IconHandler.getPath("record.png")
+                    pressedSource: IconHandler.getPath("record_pressed.png")
                     tooltip: "Starts video recording"
 
                     enabled: false
@@ -82,8 +82,8 @@ Rectangle {
                     height: width
 
                     tooltip: "Stops video recording"
-                    iconSource: iconHandler.getPath("stop.png")
-                    pressedSource: iconHandler.getPath("stop_pressed.png")
+                    iconSource: IconHandler.getPath("stop.png")
+                    pressedSource: IconHandler.getPath("stop_pressed.png")
 
                     enabled: false
                     onClicked:{
@@ -113,8 +113,8 @@ Rectangle {
 
             anchors.horizontalCenter: parent.horizontalCenter
 
-            iconSource: iconHandler.getPath("roi.png")
-            pressedSource: iconHandler.getPath("roi_pressed.png")
+            iconSource: IconHandler.getPath("roi.png")
+            pressedSource: IconHandler.getPath("roi_pressed.png")
 
             tooltip: "Open ROI manager"
             onClicked: {
@@ -144,7 +144,7 @@ Rectangle {
             width: 40
             height: width
 
-            iconSource: iconHandler.getPath("document-save-as.png")
+            iconSource: IconHandler.getPath("document-save-as.png")
 
             tooltip: "Select video destination (before recording)"
             onClicked: {

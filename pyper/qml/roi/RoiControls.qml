@@ -41,7 +41,7 @@ Frame {
 
     onDrawingTypeChanged: {
         shapeBtn.iconSource = "../../resources/icons/" + drawingType + ".png";  // different folder root
-//        shapeBtn.iconSource = iconHandler.getPath(drawingType + ".png");
+//        shapeBtn.iconSource = IconHandler.getPath(drawingType + ".png");
         changeRoiClass(sourceRoi, drawingType);
     }
     onDrawingColorChanged: {
@@ -113,7 +113,7 @@ Frame {
                 tooltip: "Select ROI color"
 
 //                iconSource: "../../../resources/icons/pick_color.png"  // FIXME: change upon selection
-                iconSource: iconHandler.getPath("pick_color.png");  // FIXME: change upon selection
+                iconSource: IconHandler.getPath("pick_color.png");  // FIXME: change upon selection
 
                 function paint() {
                     canvas.requestPaint();
@@ -146,7 +146,7 @@ Frame {
                 label: ""
 
 //                iconSource: "../../resources/icons/ellipse.png"
-                iconSource: iconHandler.getPath("ellipse.png");
+                iconSource: IconHandler.getPath("ellipse.png");
 
                 onClicked: {
                     roiLayout.checked = true;
@@ -236,7 +236,7 @@ Frame {
                 anchors.verticalCenter: parent.verticalCenter
 
 //                iconSource: "../../../resources/icons/document-save-as.png"
-                iconSource: iconHandler.getPath("document-save-as.png");
+                iconSource: IconHandler.getPath("document-save-as.png");
                 tooltip: "Save ROI"
 
                 onClicked: sourceRoi.save();
@@ -249,7 +249,7 @@ Frame {
                 anchors.verticalCenter: parent.verticalCenter
 
 //                iconSource: "../../../resources/icons/document-open.png"
-                iconSource: iconHandler.getPath("document-open.png");
+                iconSource: IconHandler.getPath("document-open.png");
                 tooltip: "Load ROI"
 
                 onClicked: sourceRoi.load();
@@ -262,7 +262,7 @@ Frame {
                 anchors.verticalCenter: parent.verticalCenter
 
 //                iconSource: "../../../resources/icons/ram.png"
-                iconSource: iconHandler.getPath("ram.png");
+                iconSource: IconHandler.getPath("ram.png");
                 tooltip: "Store the ROI in memory"
 
                 onClicked: {

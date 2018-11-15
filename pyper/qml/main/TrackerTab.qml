@@ -175,8 +175,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: iconHandler.getPath("play.png")
-                    pressedSource: iconHandler.getPath("play_pressed.png")
+                    iconSource: IconHandler.getPath("play.png")
+                    pressedSource: IconHandler.getPath("play_pressed.png")
                     tooltip: "Start tracking"
 
                     onPressed:{ splash.visible = true; }
@@ -192,8 +192,8 @@ Rectangle {
                     width: startTrackBtn.width
                     height: width
 
-                    iconSource: iconHandler.getPath("stop.png")
-                    pressedSource: iconHandler.getPath("stop_pressed.png")
+                    iconSource: IconHandler.getPath("stop.png")
+                    pressedSource: IconHandler.getPath("stop_pressed.png")
                     tooltip: "Stop tracking"
 
                     onClicked: py_tracker.stop()
@@ -220,7 +220,7 @@ Rectangle {
                 width: 50
                 height: width
 
-                iconSource: iconHandler.getPath("roi.png")
+                iconSource: IconHandler.getPath("roi.png")
 
                 tooltip: "Open ROI manager"
                 onClicked: {
@@ -233,7 +233,7 @@ Rectangle {
                 width: 50
                 height: width
 
-                iconSource: iconHandler.getPath('document-open.png')
+                iconSource: IconHandler.getPath('document-open.png')
 
                 tooltip: "Select a source of data to be displayed alongside the video."
                 onClicked: {

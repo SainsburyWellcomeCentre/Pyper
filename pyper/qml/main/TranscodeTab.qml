@@ -43,8 +43,8 @@ Rectangle {
                     width: 45
                     height: width
 
-                    iconSource: iconHandler.getPath("play.png")
-                    pressedSource: iconHandler.getPath("play_pressed.png")
+                    iconSource: IconHandler.getPath("play.png")
+                    pressedSource: IconHandler.getPath("play_pressed.png")
                     tooltip: "Start transcoding"
 
                     onClicked: { py_transcoder.start(); }
@@ -56,8 +56,8 @@ Rectangle {
                     width: startTranscodeBtn.width
                     height: width
 
-                    iconSource: iconHandler.getPath("stop.png")
-                    pressedSource: iconHandler.getPath("stop_pressed.png")
+                    iconSource: IconHandler.getPath("stop.png")
+                    pressedSource: IconHandler.getPath("stop_pressed.png")
                     tooltip: "Stop transcoding"
 
                     onClicked: py_transcoder.stop()
@@ -152,7 +152,7 @@ Rectangle {
 
             anchors.horizontalCenter: parent.horizontalCenter
 
-            iconSource: iconHandler.getPath("roi.png")
+            iconSource: IconHandler.getPath("roi.png")
 
             tooltip: "Open ROI manager"
             onClicked: {
@@ -183,7 +183,7 @@ Rectangle {
                 width: 40
                 height: width
 
-                iconSource: iconHandler.getPath("document-open.png")
+                iconSource: IconHandler.getPath("document-open.png")
 
                 tooltip: "Select video to transcode"
                 onClicked: {
@@ -220,7 +220,7 @@ Rectangle {
                 width: 40
                 height: width
 
-                iconSource: iconHandler.getPath("document-save-as.png")
+                iconSource: IconHandler.getPath("document-save-as.png")
 
                 tooltip: "Select the destination path"
                 onClicked: {

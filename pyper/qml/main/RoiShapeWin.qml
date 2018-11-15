@@ -38,19 +38,19 @@ ApplicationWindow {
         CustomButton {
             width: 50
             height: width
-            iconSource: iconHandler.getPath("ellipse.png");
+            iconSource: IconHandler.getPath("ellipse.png");
             onClicked: { roiShapeWin.shapeSelected('ellipse'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: iconHandler.getPath("rectangle.png");
+            iconSource: IconHandler.getPath("rectangle.png");
             onClicked: { roiShapeWin.shapeSelected('rectangle'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: iconHandler.getPath("freehand.png");
+            iconSource: IconHandler.getPath("freehand.png");
             onClicked: { roiShapeWin.shapeSelected('freehand'); }
         }
     }

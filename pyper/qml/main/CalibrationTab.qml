@@ -38,7 +38,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 10
 
-            iconSource: iconHandler.getPath("document-open.png")
+            iconSource: IconHandler.getPath("document-open.png")
 
             tooltip: "Select folder with the calibration images"
             onClicked: {
@@ -208,7 +208,7 @@ Rectangle {
                         width: 25
                         height: width
 
-                        iconSource: iconHandler.getPath("document-save-as.png")
+                        iconSource: IconHandler.getPath("document-save-as.png")
 
                         tooltip: "Select the destination of the camera matrix"
                         onClicked: {

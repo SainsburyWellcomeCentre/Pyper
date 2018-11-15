@@ -182,7 +182,7 @@ ApplicationWindow {
 
         Image{
            anchors.fill: parent
-           source: imageHandler.getPath("menu_bar.png")
+           source: ImageHandler.getPath("menu_bar.png")
         }
         Column {
             spacing: 15
@@ -197,7 +197,7 @@ ApplicationWindow {
 
                 text: "Welcome"
                 tooltip: "Switch to welcome mode"
-                iconSource: iconHandler.getPath("welcome.png")
+                iconSource: IconHandler.getPath("welcome.png")
                 onClicked: tabs.currentIndex = 0
             }
 
@@ -211,7 +211,7 @@ ApplicationWindow {
 
                 text: "Preview"
                 tooltip: "Switch to preview mode"
-                iconSource: iconHandler.getPath("preview.png")
+                iconSource: IconHandler.getPath("preview.png")
                 onClicked: { mainMenuBar.checkPathLoaded(1) }
             }
             CustomToolButton{
@@ -224,7 +224,7 @@ ApplicationWindow {
 
                 text: "Track"
                 tooltip: "Switch to tracking mode"
-                iconSource: iconHandler.getPath("track.png")
+                iconSource: IconHandler.getPath("track.png")
 
                 onClicked: { mainMenuBar.checkPathLoaded(2) }
             }
@@ -238,7 +238,7 @@ ApplicationWindow {
 
                 text: "Record"
                 tooltip: "Switch to recording mode"
-                iconSource: iconHandler.getPath("camera.png")
+                iconSource: IconHandler.getPath("camera.png")
 
                 onClicked: { tabs.currentIndex = 3 }
             }
@@ -252,7 +252,7 @@ ApplicationWindow {
 
                 text: "Calibration"
                 tooltip: "Switch to camera calibration mode"
-                iconSource: iconHandler.getPath("calibration.png")
+                iconSource: IconHandler.getPath("calibration.png")
 
                 onClicked: { tabs.currentIndex = 4 }
             }
@@ -266,7 +266,7 @@ ApplicationWindow {
 
                 text: "Analyse"
                 tooltip: "Switch to analysis mode"
-                iconSource: iconHandler.getPath("analyse.png")
+                iconSource: IconHandler.getPath("analyse.png")
 
                 onClicked: { tabs.currentIndex = 5 }
             }
@@ -280,7 +280,7 @@ ApplicationWindow {
 
                 text: "Transcode"
                 tooltip: "Switch to transcode mode\nSelect a video and crop/convert/scale..."
-                iconSource: iconHandler.getPath("transcode.png")
+                iconSource: IconHandler.getPath("transcode.png")
 
                 onClicked: { tabs.currentIndex = 6 }
             }

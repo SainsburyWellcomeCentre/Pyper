@@ -49,8 +49,8 @@ Item{
                 rows: 3
                 spacing: 3
                 CustomButton {
-                    iconSource: iconHandler.getPath("play.png")
-                    pressedSource: iconHandler.getPath("play_pressed.png")
+                    iconSource: IconHandler.getPath("play.png")
+                    pressedSource: IconHandler.getPath("play_pressed.png")
                     enabled: parent.enabled
                     tooltip: "Starts the video playback"
                     width: parent.width/2 - parent.spacing/2
@@ -58,8 +58,8 @@ Item{
                     onClicked: { controls.playClicked() }
                 }
                 CustomButton {
-                    iconSource: iconHandler.getPath("pause.png")
-                    pressedSource: iconHandler.getPath("pause_pressed.png")
+                    iconSource: IconHandler.getPath("pause.png")
+                    pressedSource: IconHandler.getPath("pause_pressed.png")
                     tooltip: "Pause playback"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -67,8 +67,8 @@ Item{
                     onClicked: { controls.pauseClicked() }
                 }
                 CustomButton {
-                    iconSource: iconHandler.getPath("backward.png")
-                    pressedSource: iconHandler.getPath("backward_pressed.png")
+                    iconSource: IconHandler.getPath("backward.png")
+                    pressedSource: IconHandler.getPath("backward_pressed.png")
                     tooltip: "Fast rewind"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -76,8 +76,8 @@ Item{
                     onClicked: { controls.backwardClicked(slider.value) }
                 }
                 CustomButton {
-                    iconSource: iconHandler.getPath("forward.png")
-                    pressedSource: iconHandler.getPath("forward_pressed.png")
+                    iconSource: IconHandler.getPath("forward.png")
+                    pressedSource: IconHandler.getPath("forward_pressed.png")
                     tooltip: "Fast forward"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -85,8 +85,8 @@ Item{
                     onClicked: { controls.forwardClicked(slider.value) }
                 }
                 CustomButton {
-                    iconSource: iconHandler.getPath("jump_backward.png")
-                    pressedSource: iconHandler.getPath("jump_backward_pressed.png")
+                    iconSource: IconHandler.getPath("jump_backward.png")
+                    pressedSource: IconHandler.getPath("jump_backward_pressed.png")
                     tooltip: "Go to start"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
@@ -94,8 +94,8 @@ Item{
                     onClicked: { controls.startClicked() }
                 }
                 CustomButton {
-                    iconSource: iconHandler.getPath("jump_forward.png")
-                    pressedSource: iconHandler.getPath("jump_forward_pressed.png")
+                    iconSource: IconHandler.getPath("jump_forward.png")
+                    pressedSource: IconHandler.getPath("jump_forward_pressed.png")
                     tooltip: "Go to end"
                     enabled: parent.enabled
                     width: parent.width/2 - parent.spacing/2
