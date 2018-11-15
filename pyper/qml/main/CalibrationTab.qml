@@ -10,7 +10,7 @@ import "../config"
 
 Rectangle {
     id: rectangle1
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     SplashScreen{

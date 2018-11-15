@@ -39,7 +39,7 @@ Roi {
 
         visible: false
         color: "transparent"
-        border.color: theme.roiDefault
+        border.color: Theme.roiDefault
         border.width: 3
 
         property real startPosX

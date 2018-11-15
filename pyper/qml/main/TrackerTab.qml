@@ -10,7 +10,7 @@ import "../style"
 import "../config"
 
 Rectangle {
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     function reload(){
@@ -55,7 +55,7 @@ Rectangle {
         anchors.horizontalCenter: trackerDisplay.horizontalCenter
         height: 20
 
-        color: theme.text
+        color: Theme.text
         text: py_iface.get_file_name()
         function reload(){
             text = py_iface.get_file_name();
@@ -252,7 +252,7 @@ Rectangle {
         visible: false
 
         roisControlsModelsList: [
-            RoiControlsModel { sourceRoi: callbackRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: callbackRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
             RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
         ]

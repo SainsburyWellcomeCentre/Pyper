@@ -160,11 +160,11 @@ ApplicationWindow {
 //            gradient: Gradient {
 //                GradientStop {
 //                    position: 0.0;
-//                    color: theme.background;
+//                    color: Theme.background;
 //                }
 //                GradientStop {
 //                    position: 0.5;
-//                    color: theme.frameBorder;
+//                    color: Theme.frameBorder;
 //                }
 //            }
 //        }
@@ -290,7 +290,7 @@ ApplicationWindow {
     }
     Rectangle{
         id: mainUi
-        color: theme.background
+        color: Theme.background
         width: parent.width - mainMenuBar.width
         x: mainMenuBar.width
         height: parent.height - log.height
@@ -388,10 +388,10 @@ ApplicationWindow {
         anchors.left:mainMenuBar.right
         anchors.top: mainUi.bottom
         style: TextAreaStyle{
-            backgroundColor: theme.textBackground
-            textColor: theme.text
-            selectionColor: theme.terminalSelection
-            selectedTextColor: theme.terminalSelectedText
+            backgroundColor: Theme.textBackground
+            textColor: Theme.text
+            selectionColor: Theme.terminalSelection
+            selectedTextColor: Theme.terminalSelectedText
         }
     }
     FileDialog {

@@ -9,7 +9,7 @@ import "../style"
 import "../config"
 
 Rectangle {
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     function reload(){
@@ -219,7 +219,7 @@ Rectangle {
         visible: false
 
         roisControlsModelsList: [
-            RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
         ]
     }

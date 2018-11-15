@@ -13,7 +13,7 @@ Item {
     Label {
         id: labelObj
         height: parent.height
-        color: theme.text
+        color: Theme.text
         text: "Label"
         anchors.left: textField.right
         anchors.leftMargin: 10
@@ -24,7 +24,7 @@ Item {
         height: parent.height
         readOnly: true
         placeholderText: "Field"
-        textColor: theme.text
+        textColor: Theme.text
     }
     ToolTip{
         id: tooltip

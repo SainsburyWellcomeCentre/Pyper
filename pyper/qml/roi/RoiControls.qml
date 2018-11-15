@@ -98,7 +98,7 @@ Frame {
 
             property int btnsWidth: 50
 
-            property color drawingColor: theme.roiDefault
+            property color drawingColor: Theme.roiDefault
             onDrawingColorChanged: {
                 colorBtn.paint();
             }

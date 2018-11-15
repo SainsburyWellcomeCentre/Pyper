@@ -119,8 +119,8 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 text: progressBar.value
-                font.family: theme.defaultFont
-                color: theme.text
+                font.family: Theme.defaultFont
+                color: Theme.text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 font.pointSize: 10

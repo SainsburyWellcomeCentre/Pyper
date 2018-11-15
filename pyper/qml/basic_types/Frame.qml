@@ -6,8 +6,8 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
 
-    color: theme.frameBackground
+    color: Theme.frameBackground
     radius: 9
     border.width: 3
-    border.color: theme.frameBorder
+    border.color: Theme.frameBorder
 }

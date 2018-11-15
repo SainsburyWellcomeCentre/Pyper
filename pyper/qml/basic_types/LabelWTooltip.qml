@@ -10,7 +10,7 @@ Label {
     property alias help: tooltip.tooltip
     property alias fontSize: labelWTooltip.font.pointSize
 
-    color: theme.text
+    color: Theme.text
     text: "Label"
     ToolTip{
         id: tooltip

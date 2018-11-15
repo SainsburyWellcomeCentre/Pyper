@@ -33,7 +33,7 @@ Item {
             height: parent.height
             enabled: parent.enabled
 
-            color: theme.text
+            color: Theme.text
             horizontalAlignment: Text.AlignHCenter
             readOnly: true
         }

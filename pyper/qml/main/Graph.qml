@@ -10,7 +10,7 @@ import "../style"
 import "../config"
 
 Rectangle {    
-    color: theme.background
+    color: Theme.background
     
     property string points
 

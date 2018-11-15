@@ -12,7 +12,7 @@ import "../video"
 
 Rectangle {
     id: background
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     Column {

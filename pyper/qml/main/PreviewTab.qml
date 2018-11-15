@@ -8,7 +8,7 @@ import "../roi"
 import "../style"
 
 Rectangle {
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     property bool loaded: false
@@ -53,7 +53,7 @@ Rectangle {
         anchors.horizontalCenter: previewImage.horizontalCenter
         height: 20
 
-        color: theme.text
+        color: Theme.text
         text: py_iface.get_file_name()
         function reload() {
             text = py_iface.get_file_name();

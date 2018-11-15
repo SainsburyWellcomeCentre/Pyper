@@ -80,7 +80,7 @@ ApplicationWindow {
         anchors.right: parent.right
         height: parent.height - 20
         width: parent.width
-        color: theme.codeBackground
+        color: Theme.codeBackground
 
         TextArea {
             id: document

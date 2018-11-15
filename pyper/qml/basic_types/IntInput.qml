@@ -45,10 +45,10 @@ Item {
                     anchors.fill: parent
                     implicitWidth: 80
                     implicitHeight: 20
-                    color: theme.spinBoxBackground
+                    color: Theme.spinBoxBackground
                     radius: 2
                 }
-                textColor: theme.text
+                textColor: Theme.text
             }
             onEditingFinished: {
                 root.edited();

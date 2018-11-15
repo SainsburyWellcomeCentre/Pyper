@@ -7,7 +7,7 @@ import "../style"
 
 Rectangle {
     id: background
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     Label{
@@ -16,13 +16,13 @@ Rectangle {
         anchors.top: parent.top
 
         text: "Tracking results"
-        styleColor: theme.darkBackground
-        color: theme.text
+        styleColor: Theme.darkBackground
+        color: Theme.text
         textFormat: Text.AutoText
         font.pointSize: 16
         font.bold: true
         style: Text.Raised
-        font.family: theme.defaultFont
+        font.family: Theme.defaultFont
     }
     Row {
         id: referenceLayout

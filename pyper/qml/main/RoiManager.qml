@@ -66,13 +66,13 @@ ApplicationWindow {
     Rectangle {
         id: controls
         anchors.fill: parent
-        color: theme.background
+        color: Theme.background
 
         ColorDialog {
             id: colorDialog
             title: "Please pick ROI color"
 
-            color: theme.roiDefault
+            color: Theme.roiDefault
             showAlphaChannel: false
 
             onAccepted: {

@@ -5,8 +5,8 @@ import QtQuick.Window 2.2
 import "../style"
 
 InfoScreen{
-    color: theme.errorScreenFrameBackground
-    border.color: theme.errorScreenFrameBorder
+    color: Theme.errorScreenFrameBackground
+    border.color: Theme.errorScreenFrameBorder
 
     labelWidth: width - errorIcon.width - 30
     labelAnchors.left: errorIcon.right

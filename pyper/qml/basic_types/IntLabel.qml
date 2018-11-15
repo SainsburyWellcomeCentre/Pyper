@@ -29,7 +29,7 @@ Item {
             width: contentWidth + 5
             height: parent.height
             text: "0"
-            color: theme.text
+            color: Theme.text
         }
     }
 }
