@@ -43,8 +43,8 @@ from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
 config = conf.config
 
-VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
-VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
+VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg *.mp4)"
+VIDEO_FORMATS = ('.avi', '.h264', '.mpg', '.mp4')
 
 Tracker = GuiTracker
 TRACKER_CLASSES = {
