@@ -423,10 +423,17 @@ ApplicationWindow {
                 py_tracker.save_ref_source(fileUrl);
             } else if (startsWith(currentTabName, "Record")) {
                 py_recorder.save_ref_source(fileUrl);
+            } else if (startsWith(currentTabName, "Preview")) {
+                py_viewer.save_ref_source(fileUrl);
+            } else {
+                console.error("Unknown tab " + currentTabName); // FIXME: handle preview
             }
+
             visible = false;  // TODO: see if necessary
         }
-        onRejected: { }
+        onRejected: {
+            console.log("Save aborted");
+        }
     }
     HelpWindow {
         id: helpWindow
