@@ -26,6 +26,7 @@ for d in config_dirs:
 
 # TODO: add exception handling if config_path is None
 
+print('Loading configuration from {}'.format(config_path))
 config = ConfigObj(config_path, encoding="UTF8", indent_type='    ', unrepr=True,
                    create_empty=True, write_empty_values=True)
 config.reload()
