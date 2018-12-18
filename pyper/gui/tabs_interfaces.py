@@ -864,6 +864,7 @@ class RecorderIface(TrackerIface):
         self.tracker.set_roi(self.rois['tracking'])
 
         self.pre_track()
+        self.timer_speed = int(1 / self.tracker._stream.stream.fps)
         self.timer.start(self.timer_speed)
         return True
         
