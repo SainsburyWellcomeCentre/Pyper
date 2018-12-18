@@ -1,10 +1,10 @@
-import sys
-
 import cv2
 
 from pyper.exceptions.exceptions import PyperError
 from pyper.utilities.utils import un_file
 from pyper.video.cv_wrappers.props import CV_PROP_IDS
+
+IS_CV_3 = cv2.__version__.split('.')[0] >= 3
 
 
 class VideoCaptureGrabError(PyperError):
@@ -136,7 +136,7 @@ class VideoCapture(object):
             return try_int(propid)
         else:
             prop_name = "CV_CAP_PROP_{}".format(propid.upper())
-            if sys.version_info > (3, 0):
+            if IS_CV_3:
                 propid = CV_PROP_IDS[prop_name]
             else:
                 propid = getattr(cv2.cv, prop_name)
@@ -163,7 +163,7 @@ class VideoCapture(object):
 
     @staticmethod
     def get_cv_attributes():
-        if sys.version_info > (3, 0):
+        if IS_CV_3:
             return CV_PROP_IDS.keys()
         else:
             return [attr for attr in dir(cv2.cv) if attr.startswith('CV_CAP_PROP')]
@@ -171,7 +171,7 @@ class VideoCapture(object):
     @staticmethod
     def get_cv_attribute_name(propid):
         for attr in VideoCapture.get_cv_attributes():
-            if sys.version_info > (3, 0):
+            if IS_CV_3:
                 if CV_PROP_IDS[attr] == propid:
                     return attr
             else:
