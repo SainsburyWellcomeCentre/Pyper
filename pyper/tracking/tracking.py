@@ -32,6 +32,7 @@ from pyper.video.video_frame import Frame
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException
 
 IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspberry pi
+OPENCV_VERSION = int(cv2.__version__[0])
 
 
 class Tracker(object):
@@ -456,9 +457,13 @@ class Tracker(object):
         
         :return: The contours and the biggest contour from the mask (None, None) if no contour found
         """
-        contours, hierarchy = cv2.findContours(np.copy(silhouette),
-                                               mode=cv2.RETR_LIST,
-                                               method=cv2.CHAIN_APPROX_NONE)  # TODO: is CHAIN_APPROX_SIMPLE better?
+        try:
+            if OPENCV_VERSION == 2:
+                contours, _ = cv2.findContours(np.copy(silhouette), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_NONE)  # TODO: is CHAIN_APPROX_SIMPLE better?
+            elif OPENCV_VERSION == 3:
+                _, contours, _ = cv2.findContours(np.copy(silhouette), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_NONE)
+        except ValueError:
+            contours = cv2.findContours(np.copy(silhouette), mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_NONE)  # TODO: is CHAIN_APPROX_SIMPLE better?
         if contours:
             descending_contours = sorted(contours, key=cv2.contourArea, reverse=True)
             if self.tracking_region_roi is None:
