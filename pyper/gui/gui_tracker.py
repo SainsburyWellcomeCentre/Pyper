@@ -35,7 +35,7 @@ class GuiTracker(Tracker):
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
         self.plt_curve = None
-        self.curve_update_period = 5  # FIXME: add to config, default to 1
+        self.curve_update_period = 1  # FIXME: add to config, default to 1
 
     def read(self):
         """
