@@ -61,17 +61,24 @@ class VideoWriter(object):
         :type frame: An image as an array with 1 or 3 color channels
         """
         if frame is not None and self.save_path is not None:
-            n_colors = frame.shape[2]  # FIXME: extract from here and put in other class
-            if n_colors == 3:
-                tmp_color_frame = frame
-            elif n_colors == 1:
-                tmp_color_frame = np.dstack([frame] * 3)
+            if self.is_color:
+                try:
+                    n_colors = frame.shape[2]  # FIXME: extract from here and put in other class
+                except IndexError:
+                    raise VideoWriterFrameShapeError('No color axis found')
+
+                if n_colors == 3:
+                    output_frame = frame
+                elif n_colors == 1:
+                    output_frame = np.dstack([frame] * 3)
+                else:
+                    err_msg = 'Wrong number of color channels, expected 1 or 3, got {}'.format(n_colors)
+                    raise VideoWriterFrameShapeError(err_msg)
             else:
-                err_msg = 'Wrong number of color channels, expected 1 or 3, got {}'.format(n_colors)
-                raise VideoWriterFrameShapeError(err_msg)
-            if not tmp_color_frame.dtype == np.uint8:
-                tmp_color_frame = tmp_color_frame.astype(np.uint8)
-            self.write(tmp_color_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
+                output_frame = frame
+            if not output_frame.dtype == np.uint8:
+                output_frame = output_frame.astype(np.uint8)
+            self.write(output_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
         else:
             print("skipping save because {} is None".format("frame" if frame is None else "save_path"))
 
@@ -88,10 +95,14 @@ class VideoWriter(object):
             return
         else:
             if two_d_frame_shape == self.frame_shape and self.transpose:
-                print("WARNING: dimensions flipped, transposing frame")
-                frame = np.transpose(frame, axes=(1, 0, 2))
+                # print("WARNING: dimensions flipped, transposing frame")
+                if self.is_color:
+                    frame = np.transpose(frame, axes=(1, 0, 2))
+                else:
+                    frame = np.transpose(frame, axes=(1, 0))
                 self.writer.write(frame.copy())
             else:
-                raise VideoWriterFrameShapeError("Frame shape is {}, expected {}".
-                                                 format(two_d_frame_shape, self.frame_shape))
+                raise VideoWriterFrameShapeError("Frame shape is {}, expected {} for writer of dimension {} "
+                                                 "because of flipped dimensions in openCV".
+                                                 format(two_d_frame_shape, self.frame_shape[::-1], self.frame_shape))
 
