@@ -216,6 +216,13 @@ class ViewerIface(PlayerInterface):
         self._set_display_max()
         self._update_img_provider()
 
+    @pyqtSlot(str)  # FIXME: make inherited by all but calib ?
+    def save_ref_source(self, dest_path):
+        dest_path = un_file(dest_path)
+        self.stream.seek(self.stream.current_frame_idx - 1)
+        frame = self.stream.read()
+        imsave(dest_path, frame)
+
 
 class CalibrationIface(PlayerInterface):
     """
