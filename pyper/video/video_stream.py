@@ -280,7 +280,7 @@ class UsbVideoStream(VideoStream):
         """
         capture = VideoCapture(DEFAULT_CAM)
         try:
-            capture.set("fps", FPS)
+            capture.set("fps", FPS)  # FIXME: replace by self.intended_fps (and set in GUI) (and use if FPS is None)
         except VideoCapturePropertySetError:
             print("WARNING: could not set FPS to {}. Defaulting to {}.".format(FPS, capture.fps))
         try:
