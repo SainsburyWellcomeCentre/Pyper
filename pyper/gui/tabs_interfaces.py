@@ -37,7 +37,6 @@ from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollecti
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
-from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
 from pyper.video.cv_wrappers import helpers as cv_helpers
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
@@ -475,7 +474,7 @@ class TrackerIface(BaseInterface):
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
             self.tracker.track_from = self.params.start_frame_idx
             self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
-            self.tracker.bg_source = self.params.ref
+            self.tracker.bg.source = self.params.ref  # TODO: add check for validity of frame size/type in tracker
 
             self.tracker.threshold = self.params.detection_threshold
             self.tracker.min_area = self.params.objects_min_area
@@ -830,6 +829,7 @@ class RecorderIface(TrackerIface):
         n_background_frames = self.params.n_bg_frames
         track_from = self.params.start_frame_idx
         track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+        # FIXME: add bg.source
         
         threshold = self.params.detection_threshold
         min_area = self.params.objects_min_area
