@@ -30,7 +30,8 @@ from pyper.utilities.utils import qurl_to_str
 from pyper.utilities.utils import un_file
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
-from pyper.video.video_stream import QuickRecordedVideoStream as VStream, RecordedVideoStream
+from pyper.video.video_stream import QuickRecordedVideoStream
+from pyper.video.video_stream import RecordedVideoStream
 from pyper.video.video_stream import ImageListVideoStream
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
 from pyper.analysis import video_analysis
@@ -188,7 +189,7 @@ class PlayerInterface(BaseInterface):
 
 class ViewerIface(PlayerInterface):
     """
-    Implements the PlayerInterface class with a QuickRecordedVideoStream
+    Implements the PlayerInterface class with a RecordedVideoStream or QuickRecordedVideoStream
     It is meant for video preview with frame precision seek
     """
 
@@ -203,7 +204,8 @@ class ViewerIface(PlayerInterface):
             if self.seekable:
                 self.stream = recorded_stream
             else:  # Wee need a low definition of video to mimic seeking
-                self.stream = VStream(self.params.src_path, 0, 1)
+                print('Video is not seekable, creating low resolution video for browsing')
+                self.stream = QuickRecordedVideoStream(self.params.src_path, 0, 1)
         except VideoStreamIOException:
             self.stream = None
             error_screen = self.win.findChild(QObject, 'viewerVideoLoadingErrorScreen')
