@@ -149,249 +149,262 @@ ApplicationWindow {
         id: trackingAlgorithmExclusiveGroup
     }
 
-    Rectangle{
-        id: mainMenuBar
-        width: 70
-        height: parent.height
-//        RadialGradient {
-//            anchors.fill: parent
-//            verticalRadius: parent.height * 2
-//            horizontalRadius: parent.width
-//            gradient: Gradient {
-//                GradientStop {
-//                    position: 0.0;
-//                    color: Theme.background;
-//                }
-//                GradientStop {
-//                    position: 0.5;
-//                    color: Theme.frameBorder;
-//                }
-//            }
-//        }
+    Row {
+        id: allControls
+        anchors.fill: parent
 
-        Timer {
-            id: timer
-        }
-        function checkPathLoaded(idx){
-            if (py_iface.is_path_selected()){
-                tabs.currentIndex = idx;
-            } else {
-                errorScreen.flash(2000);
+        Rectangle {
+            id: mainMenuBar
+            width: 70
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+    //        RadialGradient {
+    //            anchors.fill: parent
+    //            verticalRadius: parent.height * 2
+    //            horizontalRadius: parent.width
+    //            gradient: Gradient {
+    //                GradientStop {
+    //                    position: 0.0;
+    //                    color: Theme.background;
+    //                }
+    //                GradientStop {
+    //                    position: 0.5;
+    //                    color: Theme.frameBorder;
+    //                }
+    //            }
+    //        }
+
+            Timer {
+                id: timer
+            }
+            function checkPathLoaded(idx){
+                if (py_iface.is_path_selected()){
+                    tabs.currentIndex = idx;
+                } else {
+                    errorScreen.flash(2000);
+                }
+            }
+
+            Image{
+               anchors.fill: parent
+               source: ImageHandler.getPath("menu_bar.png")
+            }
+            Column {
+                spacing: 15
+                anchors.fill: parent
+                CustomToolButton{
+                    id: welcomeTabBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: welcomeTab.visible
+
+                    text: "Welcome"
+                    tooltip: "Switch to welcome mode"
+                    iconSource: IconHandler.getPath("welcome.png")
+                    onClicked: tabs.currentIndex = 0
+                }
+
+                CustomToolButton{
+                    id: previewTabBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: previewTab.visible
+
+                    text: "Preview"
+                    tooltip: "Switch to preview mode"
+                    iconSource: IconHandler.getPath("preview.png")
+                    onClicked: { mainMenuBar.checkPathLoaded(1) }
+                }
+                CustomToolButton{
+                    id: trackTabBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: trackTab.visible
+
+                    text: "Track"
+                    tooltip: "Switch to tracking mode"
+                    iconSource: IconHandler.getPath("track.png")
+
+                    onClicked: { mainMenuBar.checkPathLoaded(2) }
+                }
+                CustomToolButton{
+                    id: recordTabBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: recordTab.visible
+
+                    text: "Record"
+                    tooltip: "Switch to recording mode"
+                    iconSource: IconHandler.getPath("camera.png")
+
+                    onClicked: { tabs.currentIndex = 3 }
+                }
+                CustomToolButton{
+                    id: calibrationBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: calibrationTab.visible
+
+                    text: "Calibration"
+                    tooltip: "Switch to camera calibration mode"
+                    iconSource: IconHandler.getPath("calibration.png")
+
+                    onClicked: { tabs.currentIndex = 4 }
+                }
+                CustomToolButton{
+                    id: analysisBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: analysisTab.visible
+
+                    text: "Analyse"
+                    tooltip: "Switch to analysis mode"
+                    iconSource: IconHandler.getPath("analyse.png")
+
+                    onClicked: { tabs.currentIndex = 5 }
+                }
+                CustomToolButton{
+                    id: transcodeBtn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: width * 1.25
+
+                    active: transcodeTab.visible
+
+                    text: "Transcode"
+                    tooltip: "Switch to transcode mode\nSelect a video and crop/convert/scale..."
+                    iconSource: IconHandler.getPath("transcode.png")
+
+                    onClicked: { tabs.currentIndex = 6 }
+                }
             }
         }
 
-        Image{
-           anchors.fill: parent
-           source: ImageHandler.getPath("menu_bar.png")
-        }
         Column {
-            spacing: 15
-            anchors.fill: parent
-            CustomToolButton{
-                id: welcomeTabBtn
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: parent.width - mainMenuBar.width
+            Rectangle {
+                id: mainUi
+                color: Theme.background
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: width * 1.25
 
-                active: welcomeTab.visible
+                height: parent.height - log.height
 
-                text: "Welcome"
-                tooltip: "Switch to welcome mode"
-                iconSource: IconHandler.getPath("welcome.png")
-                onClicked: tabs.currentIndex = 0
+                InfoScreen {
+                    id: infoScreen
+                    width: 400
+                    height: 200
+                    text: "Video selected\n Please proceed to preview or tracking"
+                    visible: false
+                    z: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.verticalCenter
+                }
+
+                ErrorScreen {
+                    id: errorScreen
+                    width: 400
+                    height: 200
+                    text: "No video selected"
+                    visible: false
+                    z: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.verticalCenter
+                }
+
+                TabView {
+                    id: tabs
+                    tabsVisible: false
+                    frameVisible: false
+                    anchors.fill: parent
+                    Tab {
+                        id: welcomeTab
+                        title: "Welcome"
+                        WelcomeTab {
+                            id: welcomeWindow
+                        }
+                    }
+                    Tab {
+                        id: previewTab
+                        title: "Preview"
+                        PreviewTab {
+                            id: previewWindow
+                            objectName: "previewWindow"
+                        }
+                        property bool wasLoaded
+                        onLoaded: {
+                            console.log("Loading preview");
+                            wasLoaded = true;
+                        }
+                    }
+                    Tab {
+                        id: trackTab
+                        title: "Track"
+                        TrackerTab {
+                            id: trackerWindow
+                            objectName: "Tracker"
+                        }
+                        property bool wasLoaded
+                        onLoaded: {wasLoaded = true}
+                    }
+                    Tab {
+                        id: recordTab
+                        title: "Record"
+                        RecorderTab {
+                            id: recorderWindow
+                        }
+                    }
+                    Tab {
+                        id: calibrationTab
+                        title: "Calibrate"
+                        CalibrationTab {
+                            id: calibrationWindow
+                        }
+                    }
+                    Tab {
+                        id: analysisTab
+                        title: "Analyse"
+                        AnalysisTab {
+                            id: analysisWindow
+                        }
+                    }
+
+                    Tab {
+                        id: transcodeTab
+                        title: "Transcode"
+                        TranscodeTab {
+                            id: transcodeWindow
+                        }
+                    }
+                }
             }
-
-            CustomToolButton{
-                id: previewTabBtn
+            TextArea {
+                id: log
+                objectName: "log"
+                height: 50
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: width * 1.25
-
-                active: previewTab.visible
-
-                text: "Preview"
-                tooltip: "Switch to preview mode"
-                iconSource: IconHandler.getPath("preview.png")
-                onClicked: { mainMenuBar.checkPathLoaded(1) }
-            }
-            CustomToolButton{
-                id: trackTabBtn
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width * 1.25
-
-                active: trackTab.visible
-
-                text: "Track"
-                tooltip: "Switch to tracking mode"
-                iconSource: IconHandler.getPath("track.png")
-
-                onClicked: { mainMenuBar.checkPathLoaded(2) }
-            }
-            CustomToolButton{
-                id: recordTabBtn
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width * 1.25
-
-                active: recordTab.visible
-
-                text: "Record"
-                tooltip: "Switch to recording mode"
-                iconSource: IconHandler.getPath("camera.png")
-
-                onClicked: { tabs.currentIndex = 3 }
-            }
-            CustomToolButton{
-                id: calibrationBtn
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width * 1.25
-
-                active: calibrationTab.visible
-
-                text: "Calibration"
-                tooltip: "Switch to camera calibration mode"
-                iconSource: IconHandler.getPath("calibration.png")
-
-                onClicked: { tabs.currentIndex = 4 }
-            }
-            CustomToolButton{
-                id: analysisBtn
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width * 1.25
-
-                active: analysisTab.visible
-
-                text: "Analyse"
-                tooltip: "Switch to analysis mode"
-                iconSource: IconHandler.getPath("analyse.png")
-
-                onClicked: { tabs.currentIndex = 5 }
-            }
-            CustomToolButton{
-                id: transcodeBtn
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: width * 1.25
-
-                active: transcodeTab.visible
-
-                text: "Transcode"
-                tooltip: "Switch to transcode mode\nSelect a video and crop/convert/scale..."
-                iconSource: IconHandler.getPath("transcode.png")
-
-                onClicked: { tabs.currentIndex = 6 }
-            }
-        }
-
-
-    }
-    Rectangle{
-        id: mainUi
-        color: Theme.background
-        width: parent.width - mainMenuBar.width
-        x: mainMenuBar.width
-        height: parent.height - log.height
-
-        InfoScreen{
-            id: infoScreen
-            width: 400
-            height: 200
-            text: "Video selected\n Please proceed to preview or tracking"
-            visible: false
-            z: 1
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.verticalCenter
-        }
-
-        ErrorScreen{
-            id: errorScreen
-            width: 400
-            height: 200
-            text: "No video selected"
-            visible: false
-            z: 1
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.verticalCenter
-        }
-
-        TabView {
-            id: tabs
-            tabsVisible: false
-            frameVisible: false
-            anchors.fill: parent
-            Tab {
-                id: welcomeTab
-                title: "Welcome"
-                WelcomeTab {
-                    id: welcomeWindow
+                style: TextAreaStyle{
+                    backgroundColor: Theme.textBackground
+                    textColor: Theme.text
+                    selectionColor: Theme.terminalSelection
+                    selectedTextColor: Theme.terminalSelectedText
                 }
             }
-            Tab {
-                id: previewTab
-                title: "Preview"
-                PreviewTab {
-                    id: previewWindow
-                    objectName: "previewWindow"
-                }
-                property bool wasLoaded
-                onLoaded: {wasLoaded = true}
-            }
-            Tab {
-                id: trackTab
-                title: "Track"
-                TrackerTab {
-                    id: trackerWindow
-                    objectName: "Tracker"
-                }
-                property bool wasLoaded
-                onLoaded: {wasLoaded = true}
-            }
-            Tab {
-                id: recordTab
-                title: "Record"
-                RecorderTab {
-                    id: recorderWindow
-                }
-            }
-            Tab {
-                id: calibrationTab
-                title: "Calibrate"
-                CalibrationTab {
-                    id: calibrationWindow
-                }
-            }
-            Tab {
-                id: analysisTab
-                title: "Analyse"
-                AnalysisTab {
-                    id: analysisWindow
-                }
-            }
-
-            Tab {
-                id: transcodeTab
-                title: "Transcode"
-                TranscodeTab {
-                    id: transcodeWindow
-                }
-            }
-        }
-    }
-    TextArea {
-        id: log
-        objectName: "log"
-        height: 50
-        width: parent.width - mainMenuBar.width
-        anchors.left:mainMenuBar.right
-        anchors.top: mainUi.bottom
-        style: TextAreaStyle{
-            backgroundColor: Theme.textBackground
-            textColor: Theme.text
-            selectionColor: Theme.terminalSelection
-            selectedTextColor: Theme.terminalSelectedText
         }
     }
     FileDialog {
