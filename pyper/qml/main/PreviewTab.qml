@@ -150,8 +150,8 @@ Rectangle {
             onPauseClicked: { py_viewer.pause() }
             onForwardClicked: { py_viewer.move(sliderValue) }
             onBackwardClicked: { py_viewer.move(-sliderValue) }
-            onStartClicked: { py_viewer.seek_to(-1) }
-            onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames()) }
+            onStartClicked: { py_viewer.seek_to(0) }
+            onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames() - 1) }
         }
         Frame {
             id: frameControls
