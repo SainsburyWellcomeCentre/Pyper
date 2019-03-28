@@ -4,7 +4,7 @@ from pyper.exceptions.exceptions import PyperError
 from pyper.utilities.utils import un_file
 from pyper.video.cv_wrappers.props import CV_PROP_IDS
 
-IS_CV_3 = cv2.__version__.split('.')[0] >= 3
+IS_CV_3 = int(cv2.__version__.split('.')[0]) >= 3
 
 
 class VideoCaptureGrabError(PyperError):
