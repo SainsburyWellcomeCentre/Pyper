@@ -117,6 +117,7 @@ ApplicationWindow {
             }
             MenuItem {
                 text: qsTr("Save")
+                shortcut: "Ctrl+Shift+S"
                 onTriggered: { saveRefDialog.visible = true; }
             }
         }
