@@ -99,24 +99,24 @@ class VideoStream(object):
         This is one of the methods that are expected to change the most between 
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
-            
+
     def is_bg_frame(self):
         """
         Checks if the current frame is in the background frames range
-        
+
         :return: Whether the current frame is in the background range
         :rtype: bool
         """
         return self.bg_start_frame <= self.current_frame_idx <= self.bg_end_frame
-    
+
     def record_current_frame_to_disk(self):
         """ Saves current frame to video file (self.dest) """
         self.save(self.read())
-        
+
     def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
-        
+
         :param str msg: The message to display upon stoping the recording.
         """
         print(msg)
@@ -266,15 +266,15 @@ class UsbVideoStream(VideoStream):
         :param int n_background_frames: The number of frames to use for the background
         """
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
-        
+
     def _start_video_capture_session(self, save_path):
         """
         Initiates a VideoCapture object to supply the frames to read
         (from the default usb camera)
         and a VideoWriter object to save a potential output
-        
+
         :param str save_path: the destination file path
-        
+
         :return: capture and video_writer object
         :type: (VideoCapture, VideoWriter)
         """
