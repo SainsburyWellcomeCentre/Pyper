@@ -61,7 +61,7 @@ class Tracker(object):
     """
     def __init__(self, src_file_path=None, dest_file_path=None,
                  threshold=20, min_area=100, max_area=5000,
-                 teleportation_threshold=10,
+                 teleportation_threshold=10, n_erosions=0,
                  bg_start=0, track_from=1, track_to=None,
                  n_background_frames=1, n_sds=5.0,
                  clear_borders=False, normalise=False,

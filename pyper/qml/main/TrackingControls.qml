@@ -193,6 +193,21 @@ Column {
                     root.updateTracker();
                 }
             }
+            IntInput {
+                width: parent.width
+                label: "N erosions"
+                tooltip: "Number of erosions to perform on the mask"
+                value: root.py_params_iface.get_n_erosions()
+                minimumValue: 0
+                onEdited: {
+                    root.py_params_iface.set_n_erosions(value);
+                    root.updateTracker();
+                }
+                function reload() {
+                    root.py_params_iface.get_n_erosions();
+                    root.updateTracker();
+                }
+            }
         }
     }
     Frame {

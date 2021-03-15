@@ -150,6 +150,7 @@ if __name__ == '__main__':
     tracker = Tracker(src_file_path=args.video_file, dest_file_path=None,
                       threshold=args.threshold, min_area=args.min_area,
                       max_area=args.max_area, teleportation_threshold=args.teleportation_threshold,
+                      n_erosions=args.n_erosions,
                       bg_start=args.bg_time, track_from=args.track_from, track_to=args.track_to,
                       n_background_frames=args.n_background_frames, n_sds=args.n_sds,
                       clear_borders=args.clear_borders, normalise=config['tracker']['checkboxes']['normalise'],

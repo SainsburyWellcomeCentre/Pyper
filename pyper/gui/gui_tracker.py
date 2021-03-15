@@ -11,7 +11,7 @@ class GuiTracker(Tracker):
     """
     def __init__(self, ui_iface, src_file_path=None, dest_file_path=None,
                  threshold=20, min_area=100, max_area=5000,
-                 teleportation_threshold=10,
+                 teleportation_threshold=10, n_erosions=0,
                  bg_start=0, track_from=1, track_to=None,
                  n_background_frames=1, n_sds=5.0,
                  clear_borders=False, normalise=False,
@@ -25,7 +25,7 @@ class GuiTracker(Tracker):
         """
         Tracker.__init__(self, src_file_path=src_file_path, dest_file_path=dest_file_path,
                          threshold=threshold, min_area=min_area, max_area=max_area,
-                         teleportation_threshold=teleportation_threshold,
+                         teleportation_threshold=teleportation_threshold, n_erosions=n_erosions,
                          bg_start=bg_start, track_from=track_from, track_to=track_to,
                          n_background_frames=n_background_frames, n_sds=n_sds,
                          clear_borders=clear_borders, normalise=normalise,

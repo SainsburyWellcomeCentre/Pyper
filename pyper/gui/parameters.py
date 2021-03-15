@@ -52,6 +52,7 @@ class ParamsIface(QObject):
         self.objects_min_area = config['tracker']['detection']['min_area']
         self.objects_max_area = config['tracker']['detection']['max_area']
         self.teleportation_threshold = config['tracker']['detection']['teleportation_threshold']
+        self.n_erosions = config['tracker']['detection']['n_erosions']
 
         self.n_sds = config['tracker']['sd_mode']['n_sds']
 
@@ -282,3 +283,12 @@ class ParamsIface(QObject):
     @pyqtSlot(result=QVariant)
     def get_dest_path(self):
         return self.dest_path if hasattr(self, "dest_path") else ""
+
+    @pyqtSlot(result=int)
+    def get_n_erosions(self):
+        return self.n_erosions
+
+    @pyqtSlot(int)
+    def set_n_erosions(self, n_erosions):
+        if n_erosions >= 0:
+            self.n_erosions = n_erosions

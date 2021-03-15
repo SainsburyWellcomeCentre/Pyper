@@ -498,6 +498,7 @@ class TrackerIface(BaseInterface):
             self.tracker.params.min_area = self.params.objects_min_area
             self.tracker.params.max_area = self.params.objects_max_area
             self.tracker.params.teleportation_threshold = self.params.teleportation_threshold
+            self.tracker.params.n_erosions = self.params.n_erosions
 
             self.tracker.params.clear_borders = self.params.clear_borders
             self.tracker.params.normalise = self.params.normalise
@@ -859,6 +860,7 @@ class RecorderIface(TrackerIface):
         min_area = self.params.objects_min_area
         max_area = self.params.objects_max_area
         teleportation_threshold = self.params.teleportation_threshold
+        n_erosions = self.param.n_erosions
         
         n_sds = self.params.n_sds
         clear_borders = self.params.clear_borders
@@ -871,7 +873,7 @@ class RecorderIface(TrackerIface):
 
         self.tracker = self.params.tracker_class(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                                  threshold=threshold, min_area=min_area, max_area=max_area,
-                                                 teleportation_threshold=teleportation_threshold,
+                                                 teleportation_threshold=teleportation_threshold, n_erosions=n_erosions,
                                                  bg_start=bg_start, track_from=track_from, track_to=track_to,
                                                  n_background_frames=n_background_frames, n_sds=n_sds,
                                                  clear_borders=clear_borders, normalise=normalise,
