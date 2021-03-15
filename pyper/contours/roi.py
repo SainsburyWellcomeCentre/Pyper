@@ -263,7 +263,7 @@ class Ellipse(Roi):
         semi_minor = self.height / 2.
         semi_major = self.width / 2.
         xs = np.linspace(-semi_major, semi_major, math.ceil(n_points/2.))  # FIXME: inverted ?
-        ys = self.__compute_ellipse(semi_minor, semi_major, xs)   # FIXME: inverted ?
+        ys = self.__compute_ellipse(semi_minor, semi_major, xs)  # FIXME: inverted ?
         ys = np.hstack((ys, -ys[::-1])) + self.centre[1]
         xs = np.hstack((xs, xs[::-1])) + self.centre[0]
         points = np.column_stack((xs, ys)).astype(np.float32)

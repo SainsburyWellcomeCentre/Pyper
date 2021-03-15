@@ -13,3 +13,5 @@ src/qml/Pyper.creator*
 .idea
 resources/recording.avi
 *.qmlproject.user
+/build/
+*.egg-info
