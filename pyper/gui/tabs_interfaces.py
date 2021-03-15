@@ -844,7 +844,7 @@ class RecorderIface(TrackerIface):
             return False
         vid_ext = os.path.splitext(self.params.dest_path)[1]
         if vid_ext not in VIDEO_FORMATS:
-            print('Unknow format: {}'.format(vid_ext))
+            print('Unknown format: {}'.format(vid_ext))
             return False
 
         self._reset_measures()

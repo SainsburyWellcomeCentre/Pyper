@@ -249,7 +249,7 @@ class Tracker(object):
                 else:
                     self._check_specimen_in_roi()
                     self._plot()
-                    if record: self._stream.save(self.silhouette)
+                    if record: self._stream.save(self.silhouette)  # TODO: also save frame
                 result_frame = self.silhouette
             if pbar is not None: pbar.update(self._stream.current_frame_idx)
             return result_frame, self.results.get_last_position(), self.results.get_last_dist_from_arena_pair()
@@ -260,9 +260,6 @@ class Tracker(object):
             msg = "Recording stopped by user" if (type(e) == KeyboardInterrupt) else str(e)
             self._stream.stop_recording(msg)
             raise EOFError
-
-    def after_frame_track(self):
-        pass
 
     def _track_frame(self, frame, requested_color='r', requested_output='raw'):
         """
@@ -306,6 +303,14 @@ class Tracker(object):
         else:
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
+
+    def after_frame_track(self):
+        """
+        To be implemented in derived class to perform action after each frame track
+
+        :return:
+        """
+        pass
 
     def _check_specimen_in_roi(self):
         """
