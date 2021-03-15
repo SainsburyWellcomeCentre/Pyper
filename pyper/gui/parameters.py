@@ -282,4 +282,3 @@ class ParamsIface(QObject):
     @pyqtSlot(result=QVariant)
     def get_dest_path(self):
         return self.dest_path if hasattr(self, "dest_path") else ""
-
