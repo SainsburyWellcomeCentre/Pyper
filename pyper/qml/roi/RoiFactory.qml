@@ -163,6 +163,8 @@ Item {
             tracker_py_iface.set_roi(roiType, type, root.width, root.height, root.roiX, root.roiY, root.roiWidth, root.roiHeight);
         } else if (type === 'freehand') {
             tracker_py_iface.set_roi_from_points(roiType, root.width, root.height, pointsToString(roi.item.points));
+        } else {
+            console.log("Unrecognised source: " + source);
         }
     }
     function unsetPyIfaceRoi() {
