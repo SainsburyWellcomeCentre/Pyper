@@ -46,11 +46,12 @@ Rectangle {
                 enabled: parent.enabled
                 anchors.centerIn: parent
                 spacing: 5
-                width: parent.width
-                height: parent.height
+                width: parent.width - 20
+                height: parent.height - 20
 
                 Row {
                     id: row1
+                    anchors.horizontalCenter: parent.horizontalCenter
 
                     width: (children[0].width * 2) + spacing
                     height: children[0].height
