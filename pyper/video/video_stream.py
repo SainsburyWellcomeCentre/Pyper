@@ -12,30 +12,32 @@ and from Antonio Gonzalez for the RecordedVideoStream class
 :author: crousse
 """
 
-import numpy as np
 import os
 import platform
-import scipy
 import sys
-from cv2 import cv
 
+import numpy as np
 import cv2
+from skimage.transform import rescale
 
-from video_frame import Frame
-from pyper.utilities.utils import spin_progress_bar
+from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
-from pyper.cv_wrappers.video_writer import VideoWriter
-from pyper.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
+from pyper.utilities.utils import spin_progress_bar
+from pyper.video.cv_wrappers.video_writer import VideoWriter
+from pyper.video.video_frame import Frame
+from pyper.config import conf
 
 IS_PI = (platform.machine()).startswith('arm')
 if IS_PI:
     import picamera.array
     from pyper.camera.camera import CvPiCamera
 
+config = conf.config
+
     
 DEFAULT_CAM = 0
-CODEC = cv.CV_FOURCC(*'mp4v')  # TODO: check which codecs are available
-FPS = 30
+CODEC = 'mp4v'  # TODO: check which codecs are available
+DEFAULT_FPS = config['global']['default_fps']
 DEFAULT_FRAME_SIZE = (256, 256)
 
 IS_GRAPHICAL = 'PyQt5' in sys.modules.keys()
@@ -61,8 +63,9 @@ class VideoStream(object):
         self.bg_end_frame = self.bg_start_frame + n_background_frames - 1
         
         self.current_frame_idx = -1  # We start out since we increment upon frame loading
+        self.seekable = False
 
-    def save(self, frame):  # FIXME: fix video_writer calls
+    def save(self, frame):  # FIXME: fix video_writer calls (put most in VideoWriter)
         """
         Saves the frame supplied as argument to self.video_writer
         
@@ -80,7 +83,7 @@ class VideoStream(object):
                 raise VideoStreamTypeException(err_msg)
             if not tmp_color_frame.dtype == np.uint8:
                 tmp_color_frame = tmp_color_frame.astype(np.uint8)
-            self.video_writer.write(tmp_color_frame.copy())  # copy because of dynamic arrays
+            self.video_writer.write(tmp_color_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
         else:
             print("skipping save because {} is None".format("frame" if frame is None else "save_path"))
             
@@ -95,33 +98,38 @@ class VideoStream(object):
     
     def _start_video_capture_session(self, src_path):
         """ Should return a stream of frames to be used by read()
-        and a cv2.VideoWriter object to be used by save()
+        and a VideoWriter object to be used by save()
         This is one of the methods that are expected to change the most between 
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
-            
+
     def is_bg_frame(self):
         """
         Checks if the current frame is in the background frames range
-        
+
         :return: Whether the current frame is in the background range
         :rtype: bool
         """
         return self.bg_start_frame <= self.current_frame_idx <= self.bg_end_frame
-    
+
     def record_current_frame_to_disk(self):
         """ Saves current frame to video file (self.dest) """
         self.save(self.read())
-        
+
     def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
-        
+
         :param str msg: The message to display upon stoping the recording.
         """
         print(msg)
         self.video_writer.release()
-        cv2.destroyAllWindows()
+        if not IS_GRAPHICAL:
+            try:
+                cv2.destroyAllWindows()
+            except cv2.error as err:
+                pass
+                # print("Skipping windows destruction: {}".format(err))
 
 
 class RecordedVideoStream(VideoStream):
@@ -145,22 +153,23 @@ class RecordedVideoStream(VideoStream):
         self.duration = self.n_frames / float(self.fps)
 
         VideoStream.__init__(self, file_path, bg_start, n_background_frames)
+        self.seekable = self.stream.seekable
         
     def _start_video_capture_session(self, file_path):  # TODO: refactor name
         """
-        Initiates a cv2.VideoCapture object to supply the frames to read
-        and a cv2.VideoWriter object to save a potential output
+        Initiates a VideoCapture object to supply the frames to read
+        and a VideoWriter object to save a potential output
         
         :param str file_path: the source file path
         
         :return: capture and video_writer object
-        :rtype: (cv2.VideoCapture, cv2.VideoWriter)
+        :rtype: (VideoCapture, VideoWriter)
         """
         capture = VideoCapture(file_path)
         dirname, filename = os.path.split(file_path)
         # basename, ext = os.path.splitext(filename)
         save_path = os.path.join(dirname, 'recording.avi')  # Fixme: should use argument
-        video_writer = VideoWriter(save_path, cv.CV_FOURCC(*'mp4v'), 15, self.size, True)
+        video_writer = VideoWriter(save_path, 'mp4v', 15, self.size, True)
         return capture, video_writer
         
     def _get_n_frames(self, stream):
@@ -195,8 +204,12 @@ class RecordedVideoStream(VideoStream):
             raise VideoStreamIOException("Could not read video")
         else:
             return n_frames
+
+    def seek(self, frame_id):
+        self.stream.seek(frame_id)  # FIXME: because of read
+        self.current_frame_idx = frame_id
     
-    def read(self):
+    def read(self):  # OPTIMISE: (cast)
         """
         Returns the next frame after updating the count
         
@@ -249,34 +262,41 @@ class UsbVideoStream(VideoStream):
     """
     DEFAULT_FRAME_SIZE = (640, 480)
 
-    def __init__(self, save_path, bg_start, n_background_frames):
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
         :param int bg_start: The frame to use as background frames range start
         :param int n_background_frames: The number of frames to use for the background
         """
+        if requested_fps is None:
+            self.fps = DEFAULT_FPS
+        else:
+            self.fps = requested_fps
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
-        
+
     def _start_video_capture_session(self, save_path):
         """
-        Initiates a cv2.VideoCapture object to supply the frames to read
+        Initiates a VideoCapture object to supply the frames to read
         (from the default usb camera)
-        and a cv2.VideoWriter object to save a potential output
-        
-        :param str filePath: the destination file path
-        
+        and a VideoWriter object to save a potential output
+
+        :param str save_path: the destination file path
+
         :return: capture and video_writer object
-        :type: (cv2.VideoCapture, cv2.VideoWriter)
+        :type: (VideoCapture, VideoWriter)
         """
         capture = VideoCapture(DEFAULT_CAM)
         try:
-            capture.set("fps", FPS)
+            capture.set("fps", self.fps)
+            if capture.fps != self.fps:  # FIXME: use raise Warning
+                print("WARNING: Setting FPS to {} failed. Defaulting to {}.".format(self.fps, capture.fps))
+                self.fps = capture.fps
         except VideoCapturePropertySetError:
-            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(FPS, capture.fps))
+            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(self.fps, capture.fps))  # FIXME: raise warning
         try:
             capture.set("BRIGHTNESS", 100)
         except VideoCapturePropertySetError:
-            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get('brightness')))
+            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get('brightness')))  # FIXME: raise warning
 
         # Try custom resolution
         try:
@@ -297,7 +317,9 @@ class UsbVideoStream(VideoStream):
 
         actual_size = (actual_width, actual_height)  # All in openCV nomenclature
         self.size = actual_size
-        video_writer = VideoWriter(save_path, CODEC, FPS, actual_size, is_color=True)
+        if capture.fps is None:
+            raise VideoStreamIOException("FPS was not set in videocapture")
+        video_writer = VideoWriter(save_path, CODEC, capture.fps, actual_size, is_color=True)  # TEST: capture.fps
         return capture, video_writer
         
     def read(self):
@@ -331,12 +353,16 @@ class PiVideoStream(VideoStream):
     A subclass of VideoStream for the raspberryPi camera
     which isn't supported by opencv
     """
-    def __init__(self, save_path, bg_start, n_background_frames):
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
         :param int bg_start: The frame to use as background frames range start
         :param int n_background_frames: The number of frames to use for the background
         """
+        if requested_fps is None:
+            self.fps = DEFAULT_FPS
+        else:
+            self.fps = requested_fps
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
 
     def _init_cam(self):
@@ -354,14 +380,14 @@ class PiVideoStream(VideoStream):
         """
         Initiates a picamera.array.PiRGBArray object to store
         the frames from the picamera when reading 
-        and a cv2.VideoWriter object to save a potential output
+        and a VideoWriter object to save a potential output
         
         :param str save_path: the destination file path
         
         :return: array and video_writer object
-        :type: (picamera.array.PiRGBArray, cv2.VideoWriter)
+        :type: (picamera.array.PiRGBArray, VideoWriter)
         """
-        video_writer = VideoWriter(save_path, CODEC, FPS, DEFAULT_FRAME_SIZE)
+        video_writer = VideoWriter(save_path, CODEC, self.fps, DEFAULT_FRAME_SIZE)
         stream = picamera.array.PiRGBArray(self._cam)
         return stream, video_writer
         
@@ -442,7 +468,7 @@ class QuickRecordedVideoStream(RecordedVideoStream):
             try:
                 frame = stream.read()
                 n_frames += 1
-                frame = scipy.misc.imresize(frame, 0.2, interp='bilinear')  # FIXME: parametrise resizing factor
+                frame = rescale(frame, 0.2, anti_aliasing=True)  # FIXME: parametrise resizing factor
                 self.frames.append(frame)
             except VideoCaptureGrabError:
                 break

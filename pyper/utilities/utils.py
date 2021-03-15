@@ -1,8 +1,13 @@
+import os
 import sys
-from HTMLParser import HTMLParser
-
-import cv2
 import time
+import platform
+
+try:
+    from HTMLParser import HTMLParser
+except ImportError:
+    from html.parser import HTMLParser
+import cv2
 
 
 def spin_progress_bar(val):
@@ -107,8 +112,18 @@ def check_fps(prev_time):
     print("{} fps".format(fps))
     return time.time()
 
+
 def un_file(file_path):
+    """
+
+    :param str file_path:
+    :return:
+    """
     if "file://" in file_path:  # Added by QDialog
         file_path = file_path.replace("file://", "")
+    if platform.system().lower().startswith('win'):
+        if file_path.startswith('/'):
+            file_path = file_path[1:]
+        file_path = os.path.normpath(file_path)
     return file_path
 

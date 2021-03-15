@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Private 1.0 // For Tooltip
 
 import "../basic_types"
@@ -69,6 +69,8 @@ Item {
                 id: progressBar
 
                 width: previewImage.width - pBarLabel.width
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 minimumValue: 0
 
                 enabled: root.enabled
@@ -117,8 +119,8 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 text: progressBar.value
-                font.family: theme.defaultFont
-                color: theme.text
+                font.family: Theme.defaultFont
+                color: Theme.text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 font.pointSize: 10

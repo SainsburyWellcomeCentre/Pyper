@@ -1,6 +1,6 @@
-import QtQuick 2.3
-import QtQml 2.0
-import QtQuick.Controls 1.2
+import QtQml 2.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../popup_messages"
 import "../basic_types"
@@ -10,7 +10,8 @@ import "../style"
 import "../config"
 
 Rectangle {
-    color: theme.background
+    id: rectangle
+    color: Theme.background
     anchors.fill: parent
 
     function reload(){
@@ -53,8 +54,9 @@ Rectangle {
         anchors.topMargin: 10
         anchors.top: parent.top
         anchors.horizontalCenter: trackerDisplay.horizontalCenter
+        height: 20
 
-        color: theme.text
+        color: Theme.text
         text: py_iface.get_file_name()
         function reload(){
             text = py_iface.get_file_name();
@@ -86,7 +88,7 @@ Rectangle {
         }
 
         RoiFactory {
-            id: mouseRoi
+            id: callbackRoi
 
             width: parent.imgWidth
             height: parent.imgHeight
@@ -158,44 +160,70 @@ Rectangle {
 
         Frame {
             id: controls
-            height: row1.height + 20
+            height: row1.height + vidSpeed.height + 20
 
-            Row {
-                id: row1
+            CustomColumn {
+                enabled: parent.enabled
+                anchors.centerIn: parent
+                spacing: 5
+                width: parent.width
+                height: parent.height
 
-                anchors.centerIn: controls
-                width: children[0].width *2 + spacing
-                height: children[0].height
-                spacing: 10
+                Row {
+                    id: row1
 
-                CustomButton {
-                    id: startTrackBtn
+                    width: children[0].width *2 + spacing
+                    height: children[0].height
+                    spacing: 10
 
-                    width: 45
-                    height: width
+                    CustomButton {
+                        id: startTrackBtn
 
-                    iconSource: iconHandler.getPath("play.png")
-                    pressedSource: iconHandler.getPath("play_pressed.png")
-                    tooltip: "Start tracking"
+                        width: 45
+                        height: width
 
-                    onPressed:{ splash.visible = true; }
-                    onClicked: { py_tracker.start() }
-                    onReleased:{
-                        py_tracker.load();
-                        splash.visible = false;
+                        iconSource: IconHandler.getPath("play.png")
+                        pressedSource: IconHandler.getPath("play_pressed.png")
+                        tooltip: "Start tracking"
+
+                        onPressed:{ splash.visible = true; }
+                        onClicked: { py_tracker.start() }
+                        onReleased:{
+                            py_tracker.load();
+                            splash.visible = false;
+                        }
+                    }
+                    CustomButton {
+                        id: stopTrackBtn
+
+                        width: startTrackBtn.width
+                        height: width
+
+                        iconSource: IconHandler.getPath("stop.png")
+                        pressedSource: IconHandler.getPath("stop_pressed.png")
+                        tooltip: "Stop tracking"
+
+                        onClicked: py_tracker.stop()
                     }
                 }
-                CustomButton {
-                    id: stopTrackBtn
+                IntInput {
+                    id: vidSpeed
 
-                    width: startTrackBtn.width
-                    height: width
+                    width: parent.width
+                    enabled: parent.enabled
 
-                    iconSource: iconHandler.getPath("stop.png")
-                    pressedSource: iconHandler.getPath("stop_pressed.png")
-                    tooltip: "Stop tracking"
-
-                    onClicked: py_tracker.stop()
+                    label: "Spd."
+                    tooltip: "Frame period in ms (1/FPS)"
+                    value: py_iface.get_timer_period()
+                    minimumValue: 8  // > 120 FPS
+                    onEdited: {
+                        py_iface.set_timer_period(value);
+                        reload();
+                    }
+                    function reload(){
+                        value = py_iface.get_timer_period();
+                        //root.updateTracker();
+                    }
                 }
             }
         }
@@ -219,7 +247,7 @@ Rectangle {
                 width: 50
                 height: width
 
-                iconSource: iconHandler.getPath("roi.png")
+                iconSource: IconHandler.getPath("roi.png")
 
                 tooltip: "Open ROI manager"
                 onClicked: {
@@ -232,7 +260,7 @@ Rectangle {
                 width: 50
                 height: width
 
-                iconSource: iconHandler.getPath('document-open.png')
+                iconSource: IconHandler.getPath('document-open.png')
 
                 tooltip: "Select a source of data to be displayed alongside the video."
                 onClicked: {
@@ -251,7 +279,7 @@ Rectangle {
         visible: false
 
         roisControlsModelsList: [
-            RoiControlsModel { sourceRoi: mouseRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: callbackRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
             RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
         ]

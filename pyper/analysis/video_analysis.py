@@ -54,7 +54,7 @@ def points_to_angle(a, b, c):
 def plot_track(positions, background_img):
     """
 
-    Plots the trajectory of the mouse from positions onto background_img
+    Plots the trajectory of the specimen from positions onto background_img
     Positions is a list of (x,y) coordinates pairs
     """
     plt.imshow(background_img, cmap=cm.Greys_r)

@@ -1,12 +1,12 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 import QtQuick.Window 2.2
 
 import "../style"
 
 InfoScreen {
-    color: theme.splashScreenFrameBackground
-    border.color: theme.splashScreenFrameBorder
+    color: Theme.splashScreenFrameBackground
+    border.color: Theme.splashScreenFrameBorder
 
     BusyIndicator {
         id: indicator

@@ -1,6 +1,6 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.3
 
 import "../style"
 
@@ -29,7 +29,7 @@ Item {
             width: contentWidth + 5
             height: parent.height
             text: "0"
-            color: theme.text
+            color: Theme.text
         }
     }
 }

@@ -1,4 +1,5 @@
 import cv2
+import numpy as np  # required for dynamic subclassing
 
 from pyper.tracking.tracking import Tracker
 
@@ -16,7 +17,7 @@ class GuiTracker(Tracker):
                  clear_borders=False, normalise=False,
                  plot=False, fast=False, extract_arena=False,
                  camera_calibration=None,
-                 callback=None):
+                 callback=None, requested_fps=None):
         """
         :param TrackerInterface ui_iface: the interface this tracker is called from
 
@@ -30,9 +31,11 @@ class GuiTracker(Tracker):
                          clear_borders=clear_borders, normalise=normalise,
                          plot=plot, fast=fast, extract_arena=extract_arena,
                          camera_calibration=camera_calibration,
-                         callback=callback)
+                         callback=callback, requested_fps=requested_fps)
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
+        self.plt_curve = None
+        self.curve_update_period = 1  # FIXME: add to config, default to 1
 
     def read(self):
         """
@@ -41,6 +44,10 @@ class GuiTracker(Tracker):
         It also updates the uiIface positions accordingly
         """
         try:
+            if self._stream.seekable:  # Jump to tracking start frame if possible
+                if self._stream.current_frame_idx == self._stream.bg_end_frame:
+                    self._stream.seek(self.track_from)  # TODO: see if all params updated (including results)
+
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
             self.current_frame = None
@@ -56,6 +63,15 @@ class GuiTracker(Tracker):
             self.current_frame = img
             return img
 
-    def _plot(self):
+    def _plot(self):  # FIXME: document that not for each frame
         self.paint(self.silhouette, 'c')
-        self.silhouette.paint(curve=self.results.positions)
+        if self.plt_curve is None or self.is_update_frame() or (not self.fast):  # do only every x pnts in fast mode
+            self.plt_curve = self.results.plot_positions()
+        self.silhouette.paint(curve=self.plt_curve)
+
+    def is_update_frame(self):
+        return self.current_frame_idx % self.curve_update_period == 0
+
+    def should_update_vid(self):  # FIXME: document that not for each frame, + put as fast_fast
+        return self.is_update_frame() or (not self.fast)
+

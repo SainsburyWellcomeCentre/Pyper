@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.5
 
 import "../style"
 
@@ -6,8 +6,8 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
 
-    color: theme.frameBackground
+    color: Theme.frameBackground
     radius: 9
     border.width: 3
-    border.color: theme.frameBorder
+    border.color: Theme.frameBorder
 }

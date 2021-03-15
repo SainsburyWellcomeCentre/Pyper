@@ -6,28 +6,29 @@ The GUI module
 
 Creates the graphical interface
 
-.. note:: This module depends on importing OpenGL.GL although it doens't uses it directly
+
+.. note::
+    This module depends on importing OpenGL.GL although it doesn't uses it directly but it
+    is used by the Qt interface.
 
 :author: crousse
 """
 import os
 import sys
 
-sys.path.append(os.path.abspath("./"))  # FIXME: to be done by setup.py
-
-from pyper.video.transcoder import TranscoderIface
-
-from OpenGL import GL # Hack necessary to get qtQuick working
+from OpenGL import GL # WARNING: Hack necessary to get qtQuick working
 
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject, QUrl
+from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QIcon
 
+from pyper.video.transcoder import TranscoderIface
 from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface
 from pyper.gui.code_editor import EditorIface
 from pyper.gui.parameters import ParamsIface
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
+from pyper.config import conf
 
 from pyper.exceptions.exceptions import PyperGUIError
 
@@ -59,11 +60,10 @@ class Logger(QObject):
             output_text = '{}\n>>>{}'.format(previous_text, text)
             self.log.setProperty('text', output_text)
 
-if __name__ == '__main__':
+
+def main():
     app = QApplication(sys.argv)
-    
     appEngine = QQmlApplicationEngine()
-    
     context = appEngine.rootContext()
     # ALL THE ADDIMAGEPROVIDER LINES BELOW ARE REQUIRED TO MAKE QML BELIEVE THE PROVIDER IS VALID BEFORE ITS CREATION
     appEngine.addImageProvider('viewerprovider', CvImageProvider())
@@ -71,25 +71,27 @@ if __name__ == '__main__':
     appEngine.addImageProvider('recorderprovider', CvImageProvider())
     appEngine.addImageProvider('calibrationprovider', CvImageProvider())
     appEngine.addImageProvider('transcoderprovider', CvImageProvider())
-    
+
     analysis_image_provider = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider", analysis_image_provider)
     analysis_image_provider2 = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider2", analysis_image_provider2)
-    appEngine.load(QUrl('./pyper/qml/main/MouseTracker.qml'))  # FIXME: should be independant of start location (maybe location of file not start location)
-
+    qml_source_path = os.path.join(conf.shared_directory, 'qml', 'main', 'Pyper.qml')
+    if not os.path.isfile(qml_source_path):
+        raise PyperGUIError("Qml code not found at {}, please verify your installation".format(qml_source_path))
+    appEngine.load(qml_source_path)  # TODO: check if QUrl(qml_source_path)
     try:
         win = appEngine.rootObjects()[0]
     except IndexError:
         raise PyperGUIError("Could not start the QT GUI")
 
-    ico = QIcon('./resources/icons/pyper.png')
-    win.setIcon(ico)
-    
+    icon = QIcon(os.path.join(conf.shared_directory, 'resources', 'icons', 'pyper.png'))
+    win.setIcon(icon)
+
     if not DEBUG:
         logger = Logger(context, win, "log")
         sys.stdout = logger
-    
+
     # REGISTER PYTHON CLASSES WITH QML
     params = ParamsIface(app, context, win)
     viewer = ViewerIface(app, context, win, params, "preview", "viewerprovider")
@@ -100,7 +102,7 @@ if __name__ == '__main__':
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
     transcoder = TranscoderIface(app, context, win, params, "transcodingDisplay", "transcoderprovider")
     editor = EditorIface(app, context, win)
-    
+
     context.setContextProperty('py_iface', params)
     context.setContextProperty('py_viewer', viewer)
     context.setContextProperty('py_tracker', tracker)
@@ -108,8 +110,11 @@ if __name__ == '__main__':
     context.setContextProperty('py_calibration', calibrater)
     context.setContextProperty('py_editor', editor)
     context.setContextProperty('py_transcoder', transcoder)
-    
+
     win.show()
 
     sys.exit(app.exec_())
 
+
+if __name__ == '__main__':
+    main()

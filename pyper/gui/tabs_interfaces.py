@@ -10,16 +10,15 @@ It essentially implements a class for each graphical interface tab.
 :author: crousse
 """
 
-import matplotlib
-import numpy as np
 import os
 import re
+import uuid
+from time import time
+
+import matplotlib
+import numpy as np
 from scipy.io import loadmat
-from scipy.misc import imsave
-
-from pyper.utilities.utils import qurl_to_str
-
-from pyper.utilities.utils import un_file
+from skimage.io import imsave
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
@@ -27,22 +26,25 @@ from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
+from pyper.utilities.utils import qurl_to_str
+from pyper.utilities.utils import un_file
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.tracking.tracker_plugins import PupilGuiTracker
-from pyper.video.video_stream import QuickRecordedVideoStream as VStream
+from pyper.video.video_stream import QuickRecordedVideoStream
+from pyper.video.video_stream import RecordedVideoStream
 from pyper.video.video_stream import ImageListVideoStream
-from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi
+from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
 from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
-from pyper.cv_wrappers.video_capture import VideoCapture, VideoCaptureOpenError
+from pyper.video.cv_wrappers import helpers as cv_helpers
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
 config = conf.config
 
-VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg)"
-VIDEO_FORMATS = ('.avi', '.h264', '.mpg')
+VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg *.mp4)"
+VIDEO_FORMATS = ('.avi', '.h264', '.mpg', '.mp4')
 
 Tracker = GuiTracker
 TRACKER_CLASSES = {
@@ -60,6 +62,16 @@ class BaseInterface(QObject):
     It also possesses an instance of ParamsIface to 
     """
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
+        """
+
+        :param app:
+        :param context:
+        :param parent:
+        :param params:
+        :param display_name:
+        :param provider_name:
+        :param int timer_speed: interval in ms for the timer
+        """
         QObject.__init__(self, parent)
         self.app = app  # necessary to avoid QPixmap bug: must construct a QGuiApplication before
         self.ctx = context
@@ -72,7 +84,7 @@ class BaseInterface(QObject):
         self.n_frames = 0
         
         self.timer = QTimer(self)
-        self.timer_speed = timer_speed
+        self.timer_speed = params.timer_period
         self.timer.timeout.connect(self.get_img)
 
     def get_img(self):
@@ -137,6 +149,7 @@ class PlayerInterface(BaseInterface):
         """
         Start video (timer) playback
         """
+        self.timer_speed = self.params.timer_period
         self.timer.start(self.timer_speed)
 
     @pyqtSlot()
@@ -156,8 +169,7 @@ class PlayerInterface(BaseInterface):
         target_frame = self.stream.current_frame_idx
         target_frame -= 1  # reset
         target_frame += int(step_size)
-        self.stream.current_frame_idx = self._validate_frame_idx(target_frame)
-        self.get_img()
+        self.seek_to(target_frame)
 
     @pyqtSlot(QVariant)
     def seek_to(self, frame_idx):
@@ -167,6 +179,8 @@ class PlayerInterface(BaseInterface):
         :param int frame_idx: The frame to get to
         """
         self.stream.current_frame_idx = self._validate_frame_idx(frame_idx)
+        if self.stream.seekable:
+            self.stream.seek(frame_idx)
         self.get_img()
     
     def _validate_frame_idx(self, frame_idx):
@@ -185,7 +199,7 @@ class PlayerInterface(BaseInterface):
 
 class ViewerIface(PlayerInterface):
     """
-    Implements the PlayerInterface class with a QuickRecordedVideoStream
+    Implements the PlayerInterface class with a RecordedVideoStream or QuickRecordedVideoStream
     It is meant for video preview with frame precision seek
     """
 
@@ -195,7 +209,13 @@ class ViewerIface(PlayerInterface):
         Loads the video into memory
         """
         try:
-            self.stream = VStream(self.params.src_path, 0, 1)
+            recorded_stream = RecordedVideoStream(self.params.src_path, 0, 1)
+            self.seekable = recorded_stream.stream.seekable  # FIXME: add to init
+            if self.seekable:
+                self.stream = recorded_stream
+            else:  # Wee need a low definition of video to mimic seeking
+                print('Video is not seekable, creating low resolution video for browsing')
+                self.stream = QuickRecordedVideoStream(self.params.src_path, 0, 1)
         except VideoStreamIOException:
             self.stream = None
             error_screen = self.win.findChild(QObject, 'viewerVideoLoadingErrorScreen')
@@ -207,6 +227,13 @@ class ViewerIface(PlayerInterface):
         self._set_display_max()
         self._update_img_provider()
 
+    @pyqtSlot(str)  # FIXME: make inherited by all but calib ?
+    def save_ref_source(self, dest_path):
+        dest_path = un_file(dest_path)
+        self.stream.seek(self.stream.current_frame_idx - 1)
+        frame = self.stream.read()
+        imsave(dest_path, frame)
+
 
 class CalibrationIface(PlayerInterface):
     """
@@ -214,7 +241,7 @@ class CalibrationIface(PlayerInterface):
     It uses the CameraCalibration class to compute the camera matrix from a set of images containing a
     chessboard pattern.
     """
-    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=200):
+    def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
         self.n_columns = config['calibration']['n_columns']
@@ -340,10 +367,8 @@ class TrackerIface(BaseInterface):
         self.rois = {'tracking': None,
                      'restriction': None,
                      'measurement': None}
-
-        self.roi_params = {'tracking': None,
-                           'restriction': None,
-                           'measurement': None}
+        self.roi_params = {k: None for k in self.rois.keys()}
+        self.rois_vault = {k: {} for k in self.rois.keys()}  # FIXME: inner is ordered dict
 
         self.analysis_image_provider = analysis_provider_1
         self.analysisImageProvider2 = analysis_provider_2
@@ -352,6 +377,9 @@ class TrackerIface(BaseInterface):
 
         self.current_frame_idx = 0
         self.output_type = "Raw"
+
+        self.start_track_time = None
+        self.end_track_time = None
 
     @pyqtSlot()
     def prevent_video_update(self):
@@ -366,8 +394,13 @@ class TrackerIface(BaseInterface):
         :param int idx: The index of the row to return
         """
         idx = int(idx)
-        if 0 <= idx < len(self.tracker.results):
-            return map(str, self.tracker.results.get_row(idx))
+        try:
+            results = self.tracker.results
+        except AttributeError as err:
+            print("No tracker instance, make sure you have selected the correct result type; {}".format(err))
+            return -1
+        if 0 <= idx < len(results):
+            return map(str, results.get_row(idx))
         else:
             return -1
 
@@ -406,6 +439,51 @@ class TrackerIface(BaseInterface):
         self._set_display_max()
         self._update_img_provider()
 
+    @pyqtSlot(QVariant)
+    def save_roi_vault(self, roi_type):
+        diag = QFileDialog()
+        default_dir = os.getenv('HOME')
+        dest_file_path = diag.getSaveFileName(parent=diag,
+                                              caption='Choose data file',
+                                              directory=default_dir,
+                                              filter="Archive (*.tar *.bz2 *.gzip *.zip)",
+                                              initialFilter="Archive (*.bz2)")
+        dest_file_path = dest_file_path[0]
+        vault = RoiCollection(self.rois_vault[roi_type].values())
+        vault.compress(dest_file_path)
+
+    @pyqtSlot(QVariant)
+    def load_roi_vault(self, roi_type):
+        diag = QFileDialog()
+        default_dir = os.getenv('HOME')
+        src_file_path = diag.getOpenFileName(parent=diag,
+                                             caption='Choose data file',
+                                             directory=default_dir,
+                                             filter="Archive (*.tar *.bz2 *.gzip *.zip)",
+                                             initialFilter="Archive (*.bz2)")
+        src_file_path = src_file_path[0]
+        self.load_roi_vault_from_path(roi_type, src_file_path)
+
+    def load_roi_vault_from_path(self, roi_type, src_file_path):
+        vault = RoiCollection()
+        vault.decompress(src_file_path)
+        self.loaded_uuids = []
+        for roi in vault:
+            _uuid = self.get_uuid()
+            self.rois_vault[roi_type][_uuid] = roi
+            self.loaded_uuids.append(_uuid)
+
+    @pyqtSlot(QVariant, result=QVariant)
+    def retrieve_next(self, roi_type):
+        try:
+            _uuid = self.loaded_uuids.pop()
+        except IndexError:
+            return -1
+        roi = self.rois_vault[roi_type][_uuid]
+        self.rois[roi_type] = roi
+        roi_data = [_uuid] + list(self.tracker._stream.size) + roi.get_data()
+        return roi_data
+
     @pyqtSlot()
     def set_tracker_params(self):
         if self.tracker is not None:
@@ -414,7 +492,7 @@ class TrackerIface(BaseInterface):
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
             self.tracker.track_from = self.params.start_frame_idx
             self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
-            self.tracker.bg_source = self.params.ref
+            self.tracker.bg.source = self.params.ref  # TODO: add check for validity of frame size/type in tracker
 
             self.tracker.threshold = self.params.detection_threshold
             self.tracker.min_area = self.params.objects_min_area
@@ -427,24 +505,49 @@ class TrackerIface(BaseInterface):
             self.tracker.extract_arena = self.params.extract_arena
             self.tracker.infer_location = self.params.infer_location
 
-            if self.rois['tracking'] is not None:  # REFACTOR: refactor tracking.Tracker to use roi dictionnary and extract method
-                self.tracker.set_roi(self.rois['tracking'])
-            else:
-                if self.roi_params['tracking'] is not None:
-                    self.tracker.set_roi(self._get_roi(*self.roi_params['tracking']))
-            if self.rois['restriction'] is not None:
-                self.tracker.set_tracking_region_roi(self.rois['restriction'])
-            else:
-                if self.roi_params['restriction'] is not None:
-                    self.tracker.set_tracking_region_roi(self._get_roi(*self.roi_params['restriction']))
-            if self.rois['measurement'] is not None:
-                self.tracker.set_measure_roi(self.rois['measurement'])
-            else:
-                if self.roi_params['measurement'] is not None:
-                    self.tracker.set_measure_roi(self.__get_roi_from_points(*self.roi_params['measurement']))
+    def _set_tracker_roi(self, roi_type, tracker_method):
+        """
+
+        :param str roi_type:
+        :param method tracker_method:
+        :return:
+        """
+        if roi_type not in self.rois.keys():
+            return
+        if self.rois[roi_type] is not None:
+            tracker_method(self.rois[roi_type])
+        else:
+            if self.roi_params[roi_type] is not None:
+                tracker_method(self._get_roi(*self.roi_params[roi_type]))
+
+    @pyqtSlot()
+    def set_tracker_rois(self):  # REFACTOR: refactor tracking.Tracker to use roi dictionary and extract method
+        if self.tracker is not None:
+            # self.tracker.set_rois(self.rois)  # REFACTOR:
+            self._set_tracker_roi('tracking', self.tracker.set_roi)
+            self._set_tracker_roi('restriction', self.tracker.set_tracking_region_roi)
+            self._set_tracker_roi('measurement', self.tracker.set_measure_roi)
 
     def _reset_measures(self):
-        self.tracker.results.reset()   # reset between runs
+        if self.tracker is not None:
+            self.tracker.results.reset()   # reset between runs
+
+    def pre_track(self):
+        """
+        A method to be overwritten to allow execution of custom code before start in
+        derived classes
+        """
+        self.start_track_time = time()
+        # self.timer_speed = int(1 / self.tracker._stream.stream.fps)
+        self.tracker.results.start_time = time()
+
+    def post_track(self):
+        self.end_track_time = time()
+        if self.start_track_time is not None:
+            n_frames = self.tracker._stream.current_frame_idx
+            duration = float(self.end_track_time - self.start_track_time)
+            fps = n_frames / duration
+            print("Acquired {0} frames in {1:.2f} seconds (fps={2:.2f})".format(n_frames, duration, fps))
 
     @pyqtSlot()
     def start(self):
@@ -454,6 +557,9 @@ class TrackerIface(BaseInterface):
         if self.tracker is not None:
             self._reset_measures()
             self.set_tracker_params()
+            self.set_tracker_rois()
+            self.pre_track()
+            self.timer_speed = self.params.timer_period
             self.timer.start(self.timer_speed)
 
     @pyqtSlot()
@@ -470,6 +576,7 @@ class TrackerIface(BaseInterface):
         :param string msg: The message to print upon stoping
         """
         self.timer.stop()
+        self.post_track()
         self.tracker._stream.stop_recording(msg)
         self.image_provider.reuse_on_next_load = True  # Prevents loading on next resize
 
@@ -524,8 +631,8 @@ class TrackerIface(BaseInterface):
         :param str source_type: The string representing the source type
         :param float img_width: The width of the image representation in the GUI
         :param float img_height: The height of the image representation in the GUI
-        :param float roi_x: The center of the roi in the first dimension
-        :param float roi_y: The center of the roi in the second dimension
+        :param float roi_x: The centre of the roi in the first dimension
+        :param float roi_y: The centre of the roi in the second dimension
         :param float roi_width: The width of the ROI
         :param float roi_height: The height of the ROI
         """
@@ -560,6 +667,51 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def remove_roi(self, roi_type):
         self.__assign_roi(roi_type, None)
+
+    @pyqtSlot(result=QVariant)
+    def get_uuid(self):
+        return uuid.uuid4().hex[:10]
+
+    @pyqtSlot(QVariant, QVariant)
+    def store_roi(self, roi_type, uuid):
+        self.rois_vault[roi_type][uuid] = self.rois[roi_type]  # FIXME: check if exists first
+
+    @pyqtSlot(QVariant, QVariant, result=QVariant)
+    def retrieve_roi(self, roi_type, uuid):
+        roi = self.rois_vault[roi_type][uuid]
+        self.rois[roi_type] = roi
+        self.set_tracker_rois()
+        return list(self.tracker._stream.size) + roi.get_data()
+
+    @pyqtSlot(str)
+    def save_roi(self, roi_type):
+        diag = QFileDialog()
+        default_dest = os.getenv('HOME')
+        dest_path = diag.getSaveFileName(parent=diag,
+                                         caption='Save file',
+                                         directory=default_dest,
+                                         filter="ROI (*.roi)")
+        dest_path = dest_path[0]
+        if dest_path:
+            roi = self.rois[roi_type]
+            if roi is not None:
+                roi.save(dest_path)
+            else:
+                print("No ROI to save")
+
+    @pyqtSlot(result=QVariant)
+    def load_roi(self):
+        diag = QFileDialog()
+        default_src = os.getenv('HOME')
+        src_path = diag.getOpenFileName(parent=diag,
+                                        caption='Load file',
+                                        directory=default_src,
+                                        filter="ROI (*.roi)")
+        src_path = src_path[0]
+        if src_path:
+            return Roi.load(src_path)
+        else:
+            return -1
 
     @pyqtSlot(QVariant)
     def save(self, default_dest):
@@ -692,7 +844,7 @@ class RecorderIface(TrackerIface):
             return False
         vid_ext = os.path.splitext(self.params.dest_path)[1]
         if vid_ext not in VIDEO_FORMATS:
-            print('Unknow format: {}'.format(vid_ext))
+            print('Unknown format: {}'.format(vid_ext))
             return False
 
         self._reset_measures()
@@ -701,6 +853,7 @@ class RecorderIface(TrackerIface):
         n_background_frames = self.params.n_bg_frames
         track_from = self.params.start_frame_idx
         track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+        # FIXME: add bg.source
         
         threshold = self.params.detection_threshold
         min_area = self.params.objects_min_area
@@ -712,6 +865,10 @@ class RecorderIface(TrackerIface):
         normalise = self.params.normalise
         extract_arena = self.params.extract_arena
 
+        requested_fps = round(1/(self.params.timer_period / 1000))  # convert period to seconds
+        if __debug__:
+            print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
+
         self.tracker = self.params.tracker_class(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                                  threshold=threshold, min_area=min_area, max_area=max_area,
                                                  teleportation_threshold=teleportation_threshold,
@@ -720,13 +877,16 @@ class RecorderIface(TrackerIface):
                                                  clear_borders=clear_borders, normalise=normalise,
                                                  plot=True, fast=True, extract_arena=extract_arena,
                                                  camera_calibration=self.params.calib,
-                                                 callback=None)
+                                                 callback=None, requested_fps=requested_fps)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
         self._update_img_provider()
         
         self.tracker.set_roi(self.rois['tracking'])
-        
+
+        self.pre_track()
+        period = round((1 / self.tracker._stream.stream.fps) * 1000)
+        self.timer_speed = period  # convert to ms
         self.timer.start(self.timer_speed)
         return True
         
@@ -741,14 +901,7 @@ class RecorderIface(TrackerIface):
         """
         Check if a camera is available
         """
-        default_cam_idx = 0
-        try:
-            cap = VideoCapture(default_cam_idx)
-            detected = True
-            cap.release()  # TODO: see if should be in finally block
-        except VideoCaptureOpenError:
-            detected = False
-        return detected
+        return cv_helpers.camera_available()
 
     def get_img(self):
         self.display.reload()

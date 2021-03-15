@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../popup_messages"
 import "../basic_types"
@@ -8,7 +8,7 @@ import "../roi"
 import "../style"
 
 Rectangle {
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     property bool loaded: false
@@ -51,8 +51,9 @@ Rectangle {
         anchors.top: parent.top
         anchors.topMargin: 10
         anchors.horizontalCenter: previewImage.horizontalCenter
+        height: 20
 
-        color: theme.text
+        color: Theme.text
         text: py_iface.get_file_name()
         function reload() {
             text = py_iface.get_file_name();
@@ -149,8 +150,8 @@ Rectangle {
             onPauseClicked: { py_viewer.pause() }
             onForwardClicked: { py_viewer.move(sliderValue) }
             onBackwardClicked: { py_viewer.move(-sliderValue) }
-            onStartClicked: { py_viewer.seek_to(-1) }
-            onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames()) }
+            onStartClicked: { py_viewer.seek_to(0) }
+            onEndClicked: { py_viewer.seek_to(py_viewer.get_n_frames() - 1) }
         }
         Frame {
             id: frameControls

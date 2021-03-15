@@ -9,25 +9,9 @@ tutorial in the :doc:`installation` section.
 Starting the program
 ^^^^^^^^^^^^^^^^^^^^
 To get a quick feel for the software, some example files have been included in the resources folder of the program.
-Start by opening the program, in a terminal:
 
-* Change your working directory to that of the source of the program.
-   This must fit your installation folder. For example you downloaded on the desktop:
+.. include:: starting_pyper.rst
 
-.. code-block:: bash
-    
-    cd ~/Desktop/pyper/
-    
-* Then actually launch the program:
-
-.. code-block:: bash
-
-    python pyper/gui/tracking_gui.py
-    
-.. note::
-    You may want to use brewPython if you followed the mac instructions or a full path on windows.
-        
-The graphical interface should now be started.
 
 Preview
 ^^^^^^^
@@ -43,15 +27,8 @@ You can now go to the *Preview* tab and navigate through the file.
 
 These frames will be used in the *Track* tab.
 
-.. warning::
-    Not all video files are indexable. Therefore, for the preview,
-    the programs loads a downscaled version of the video in memory.
-    This has 2 downsides.:
+.. include:: preview_non_seekable_warning.rst
 
-    #. The video is of lower resolution
-    #. The size of the video is limited by the amount of RAM in the machine.
-
-    Please note this does not affect the tracking which loads the original video frame by frame.
     
 Tracking
 ^^^^^^^^
@@ -111,9 +88,8 @@ specified by a ROI. You can also scale the output independently in each axis.
 This is sometimes useful for several reasons:
 
 #. Your recording CODEC might not allow frame indexing.
-#. Some recording devices create frames with a few pixels of NaN data on the border that confuse most video readers
-    like VLC ...
-   This can easily be solved by cropping the image using the ROI.
+#. Some recording devices create frames with a few pixels of NaN data on the border that confuse most video readers like VLC.
+    This can easily be solved by cropping the image using the ROI.
 #. Most of your video does not contain useful data and you want to reduce it's size to the interesting region.
 
 For more on the *transcoding* tab, see :doc:`usage`

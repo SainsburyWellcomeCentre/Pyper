@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Private 1.0
 
 import "../style"
@@ -20,7 +20,7 @@ Rectangle {
     signal pressed(real xPosition, real yPosition)
     signal released(real xPosition, real yPosition)
 
-    textColor: theme.text
+    textColor: Theme.text
     color: "transparent"
 
     onActiveChanged: setColor()
@@ -28,14 +28,14 @@ Rectangle {
 
     function setColor(){
         if (hovered){
-            color = theme.toolButtonHoveredBackground
-            textColor = theme.toolButtonText
+            color = Theme.toolButtonHoveredBackground
+            textColor = Theme.toolButtonText
         } else if (active) {
-            color = theme.toolButtonActiveBackground
-            textColor = theme.toolButtonNegativeText
+            color = Theme.toolButtonActiveBackground
+            textColor = Theme.toolButtonNegativeText
         } else {
             color = "transparent"
-            textColor = theme.toolButtonText
+            textColor = Theme.toolButtonText
         }
     }
 

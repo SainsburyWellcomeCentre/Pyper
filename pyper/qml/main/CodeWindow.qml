@@ -1,9 +1,9 @@
-import QtQuick 2.3
+import QtQuick 2.5
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
 
 import "../style"
 
@@ -15,6 +15,17 @@ ApplicationWindow {
     property variant algorithmsExclusiveGroup
     property variant algorithmsMenu
     property variant pythonObject
+
+    onVisibleChanged: {
+        if (visible) {
+            if (py_editor.load_plugin_template().search("PreprocFile") === -1) {
+                document.textFormat = Text.PlainText;
+                document.text = py_editor.load_plugin_template();
+            }
+        }
+    }
+
+
 
     menuBar: MenuBar {
         Menu {
@@ -69,7 +80,7 @@ ApplicationWindow {
         anchors.right: parent.right
         height: parent.height - 20
         width: parent.width
-        color: theme.codeBackground
+        color: Theme.codeBackground
 
         TextArea {
             id: document

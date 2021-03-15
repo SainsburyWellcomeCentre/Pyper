@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../popup_messages"
 import "../basic_types"
@@ -9,7 +9,7 @@ import "../style"
 import "../config"
 
 Rectangle {
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     function reload(){
@@ -40,56 +40,82 @@ Rectangle {
 
         Frame {
             id: controls
-            height: row1.height + 20
+            height: row1.height + vidSpeed.height + 20
 
-            Row {
-                id: row1
-
+            CustomColumn {
+                enabled: parent.enabled
                 anchors.centerIn: parent
-                width: (children[0].width * 2) + spacing
-                height: children[0].height
-                spacing: 10
+                spacing: 5
+                width: parent.width
+                height: parent.height
 
-                CustomButton {
-                    id: recordBtn
+                Row {
+                    id: row1
 
-                    width: 45
-                    height: width
+                    width: (children[0].width * 2) + spacing
+                    height: children[0].height
+                    spacing: 10
 
-                    iconSource: iconHandler.getPath("record.png")
-                    pressedSource: iconHandler.getPath("record_pressed.png")
-                    tooltip: "Starts video recording"
+                    CustomButton {
+                        id: recordBtn
 
-                    enabled: false
-                    onClicked: {  // FIXME: should have both ROIs and probably embed in factory
-                        if (py_recorder.cam_detected()){
-                            if (trackingRoi.isDrawn){
-                                py_recorder.set_roi(trackingRoi.width, trackingRoi.height, trackingRoi.roiX, trackingRoi.roiY, trackingRoi.roiWidth);
+                        width: 45
+                        height: width
+
+                        iconSource: IconHandler.getPath("record.png")
+                        pressedSource: IconHandler.getPath("record_pressed.png")
+                        tooltip: "Starts video recording"
+
+                        enabled: false
+                        onClicked: {  // FIXME: should have both ROIs and probably embed in factory
+                            if (py_recorder.cam_detected()){
+                                if (trackingRoi.isDrawn){
+                                    py_recorder.set_roi(trackingRoi.width, trackingRoi.height, trackingRoi.roiX, trackingRoi.roiY, trackingRoi.roiWidth);
+                                }
+                                if (py_recorder.start()) {
+                                    enabled = false;
+                                    stopBtn.enabled = true;
+                                }
+                            } else {
+                                errorScreen.flash(3000);
                             }
-                            if (py_recorder.start()) {
-                                enabled = false;
-                                stopBtn.enabled = true;
-                            }
-                        } else {
-                            errorScreen.flash(3000);
+                        }
+                    }
+                    CustomButton {
+                        id: stopBtn
+
+                        width: recordBtn.width
+                        height: width
+
+                        tooltip: "Stops video recording"
+                        iconSource: IconHandler.getPath("stop.png")
+                        pressedSource: IconHandler.getPath("stop_pressed.png")
+
+                        enabled: false
+                        onClicked:{
+                            py_recorder.stop()
+                            recordBtn.enabled = true;
+                            enabled = false;
                         }
                     }
                 }
-                CustomButton {
-                    id: stopBtn
+                IntInput {
+                    id: vidSpeed
 
-                    width: recordBtn.width
-                    height: width
+                    width: parent.width
+                    enabled: parent.enabled
 
-                    tooltip: "Stops video recording"
-                    iconSource: iconHandler.getPath("stop.png")
-                    pressedSource: iconHandler.getPath("stop_pressed.png")
-
-                    enabled: false
-                    onClicked:{
-                        py_recorder.stop()
-                        recordBtn.enabled = true;
-                        enabled = false;
+                    label: "Spd."
+                    tooltip: "Acqusition frame period in ms (1/FPS)"
+                    value: py_iface.get_timer_period()
+                    minimumValue: 8  // > 120 FPS
+                    onEdited: {
+                        py_iface.set_timer_period(value);
+                        reload();
+                    }
+                    function reload(){
+                        value = py_iface.get_timer_period();
+                        //root.updateTracker();
                     }
                 }
             }
@@ -113,8 +139,8 @@ Rectangle {
 
             anchors.horizontalCenter: parent.horizontalCenter
 
-            iconSource: iconHandler.getPath("roi.png")
-            pressedSource: iconHandler.getPath("roi_pressed.png")
+            iconSource: IconHandler.getPath("roi.png")
+            pressedSource: IconHandler.getPath("roi_pressed.png")
 
             tooltip: "Open ROI manager"
             onClicked: {
@@ -144,7 +170,7 @@ Rectangle {
             width: 40
             height: width
 
-            iconSource: iconHandler.getPath("document-save-as.png")
+            iconSource: IconHandler.getPath("document-save-as.png")
 
             tooltip: "Select video destination (before recording)"
             onClicked: {
@@ -219,7 +245,7 @@ Rectangle {
         visible: false
 
         roisControlsModelsList: [
-            RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: theme.roiDefault; checked: true},
+            RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
         ]
     }

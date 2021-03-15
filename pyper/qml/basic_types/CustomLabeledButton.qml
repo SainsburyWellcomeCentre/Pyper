@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Private 1.0
 
 import "../style"
@@ -11,9 +11,9 @@ Rectangle{
     antialiasing: true
 
     property color gradientStart
-    gradientStart: theme.labeledButtonGradientStart
+    gradientStart: Theme.labeledButtonGradientStart
     property color gradientStop
-    gradientStop: theme.labeledButtonGradientEnd
+    gradientStop: Theme.labeledButtonGradientEnd
     gradient: Gradient {
                 GradientStop { position: 0.0; color: gradientStart }
                 GradientStop { position: 1.0; color: gradientStop}
@@ -44,7 +44,7 @@ Rectangle{
 
         font.pixelSize: parent.height * 0.5
         style: Text.Sunken
-        color: theme.text
+        color: Theme.text
         text: parent.label
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter

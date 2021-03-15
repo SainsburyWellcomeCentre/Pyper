@@ -1,13 +1,14 @@
-import QtQuick 2.3
+import QtQuick 2.5
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
 import QtQuick.Dialogs 1.2
 
 import "../basic_types"
 import "../style"
+import "../config"
 
 Frame {
     id: roiLayout
@@ -39,7 +40,8 @@ Frame {
     property ExclusiveGroup exclusiveGroup: null
 
     onDrawingTypeChanged: {
-        shapeBtn.iconSource = "../../../resources/icons/" + drawingType + ".png";
+        shapeBtn.iconSource = "../../resources/icons/" + drawingType + ".png";  // different folder root
+//        shapeBtn.iconSource = IconHandler.getPath(drawingType + ".png");
         changeRoiClass(sourceRoi, drawingType);
     }
     onDrawingColorChanged: {
@@ -68,7 +70,7 @@ Frame {
         anchors.margins: 10
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 25
+        spacing: 10
 
         Row {
             spacing: 5
@@ -96,7 +98,7 @@ Frame {
 
             property int btnsWidth: 50
 
-            property color drawingColor: theme.roiDefault
+            property color drawingColor: Theme.roiDefault
             onDrawingColorChanged: {
                 colorBtn.paint();
             }
@@ -110,7 +112,8 @@ Frame {
 
                 tooltip: "Select ROI color"
 
-                iconSource: "../../../resources/icons/pick_color.png"  // FIXME: change upon selection
+//                iconSource: "../../../resources/icons/pick_color.png"  // FIXME: change upon selection
+                iconSource: IconHandler.getPath("pick_color.png");  // FIXME: change upon selection
 
                 function paint() {
                     canvas.requestPaint();
@@ -142,7 +145,8 @@ Frame {
                 height: width
                 label: ""
 
-                iconSource: "../../../resources/icons/ellipse.png"
+//                iconSource: "../../resources/icons/ellipse.png"
+                iconSource: IconHandler.getPath("ellipse.png");
 
                 onClicked: {
                     roiLayout.checked = true;
@@ -166,7 +170,7 @@ Frame {
                     if (isDown) { // already active -> revert
                         roiLayout.pythonObject.restore_cursor();
                         isDown = false;
-
+                        sourceRoi.finalise();
                     } else {  // activate
                         roiLayout.pythonObject.chg_cursor();
                         isDown = true;
@@ -184,21 +188,140 @@ Frame {
             rows: 2
 
             spacing: 5
-            IntLabel {
+            IntInput {
                 label: "x:"
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi x position"
                 value: sourceRoi.roiX
+                decimals: 1
+                onValueChanged: sourceRoi.roiX = value
             }
-            IntLabel {
+            IntInput {
                 label: "y:"
-                value: sourceRoi.roiX
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi x position"
+                value: sourceRoi.roiY
+                decimals: 1
+                onValueChanged: sourceRoi.roiY = value
             }
-            IntLabel {
-                label: "width:"
+            IntInput {
+                label: "w:"
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi width"
                 value: sourceRoi.roiWidth
+                decimals: 1
+                onValueChanged: sourceRoi.roiWidth = value
             }
-            IntLabel {
-                label: "height:"
+            IntInput {
+                label: "h:"
+                width: 85
+                boxWidth: 65
+                tooltip: "Set roi height"
                 value: sourceRoi.roiHeight
+                decimals: 1
+                onValueChanged: sourceRoi.roiHeight = value
+            }
+        }
+        Row {
+//            spacing: 5
+            property int btnsWidth: 40
+            CustomButton {
+                id: saveRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+                anchors.verticalCenter: parent.verticalCenter
+
+//                iconSource: "../../../resources/icons/document-save-as.png"
+                iconSource: IconHandler.getPath("document-save-as.png");
+                tooltip: "Save ROI"
+
+                onClicked: sourceRoi.save();
+            }
+            CustomButton {
+                id: loadRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+                anchors.verticalCenter: parent.verticalCenter
+
+//                iconSource: "../../../resources/icons/document-open.png"
+                iconSource: IconHandler.getPath("document-open.png");
+                tooltip: "Load ROI"
+
+                onClicked: sourceRoi.load();
+            }
+            CustomButton {
+                id: storeRoiBtn
+
+                width: parent.btnsWidth
+                height: width
+                anchors.verticalCenter: parent.verticalCenter
+
+//                iconSource: "../../../resources/icons/ram.png"
+                iconSource: IconHandler.getPath("ram.png");
+                tooltip: "Store the ROI in memory"
+
+                onClicked: {
+                    var uuid = sourceRoi.store()
+                    cbItems.append({text: uuid})
+                }
+            }
+            Column {
+                property int btnsWidth: 55
+                property int btnsHeight: 25
+                CustomLabeledButton {
+                    id: loadRoiBatchBtn  // make menu?
+
+                    width: parent.btnsWidth
+                    height: parent.btnsHeight
+
+                    label: "load all"
+                    tooltip: "Load batch of ROI from file to memory"
+
+                    onClicked: {
+                        sourceRoi.loadRoisBatch();
+                        while (true) {
+                            var uuid = sourceRoi.retrieveNext();
+                            if (uuid == undefined) {
+                                break;
+                            } else if (uuid === -1) {
+                                break;
+                            } else {
+                                cbItems.append({text: uuid})
+                            }
+                        }
+                    }
+                }
+                CustomLabeledButton {
+                    id: saveRoiBatchBtn  // make menu?
+
+                    width: parent.btnsWidth
+                    height: parent.btnsHeight
+
+                    label: "save all"
+                    tooltip: "Save all ROIs in manager to memory"
+
+                    onClicked: {
+                        sourceRoi.saveRoisBatch();
+                    }
+                }
+            }
+        }
+        ComboBox {
+            model: ListModel {
+                id: cbItems
+            }
+            width: 170
+            onCurrentIndexChanged: {
+                var currentItem = cbItems.get(currentIndex);
+                if (currentItem != undefined) {
+                    var uuid = currentItem.text;
+                    sourceRoi.retrieve(uuid);
+                }
             }
         }
     }

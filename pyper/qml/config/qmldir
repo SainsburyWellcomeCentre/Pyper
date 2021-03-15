@@ -1,2 +1,2 @@
-singleton iconHandler IconPath.qml
-singleton imageHandler ImagePath.qml
+singleton IconHandler IconPath.qml
+singleton ImageHandler ImagePath.qml

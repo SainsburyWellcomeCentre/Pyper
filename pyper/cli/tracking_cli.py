@@ -24,6 +24,7 @@ def coords(string):
     except:
         raise argparse.ArgumentError('Coordinates must be x, y. Got {}'.format(string))
 
+
 def get_parser():
     config = conf.config
 
@@ -45,7 +46,8 @@ def get_parser():
                              ' Default: %(default)s.')
     parser.add_argument('--n-SDs', dest='n_sds', type=float, default=config['tracker']['sd_mode']['n_sds'],
                         help='If the above n-background-frames option is selected,'
-                             ' the number of standard deviations to use as threshold for movement. Default: %(default)s.')
+                             ' the number of standard deviations to use as threshold for movement.'
+                             ' Default: %(default)s.')
 
     parser.add_argument('--clear-borders', dest='clear_borders', action='store_true',
                         default=config['tracker']['checkboxes']['clear_borders'],
@@ -60,19 +62,23 @@ def get_parser():
                         help='The maximum area of the object in pixels to be considered valid. Default: %(default)s.')
     parser.add_argument('--teleportation-threshold', dest='teleportation_threshold', type=int,
                         default=config['tracker']['detection']['teleportation_threshold'],
-                        help="The number of pixels in either x or y the mouse shouldn't jump by to be considered valid."
+                        help="The number of pixels in either x or y the tracked specimen "
+                             "shouldn't jump by to be considered valid."
                              " Default: %(default)s.")
     # parser.add_argument('--n-iter', dest='n_iter', type=int, default=config['tracker']['n_iter'],
-    #                     help='The number of iterations for the erosion to remove the tail. Default: %(default)s.')  # FIXME: unused
+    #                     help='The number of iterations for the erosion to remove the tail.
+    # Default: %(default)s.')  # FIXME: unused
 
     parser.add_argument('--filter-size', dest='one_d_kernel', type=int, default=config['analysis']['filter_size'],
                         help='Size in points of the Gaussian kernel filtered used to smooth the trajectory.'
                              ' Set to zero to avoid smoothing. Default: %(default)s.')
 
     parser.add_argument('--roi-center', dest='center', type=coords, nargs=2, default=config['tracker']['roi']['center'],
-                        help='Center (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
+                        help='Center (in pixels) of the roi for the tracked specimen. '
+                             'No roi if missing. Default: %(default)s.')
     parser.add_argument('--roi-radius', dest='radius', type=int, default=config['tracker']['roi']['radius'],
-                        help='Radius (in pixels) of the roi for the mouse. No roi if missing. Default: %(default)s.')
+                        help='Radius (in pixels) of the roi for the tracked specimen. '
+                             'No roi if missing. Default: %(default)s.')
 
     parser.add_argument('--plot', action='store_true', default=config['figures']['plot'],
                         help='Whether to display the tracking progress.')
@@ -84,6 +90,7 @@ def get_parser():
                         help='The image format to save the figures in.')
     parser.add_argument('--prefix', type=str, help='A prefix to append to the saved figures and data.')
     return parser
+
 
 if __name__ == '__main__':
     parser = get_parser()

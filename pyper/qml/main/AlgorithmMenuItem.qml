@@ -1,4 +1,4 @@
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 
 MenuItem {
     text: qsTr("Unknown algorithm")
@@ -6,7 +6,14 @@ MenuItem {
     property variant pythonObject
     checkable: true
 
+    property bool objectSet: false
+    onPythonObjectChanged: {
+        objectSet = true;
+    }
+
     onTriggered: {
-        pythonObject.set_tracker_type(className)
+        if (objectSet) {
+            pythonObject.set_tracker_type(className);
+        }
     }
 }

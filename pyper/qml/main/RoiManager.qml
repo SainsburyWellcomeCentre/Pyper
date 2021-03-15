@@ -1,9 +1,9 @@
-import QtQuick 2.3
+import QtQuick 2.5
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
 import QtQuick.Dialogs 1.2
 
 import "../basic_types"
@@ -66,13 +66,13 @@ ApplicationWindow {
     Rectangle {
         id: controls
         anchors.fill: parent
-        color: theme.background
+        color: Theme.background
 
         ColorDialog {
             id: colorDialog
             title: "Please pick ROI color"
 
-            color: theme.roiDefault
+            color: Theme.roiDefault
             showAlphaChannel: false
 
             onAccepted: {
@@ -80,7 +80,7 @@ ApplicationWindow {
                 currentRoi.drawingColor = colorDialog.color;
                 visible = false;
             }
-            visible: false
+//            visible: false  // breaks on OsX
         }
 
         ExclusiveGroup {

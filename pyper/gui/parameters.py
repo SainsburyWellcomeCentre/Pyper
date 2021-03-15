@@ -1,6 +1,6 @@
 import os
 import sys
-from scipy.misc import imread
+from skimage.io import imread
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
 from PyQt5.QtWidgets import QFileDialog
@@ -41,7 +41,7 @@ class ParamsIface(QObject):
     def _set_defaults(self):
         """
         Reset the parameters to default.
-        To customise the defaults, users should do this here.
+        To customise the defaults, users should do this in the config file.
         """
         self.bg_frame_idx = config['tracker']['frames']['ref']
         self.n_bg_frames = config['tracker']['sd_mode']['n_background_frames']
@@ -60,11 +60,21 @@ class ParamsIface(QObject):
         self.extract_arena = config['tracker']['checkboxes']['extract_arena']
         self.infer_location = config['tracker']['checkboxes']['infer_location']
 
+        self.timer_period = config['global']['timer_period']
+
     def __del__(self):
         """
         Reset the standard out on destruction
         """
         sys.stdout = sys.__stdout__
+
+    @pyqtSlot(int)
+    def set_timer_period(self, timer_period):
+        self.timer_period = timer_period
+
+    @pyqtSlot(result=int)
+    def get_timer_period(self):
+        return self.timer_period
         
     @pyqtSlot(str)
     def set_ref_source(self, ref_path):
@@ -272,4 +282,3 @@ class ParamsIface(QObject):
     @pyqtSlot(result=QVariant)
     def get_dest_path(self):
         return self.dest_path if hasattr(self, "dest_path") else ""
-

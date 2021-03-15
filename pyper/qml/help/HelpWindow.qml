@@ -1,6 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.3
-import QtWebKit 3.0
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 
 ApplicationWindow {
@@ -9,15 +8,32 @@ ApplicationWindow {
     width: 640
     height: 480
 
-    property alias url: webview.url
+    property string url: "http://pyper.readthedocs.io/en/latest/"
 
     visible: false
 
-    WebView {
+    Binding {
+        id: b1
+
+        property: "url"
+        value: root.url
+    }
+
+
+    Loader {
         id: webview
-
         anchors.fill: parent
+        source: "WebKitHelpWindow.qml"
 
-        url: 'http://pyper.readthedocs.io/en/latest/'
+        onStatusChanged: {
+            if (webview.progress == 1) {
+                if (webview.status == Loader.Error) {  // Finished loading but failed
+                    source = "WebEngineHelpWindow.qml";  // try webengine instead
+                }
+            }
+        }
+        onLoaded: {
+            b1.target = webview.item;
+        }
     }
 }

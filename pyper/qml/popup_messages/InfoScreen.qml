@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 import QtQuick.Window 2.2
 
 import "../style"
@@ -17,8 +17,8 @@ Rectangle{
     width: 200
     height: 100
     radius: 10
-    color: theme.infoScreenFrameBackground
-    border.color: theme.infoScreenFrameBorder
+    color: Theme.infoScreenFrameBackground
+    border.color: Theme.infoScreenFrameBorder
     border.width: 2
 
     function flash(duration) {
@@ -42,7 +42,7 @@ Rectangle{
         anchors.centerIn: parent
 
         font.pixelSize: 15
-        color: theme.text
+        color: Theme.text
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         font.bold: true

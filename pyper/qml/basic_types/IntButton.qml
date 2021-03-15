@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../style"
 
@@ -33,7 +33,7 @@ Item {
             height: parent.height
             enabled: parent.enabled
 
-            color: theme.text
+            color: Theme.text
             horizontalAlignment: Text.AlignHCenter
             readOnly: true
         }

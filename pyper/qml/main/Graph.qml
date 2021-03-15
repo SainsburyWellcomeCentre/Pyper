@@ -1,6 +1,6 @@
-import QtQuick 2.3
-import QtQml 2.0
-import QtQuick.Controls 1.2
+import QtQml 2.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../popup_messages"
 import "../basic_types"
@@ -10,9 +10,10 @@ import "../style"
 import "../config"
 
 Rectangle {    
-    color: theme.background
+    color: Theme.background
     
     property string points
+
     onPointsChanged: {
         setPath(points);
     }
@@ -78,25 +79,27 @@ Rectangle {
             graphCanvas.path = [];
         }
         function drawPath() {
-            var currentPoint = path[0];
-            lastX = currentPoint.x;
-            lastY = currentPoint.y;
-            
-            var ctx = getContext('2d');
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = drawingColor;
-            ctx.beginPath();
-            
-            for (var i=1; i < path.length; i++) {
-                currentPoint = path[i];
-                
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(currentPoint.x, currentPoint.y);
-                
+            if (available) {
+                var currentPoint = path[0];
                 lastX = currentPoint.x;
                 lastY = currentPoint.y;
+
+                var ctx = getContext('2d');
+                ctx.lineWidth = 3.0;
+                ctx.strokeStyle = drawingColor;
+                ctx.beginPath();
+
+                for (var i=1; i < path.length; i++) {
+                    currentPoint = path[i];
+
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(currentPoint.x, currentPoint.y);
+
+                    lastX = currentPoint.x;
+                    lastY = currentPoint.y;
+                }
+                ctx.stroke();
             }
-            ctx.stroke();
         }
         function clearCanvas() {
             var ctx = getContext("2d");

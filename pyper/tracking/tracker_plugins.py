@@ -7,7 +7,7 @@ from pyper.gui.gui_tracker import GuiTracker
 class PupilGuiTracker(GuiTracker):
     """
     A subclass of GuiTracker with processing optimised
-    to track the pupil of a mouse
+    to track the pupil of an animal
     """
     WHITE_FRAME = None
 
@@ -20,7 +20,7 @@ class PupilGuiTracker(GuiTracker):
 
     def _get_silhouette(self, frame):
         """
-        Get the binary mask (8bits) of the mouse
+        Get the binary mask (8bits) of the pupil
         from the thresholded difference between frame and the background
 
         :param frame: The current frame to analyse

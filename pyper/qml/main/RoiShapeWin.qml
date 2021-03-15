@@ -1,15 +1,16 @@
-import QtQuick 2.3
+import QtQuick 2.5
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
 import QtQuick.Dialogs 1.2
 
 import "../basic_types"
 import "../roi"
 import "../popup_messages"
 import "../style"
+import "../config"
 
 ApplicationWindow {
     id: roiShapeWin
@@ -37,19 +38,19 @@ ApplicationWindow {
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/ellipse.png"
+            iconSource: IconHandler.getPath("ellipse.png");
             onClicked: { roiShapeWin.shapeSelected('ellipse'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/rectangle.png"
+            iconSource: IconHandler.getPath("rectangle.png");
             onClicked: { roiShapeWin.shapeSelected('rectangle'); }
         }
         CustomButton {
             width: 50
             height: width
-            iconSource: "../../../resources/icons/freehand.png"
+            iconSource: IconHandler.getPath("freehand.png");
             onClicked: { roiShapeWin.shapeSelected('freehand'); }
         }
     }

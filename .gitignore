@@ -9,6 +9,9 @@
 doc/build/*
 testTrack.mpg
 resources/teleporter/*
-src/qml/MouseTracker.creator*
+src/qml/Pyper.creator*
 .idea
 resources/recording.avi
+*.qmlproject.user
+/build/
+*.egg-info

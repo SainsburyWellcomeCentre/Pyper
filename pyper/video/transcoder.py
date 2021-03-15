@@ -9,22 +9,23 @@ This may be required if your player doesn't support your format or to fix some v
 :author: crousse
 """
 
-import numpy as np
-import os
-from scipy.misc import imresize
-import cv2
-from cv2 import cv
-
 import math
+import os
+
+import numpy as np
+# from scipy.misc import imresize
+from skimage.transform import resize as imresize
+from tqdm import trange
+import cv2
+
 from PyQt5.QtCore import pyqtSlot, QVariant
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperValueError
-from pyper.gui.tabs_interfaces import TrackerIface
 from pyper.gui.gui_tracker import GuiTracker
-from video_stream import RecordedVideoStream
-from pyper.cv_wrappers.video_writer import VideoWriter
+from pyper.gui.tabs_interfaces import TrackerIface
+from pyper.video.cv_wrappers.video_writer import VideoWriter
+from pyper.video.video_stream import RecordedVideoStream
 
-from progressbar import Percentage, Bar, ProgressBar
 
 # TODO: see if can avoid to swap axis multiple times for Transcoder below
 
@@ -41,7 +42,7 @@ class TranscoderIface(TrackerIface):
                       # "xvid"
                       # "MJPG"
                       }
-    EXTS_TO_CODECS = {v: k for k, v in CODECS_TO_EXTS.iteritems()}
+    EXTS_TO_CODECS = {v: k for k, v in CODECS_TO_EXTS.items()}
 
     def __init__(self, app, context, parent, params, display_name, provider_name):
         TrackerIface.__init__(self, app, context, parent, params, display_name, provider_name, None, None)
@@ -182,7 +183,7 @@ class GuiTranscoder(GuiTracker):
         self.dest_file_path = dest_file_path
 
         self.video_writer = VideoWriter(self.dest_file_path,
-                                        cv.CV_FOURCC(*self.codec),
+                                        self.codec,
                                         float(self._stream.fps),
                                         output_size[::-1],  # invert size with openCV
                                         True)
@@ -191,7 +192,7 @@ class GuiTranscoder(GuiTracker):
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
         self.video_writer = VideoWriter(self.dest_file_path,
-                                        cv.CV_FOURCC(*self.codec),
+                                        self.codec,
                                         float(self._stream.fps),
                                         output_size[::-1],  # invert size with openCV
                                         True)
@@ -294,7 +295,7 @@ class Transcoder(RecordedVideoStream):
         self.scale_params = np.array(scale_params)
         size = self.get_final_size()
         self.video_writer = VideoWriter(dest_file_path,
-                                        cv.CV_FOURCC(*'mp4v'),  # FIXME: Format as argument
+                                        'mp4v',  # FIXME: Format as argument
                                         self.fps,
                                         size[::-1],
                                         True)
@@ -311,16 +312,12 @@ class Transcoder(RecordedVideoStream):
     def transcode(self):
         crop_params = self.crop_params
         final_width, final_height = self.get_final_size()
-        widgets = ['Encoding Progress: ', Percentage(), Bar()]  # FIXME: only if CLI (put option in __init__
-        pbar = ProgressBar(widgets=widgets, maxval=self.n_frames).start()
-        for i in range(self.n_frames):
-            pbar.update(i)
+        for i in trange(self.n_frames):  # FIXME: progressbar only if CLI (put option in __init__)
             frame = self.read()
             frame = frame[crop_params[0][0]: -crop_params[0][1], crop_params[1][0]: -crop_params[1][1]]
             scale = np.concatenate((self.scale_params, np.array([1]))) * frame.shape
             frame = imresize(frame, scale.astype(int), interp='bilinear')
             self.video_writer.write(frame)
         # self.video_writer.write(np.uint8(np.dstack([frame]*3)))
-        pbar.finish()
         self.video_writer.release()
         self.video_writer = None

@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../style"
 
@@ -10,7 +10,7 @@ Label {
     property alias help: tooltip.tooltip
     property alias fontSize: labelWTooltip.font.pointSize
 
-    color: theme.text
+    color: Theme.text
     text: "Label"
     ToolTip{
         id: tooltip

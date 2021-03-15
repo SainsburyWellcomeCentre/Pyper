@@ -1,6 +1,6 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Layouts 1.1
+import QtQuick 2.5
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.2
 
 import "../popup_messages"
 import "../basic_types"
@@ -10,7 +10,7 @@ import "../config"
 
 Rectangle {
     id: rectangle1
-    color: theme.background
+    color: Theme.background
     anchors.fill: parent
 
     SplashScreen{
@@ -38,7 +38,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 10
 
-            iconSource: iconHandler.getPath("document-open.png")
+            iconSource: IconHandler.getPath("document-open.png")
 
             tooltip: "Select folder with the calibration images"
             onClicked: {
@@ -208,7 +208,7 @@ Rectangle {
                         width: 25
                         height: width
 
-                        iconSource: iconHandler.getPath("document-save-as.png")
+                        iconSource: IconHandler.getPath("document-save-as.png")
 
                         tooltip: "Select the destination of the camera matrix"
                         onClicked: {

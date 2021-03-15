@@ -1,5 +1,5 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
 
 import "../style"
 
@@ -39,7 +39,7 @@ Roi {
 
         visible: false
         color: "transparent"
-        border.color: theme.roiDefault
+        border.color: Theme.roiDefault
         border.width: 3
 
         property real startPosX

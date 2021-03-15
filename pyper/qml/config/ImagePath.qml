@@ -1,5 +1,5 @@
 pragma Singleton
-import QtQuick 2.0
+import QtQuick 2.5
 
 Item {
     id: root
@@ -12,7 +12,7 @@ Item {
 
     QtObject {  // For private properties
         id: pathSources
-        property string iconDir: '../../../resources/images/'
+        property string iconDir: '../../resources/images/'
     }
     function getPath(imageName) {
         return pathSources.iconDir + imageName;

@@ -14,7 +14,7 @@ object is used to speed-up video acquisition and online processing.
 
 The combination of recording and online position tracking allows the definition
 of complex behavioural experiment as the program can send a TTL pulse to an
-other computer upon detecting the mouse (for example: in a certain region of
+other computer upon detecting the specimen (e.g. mouse) (for example: in a certain region of
 space).
 
 Two other kind or ROIs allow you to measure the video pixel values and process

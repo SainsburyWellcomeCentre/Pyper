@@ -1,6 +1,6 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.3
 
 import "../style"
 
@@ -18,6 +18,8 @@ Item {
     property alias stepSize: spinBox.stepSize
     property alias suffix: spinBox.suffix
     property alias decimals: spinBox.decimals
+
+    property alias boxWidth: spinBox.width
 
     signal edited()
 
@@ -43,10 +45,10 @@ Item {
                     anchors.fill: parent
                     implicitWidth: 80
                     implicitHeight: 20
-                    color: theme.spinBoxBackground
+                    color: Theme.spinBoxBackground
                     radius: 2
                 }
-                textColor: theme.text
+                textColor: Theme.text
             }
             onEditingFinished: {
                 root.edited();
