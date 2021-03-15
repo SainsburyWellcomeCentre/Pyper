@@ -1,6 +1,6 @@
 import os
 import sys
-from scipy.misc import imread
+from skimage.io import imread
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
 from PyQt5.QtWidgets import QFileDialog

@@ -18,7 +18,7 @@ from time import time
 import matplotlib
 import numpy as np
 from scipy.io import loadmat
-from scipy.misc import imsave
+from skimage.io import imsave
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt

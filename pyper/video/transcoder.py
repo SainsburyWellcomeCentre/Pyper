@@ -13,7 +13,8 @@ import math
 import os
 
 import numpy as np
-from scipy.misc import imresize
+# from scipy.misc import imresize
+from skimage.transform import resize as imresize
 from tqdm import trange
 import cv2
 

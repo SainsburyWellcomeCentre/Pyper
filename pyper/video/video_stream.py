@@ -17,8 +17,8 @@ import platform
 import sys
 
 import numpy as np
-import scipy
 import cv2
+from skimage.transform import rescale
 
 from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
@@ -452,7 +452,7 @@ class QuickRecordedVideoStream(RecordedVideoStream):
             try:
                 frame = stream.read()
                 n_frames += 1
-                frame = scipy.misc.imresize(frame, 0.2, interp='bilinear')  # FIXME: parametrise resizing factor
+                frame = rescale(frame, 0.2, anti_aliasing=True)  # FIXME: parametrise resizing factor
                 self.frames.append(frame)
             except VideoCaptureGrabError:
                 break
