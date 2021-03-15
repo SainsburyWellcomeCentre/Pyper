@@ -37,12 +37,16 @@ Rectangle {
 
     TextArea {
         id: text1
-        x: 196
-        y: 246
-        width: 397
-        height: 142
+        x: 18
+        y: 175
+        width: 604
+        height: 238
 
-        text: qsTr("Please select an existing video using the file menu or proceed to record or calibration")
+        text: qsTr("This program is is designed to track the path of an object of interest in a live feed from a camera or a recorded video.
+
+Different functionalities are available through the tabs on the left. You can get more information on each tab by pression ctrl+H. Alternatively, follow the tutorial or select the help menu in the top bar.
+
+To get started, please select an existing video using the file menu (ctrl+O) or proceed to record or calibration.")
         font.family: Theme.defaultFont
         readOnly: true
         horizontalAlignment: Text.AlignHCenter
