@@ -28,5 +28,5 @@ class TemplateTracker(GuiTracker):
         diff = Frame(np.full(frame.shape, 255, dtype=np.uint8) - frame)  # Negative
 
         diff = diff.astype(np.uint8)
-        silhouette = diff.threshold(self.threshold)
+        silhouette = diff.threshold(self.params.threshold)
         return silhouette, diff

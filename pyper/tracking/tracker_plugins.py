@@ -13,7 +13,7 @@ class PupilGuiTracker(GuiTracker):
 
     def _pre_process_frame(self, frame):
         treated_frame = Frame(frame.gray().astype(np.uint8))
-        # if not IS_PI and not self.fast:
+        # if not IS_PI and not self.params.fast:
         #     treated_frame = treated_frame.denoise(3).blur(3)
         treated_frame = treated_frame.blur(1)
         return treated_frame
@@ -32,7 +32,7 @@ class PupilGuiTracker(GuiTracker):
         if PupilGuiTracker.WHITE_FRAME is None:
             PupilGuiTracker.WHITE_FRAME = np.full(frame.shape, 255, dtype=np.uint8)
 
-        if self.normalise:
+        if self.params.normalise:
             frame = frame.normalise(self.bg.global_avg)
         # diff = Frame(cv2.absdiff(frame, self.bg))
         diff = Frame(PupilGuiTracker.WHITE_FRAME - frame)  # Negative
@@ -43,8 +43,8 @@ class PupilGuiTracker(GuiTracker):
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)
-            silhouette = diff.threshold(self.threshold)
-        if self.clear_borders:
+            silhouette = diff.threshold(self.params.threshold)
+        if self.params.clear_borders:
             silhouette.clearBorders()
         return silhouette, diff
 

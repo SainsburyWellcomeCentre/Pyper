@@ -35,6 +35,26 @@ IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspber
 OPENCV_VERSION = int(cv2.__version__[0])
 
 
+class TrackingParams(object):
+    def __init__(self, threshold, max_area, teleportation_threshold, track_to, min_area=0, track_from=1,
+                 clear_borders=False, normalise=False, fast=False, extract_arena=False, infer_location=False,
+                 n_erosions=0):
+        self.threshold = threshold
+        self.max_area = max_area
+        self.teleportation_threshold = teleportation_threshold
+        self.track_to = track_to
+
+        self.min_area = min_area
+        self.track_from = track_from
+
+        self.clear_borders = clear_borders
+        self.normalise = normalise
+        self.fast = fast
+        self.extract_arena = extract_arena
+        self.infer_location = infer_location
+        self.n_erosions = n_erosions
+
+
 class Tracker(object):
     """
     A tracker object to track a specimen in a video stream
@@ -93,21 +113,12 @@ class Tracker(object):
                                                   is_color=True)  # FIXME: make optional
         else:
             self._stream = RecordedVideoStream(src_file_path, *track_range_params)
-        
-        self.threshold = threshold
-        self.min_area = min_area
-        self.max_area = max_area
-        self.teleportation_threshold = teleportation_threshold
-        
-        self.track_from = track_from
-        self.track_to = track_to
-        
-        self.clear_borders = clear_borders
-        self.normalise = normalise
+
+        self.params = TrackingParams(threshold, max_area, teleportation_threshold, track_to, min_area=min_area,
+                                     track_from=track_from, clear_borders=clear_borders, normalise=normalise,
+                                     fast=fast, extract_arena=extract_arena, infer_location=infer_location)
+        # TODO: add n_erosions
         self.plot = plot
-        self.fast = fast
-        self.extract_arena = extract_arena
-        self.infer_location = infer_location
 
         self.bg = Background(n_sds)
         
@@ -144,8 +155,8 @@ class Tracker(object):
         :return: arena
         :rtype: Roi
         """
-        if self.extract_arena:
-            mask = self.bg.to_mask(self.threshold)
+        if self.params.extract_arena:
+            mask = self.bg.to_mask(self.params.threshold)
             cnt = self._get_biggest_contour(mask)
             arena = Circle(*cv2.minEnclosingCircle(cnt))  # TODO: make more generic
             self.arena = arena
@@ -164,7 +175,7 @@ class Tracker(object):
         return pbar
 
     def _set_default_results(self):
-        if self.infer_location:
+        if self.params.infer_location:
             self.results.repeat_last()
         else:
             self.results.append_defaults()
@@ -173,7 +184,7 @@ class Tracker(object):
         return fid < self._stream.bg_start_frame
 
     def is_after_frame(self, fid):
-        return self.track_to and (fid > self.track_to)
+        return self.params.track_to and (fid > self.params.track_to)
         
     def track(self, roi=None, record=False, check_fps=False, reset=True):
         """The main function. Loops until the end of the recording (ctrl+c if acquiring).
@@ -236,10 +247,10 @@ class Tracker(object):
                 self.bg.build(frame)
                 self.arena = self._extract_arena()
                 if record: self._stream.save(frame)
-            elif self._stream.bg_end_frame < fid < self.track_from:
+            elif self._stream.bg_end_frame < fid < self.params.track_from:
                 if record: self._stream.save(frame)
             else:  # Tracked frame
-                if fid == self.track_from: self.bg.finalise()
+                if fid == self.params.track_from: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
                 self.after_frame_track()
                 self.silhouette = self.update_img(self.silhouette, sil)
@@ -278,7 +289,7 @@ class Tracker(object):
         silhouette, diff = self._get_silhouette(processed_frame)
         biggest_contour = self._get_biggest_contour(silhouette)
 
-        if IS_PI and self.fast:
+        if IS_PI and self.params.fast:
             requested_output = 'mask'
         plot_silhouette, color_is_default = self._get_plot_silhouette(requested_output, frame, diff, silhouette)
         color = 'w' if color_is_default else requested_color
@@ -290,7 +301,7 @@ class Tracker(object):
             if self.plot:
                 specimen.draw()  # even if wrong size to held spot issues
                 self._draw_subregion_roi(plot_silhouette)
-            if self.min_area < area < self.max_area:
+            if self.params.min_area < area < self.params.max_area:
                 distances = (self._get_distance_from_arena_center(), self._get_distance_from_arena_border())
                 self.results.update(specimen.centre, area, self.measure_callback(frame), distances)
                 self._check_teleportation(frame, silhouette)
@@ -327,14 +338,14 @@ class Tracker(object):
     def _get_distance_from_arena_border(self):  # FIXME: merge and move
         if self.results.last_pos_is_default():
             return
-        if self.extract_arena:
+        if self.params.extract_arena:
             last_pos = self.results.get_last_position()
             return self.arena.dist_from_border(last_pos)
             
     def _get_distance_from_arena_center(self):  # FIXME: merge and move
         if self.results.last_pos_is_default():
             return
-        if self.extract_arena:
+        if self.params.extract_arena:
             last_pos = self.results.get_last_position()
             return self.arena.dist_from_centre(last_pos)
             
@@ -343,7 +354,7 @@ class Tracker(object):
             roi_contour = ObjectContour(self.roi.points, frame, contour_type='raw',
                                         color=roi_color, line_thickness=2)
             roi_contour.draw()
-        if self.extract_arena:
+        if self.params.extract_arena:
             arena_contour = ObjectContour(self.arena.points, frame, contour_type='raw',
                                           color=arena_color, line_thickness=2)
             arena_contour.draw()
@@ -376,8 +387,8 @@ class Tracker(object):
             return float('NaN')
     
     def _pre_process_frame(self, frame):
-        treated_frame = frame.gray(self.fast)   # TODO: check if we should separate setting
-        if not self.fast:
+        treated_frame = frame.gray(self.params.fast)   # TODO: check if we should separate setting
+        if not self.params.fast:
             treated_frame = treated_frame.denoise().blur()
         return treated_frame
 
@@ -400,10 +411,10 @@ class Tracker(object):
         return plot_silhouette, color_is_default
 
     def _handle_bad_size_contour(self, area, img=None):
-        if area > self.max_area:
-            msg = 'Biggest structure too big ({} > {})'.format(area, self.max_area)
+        if area > self.params.max_area:
+            msg = 'Biggest structure too big ({} > {})'.format(area, self.params.max_area)
         else:
-            msg = 'Biggest structure too small ({} < {})'.format(area, self.min_area)
+            msg = 'Biggest structure too small ({} < {})'.format(area, self.params.min_area)
         self._fast_print(msg)
         if img is not None:
             write_structure_size_incorrect_msg(img, img.shape[:2], msg)
@@ -420,7 +431,7 @@ class Tracker(object):
         :param str in_str: The string to print
         :return:
         """
-        if not self.fast:
+        if not self.params.fast:
             print(in_str)
         
     def _check_teleportation(self, frame, silhouette):
@@ -440,8 +451,8 @@ class Tracker(object):
         if not self.results.has_non_default_position():  # No tracking yet
             return
         last_vector = self.results.get_last_movement_vector()
-        if (last_vector > self.teleportation_threshold).any():
-            # if self.infer_location:
+        if (last_vector > self.params.teleportation_threshold).any():
+            # if self.params.infer_location:
             #     self.positions[-1] = self.positions[-2]
             # else:
             silhouette.save('teleporting_silhouette.tif')  # Used for debugging
@@ -493,7 +504,7 @@ class Tracker(object):
         :returns: silhouette (the binary mask)
         :rtype: video_frame.Frame
         """
-        if self.normalise:
+        if self.params.normalise:
             frame = frame.normalise(self.bg.global_avg)
         diff = self.bg.diff(frame)
         if self.bg.use_sd:
@@ -502,8 +513,10 @@ class Tracker(object):
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)  # OPTIMISE
-            silhouette = diff.threshold(self.threshold)
-        if self.clear_borders:
+            silhouette = diff.threshold(self.params.threshold)
+        if self.params.n_erosions:
+            silhouette = silhouette.erode(self.params.n_erosions)
+        if self.params.clear_borders:
             silhouette.clear_borders()
         return silhouette, diff
 

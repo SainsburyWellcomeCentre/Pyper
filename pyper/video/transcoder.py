@@ -148,9 +148,9 @@ class TranscoderIface(TrackerIface):
     @pyqtSlot()
     def set_tracker_params(self):
         if self.tracker is not None:
-            self.tracker.track_from = self.start_frame_idx
+            self.tracker.params.track_from = self.start_frame_idx
             if self.end_frame_idx == -1:
-                self.tracker.track_to = self.tracker._stream.n_frames - 1
+                self.tracker.params.track_to = self.tracker._stream.n_frames - 1
 
             if self.rois['restriction'] is not None:
                 self.tracker.set_tracking_region_roi(self.rois['restriction'])
@@ -249,9 +249,9 @@ class GuiTranscoder(GuiTracker):
     def transcode_frame(self):
         frame = self._stream.read()
         original_frame = frame.copy()
-        if self._stream.current_frame_idx >= self.track_to:
+        if self._stream.current_frame_idx >= self.params.track_to:
             raise EOFError("End of tracking reached")
-        if self.track_from <= self._stream.current_frame_idx:
+        if self.params.track_from <= self._stream.current_frame_idx:
             frame = self._crop_frame(frame)
             frame = self._scale_frame(frame)
             self.video_writer.write(frame.astype(np.uint8))

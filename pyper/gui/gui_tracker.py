@@ -46,7 +46,7 @@ class GuiTracker(Tracker):
         try:
             if self._stream.seekable:  # Jump to tracking start frame if possible
                 if self._stream.current_frame_idx == self._stream.bg_end_frame:
-                    self._stream.seek(self.track_from)  # TODO: see if all params updated (including results)
+                    self._stream.seek(self.params.track_from)  # TODO: see if all params updated (including results)
 
             self.current_frame_idx = self._stream.current_frame_idx + 1
             result = self.track_frame(record=self.record, requested_output=self.ui_iface.output_type)
@@ -65,7 +65,7 @@ class GuiTracker(Tracker):
 
     def _plot(self):  # FIXME: document that not for each frame
         self.paint(self.silhouette, 'c')
-        if self.plt_curve is None or self.is_update_frame() or (not self.fast):  # do only every x pnts in fast mode
+        if self.plt_curve is None or self.is_update_frame() or (not self.params.fast):  # do only every x pnts in fast mode
             self.plt_curve = self.results.plot_positions()
         self.silhouette.paint(curve=self.plt_curve)
 
@@ -73,5 +73,5 @@ class GuiTracker(Tracker):
         return self.current_frame_idx % self.curve_update_period == 0
 
     def should_update_vid(self):  # FIXME: document that not for each frame, + put as fast_fast
-        return self.is_update_frame() or (not self.fast)
+        return self.is_update_frame() or (not self.params.fast)
 

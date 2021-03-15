@@ -490,20 +490,20 @@ class TrackerIface(BaseInterface):
             self.tracker._stream.bg_start_frame = self.params.bg_frame_idx
             n_background_frames = self.params.n_bg_frames
             self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
-            self.tracker.track_from = self.params.start_frame_idx
-            self.tracker.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+            self.tracker.params.track_from = self.params.start_frame_idx
+            self.tracker.params.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
             self.tracker.bg.source = self.params.ref  # TODO: add check for validity of frame size/type in tracker
 
-            self.tracker.threshold = self.params.detection_threshold
-            self.tracker.min_area = self.params.objects_min_area
-            self.tracker.max_area = self.params.objects_max_area
-            self.tracker.teleportation_threshold = self.params.teleportation_threshold
+            self.tracker.params.threshold = self.params.detection_threshold
+            self.tracker.params.min_area = self.params.objects_min_area
+            self.tracker.params.max_area = self.params.objects_max_area
+            self.tracker.params.teleportation_threshold = self.params.teleportation_threshold
 
+            self.tracker.params.clear_borders = self.params.clear_borders
+            self.tracker.params.normalise = self.params.normalise
             self.tracker.n_sds = self.params.n_sds
-            self.tracker.clear_borders = self.params.clear_borders
-            self.tracker.normalise = self.params.normalise
-            self.tracker.extract_arena = self.params.extract_arena
-            self.tracker.infer_location = self.params.infer_location
+            self.tracker.params.extract_arena = self.params.extract_arena
+            self.tracker.params.infer_location = self.params.infer_location
 
     def _set_tracker_roi(self, roi_type, tracker_method):
         """
@@ -547,7 +547,7 @@ class TrackerIface(BaseInterface):
             n_frames = self.tracker._stream.current_frame_idx
             duration = float(self.end_track_time - self.start_track_time)
             fps = n_frames / duration
-            print("Acquired {0} frames in {1:.2f} seconds (fps={2:.2f})".format(n_frames, duration, fps))
+            print("Handled {0} frames in {1:.2f} seconds (fps={2:.2f})".format(n_frames, duration, fps))
 
     @pyqtSlot()
     def start(self):
