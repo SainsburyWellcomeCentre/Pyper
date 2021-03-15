@@ -8,6 +8,7 @@ This module is used to check the position of the tracked specimen relative to a 
 
 :author: crousse
 """
+import math
 import os
 import shutil
 import tarfile
@@ -261,11 +262,11 @@ class Ellipse(Roi):
         n_points = 200
         semi_minor = self.height / 2.
         semi_major = self.width / 2.
-        xs = np.linspace(-semi_major, semi_major, n_points/2.)  # FIXME: inverted ?
+        xs = np.linspace(-semi_major, semi_major, math.ceil(n_points/2.))  # FIXME: inverted ?
         ys = self.__compute_ellipse(semi_minor, semi_major, xs)   # FIXME: inverted ?
         ys = np.hstack((ys, -ys[::-1])) + self.centre[1]
         xs = np.hstack((xs, xs[::-1])) + self.centre[0]
-        points = np.array(zip(xs, ys), dtype=np.float32)
+        points = np.column_stack((xs, ys)).astype(np.float32)
         return points
 
     def get_data(self):
