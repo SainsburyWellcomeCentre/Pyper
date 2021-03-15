@@ -71,6 +71,7 @@ def main():
     appEngine.addImageProvider('recorderprovider', CvImageProvider())
     appEngine.addImageProvider('calibrationprovider', CvImageProvider())
     appEngine.addImageProvider('transcoderprovider', CvImageProvider())
+
     analysis_image_provider = PyplotImageProvider(fig=None)
     appEngine.addImageProvider("analysisprovider", analysis_image_provider)
     analysis_image_provider2 = PyplotImageProvider(fig=None)
@@ -78,16 +79,19 @@ def main():
     qml_source_path = os.path.join(conf.shared_directory, 'qml', 'main', 'Pyper.qml')
     if not os.path.isfile(qml_source_path):
         raise PyperGUIError("Qml code not found at {}, please verify your installation".format(qml_source_path))
-    appEngine.load(qml_source_path)
+    appEngine.load(qml_source_path)  # TODO: check if QUrl(qml_source_path)
     try:
         win = appEngine.rootObjects()[0]
     except IndexError:
         raise PyperGUIError("Could not start the QT GUI")
+
     icon = QIcon(os.path.join(conf.shared_directory, 'resources', 'icons', 'pyper.png'))
     win.setIcon(icon)
+
     if not DEBUG:
         logger = Logger(context, win, "log")
         sys.stdout = logger
+
     # REGISTER PYTHON CLASSES WITH QML
     params = ParamsIface(app, context, win)
     viewer = ViewerIface(app, context, win, params, "preview", "viewerprovider")
@@ -98,6 +102,7 @@ def main():
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
     transcoder = TranscoderIface(app, context, win, params, "transcodingDisplay", "transcoderprovider")
     editor = EditorIface(app, context, win)
+
     context.setContextProperty('py_iface', params)
     context.setContextProperty('py_viewer', viewer)
     context.setContextProperty('py_tracker', tracker)
@@ -105,7 +110,9 @@ def main():
     context.setContextProperty('py_calibration', calibrater)
     context.setContextProperty('py_editor', editor)
     context.setContextProperty('py_transcoder', transcoder)
+
     win.show()
+
     sys.exit(app.exec_())
 
 

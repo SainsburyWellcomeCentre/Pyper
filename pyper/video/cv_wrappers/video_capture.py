@@ -33,6 +33,10 @@ class VideoCapture(object):
     """
 
     def __init__(self, filename_or_cam_idx):
+        """
+
+        :param str/int filename_or_cam_idx: Filename to load or index of camera to open
+        """
         self.cam_idx = None
         self.filename = None
         self.current_frame_idx = 0
@@ -112,7 +116,7 @@ class VideoCapture(object):
 
     @property
     def n_frames(self):
-        return self.get('frame_count')
+        return self.get('frame_count')  # TODO: add check for n_frames < 0
 
     @property
     def fourcc(self):
@@ -177,5 +181,3 @@ class VideoCapture(object):
             else:
                 if getattr(cv2.cv, attr) == propid:
                     return attr
-
-
