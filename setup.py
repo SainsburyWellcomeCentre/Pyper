@@ -6,10 +6,9 @@ import errno
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
+PYTHON_VERSION = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
 
-SUPPORTED_PYTHON_VERSION = '2.7'
-
-libs_directory = os.path.join(sys.prefix, 'lib', 'python{}'.format(SUPPORTED_PYTHON_VERSION), 'site-packages')
+libs_directory = os.path.join(sys.prefix, 'lib', 'python{}'.format(PYTHON_VERSION), 'site-packages')
 shared_directory = os.path.join(sys.prefix, 'share')  # Where resources should go
 global_config_directory = os.path.join(sys.prefix, 'etc', 'pyper')
 user_config_dir = os.path.join(os.path.expanduser('~'), '.pyper')
@@ -27,7 +26,7 @@ requirements = [
     'tqdm',
     'configobj',
     # 'ffmpeg',
-    # 'opencv=2.4.13.4',
+    # 'opencv',
     # 'pyqt=5.6'
 ]
 # for documentation: sphinx-argparse
@@ -169,7 +168,7 @@ class CopyResources(install):
 setup(
     name='pyper',
     version='2.0.0.dev1',
-    python_requires='==2.7',
+    python_requires='>=2.7',
     packages=find_packages(exclude=['config', 'docs', 'tests*']),
     install_requires=requirements,
     # extras_require={
@@ -192,7 +191,7 @@ setup(
     author_email='Charly Rousseau <c.rousseau@ucl.ac.uk>',
     description='Motion tracking with closed loop abilities',
     classifiers=['Development Status :: 4 - Beta',  # TODO: change for release
-                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python',
                  'Environment :: Console',
                  'Environment :: MacOS X',
                  'Environment :: Win32 (MS Windows)',
