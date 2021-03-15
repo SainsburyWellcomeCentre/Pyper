@@ -142,12 +142,12 @@ class Tracker(object):
         converts it to an roi object.
         
         :return: arena
-        :rtype: Circle
+        :rtype: Roi
         """
         if self.extract_arena:
             mask = self.bg.to_mask(self.threshold)
             cnt = self._get_biggest_contour(mask)
-            arena = Circle(*cv2.minEnclosingCircle(cnt))
+            arena = Circle(*cv2.minEnclosingCircle(cnt))  # TODO: make more generic
             self.arena = arena
         
     def _make_bottom_square(self):  # TODO: extract
