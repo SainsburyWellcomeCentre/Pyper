@@ -62,6 +62,16 @@ class BaseInterface(QObject):
     It also possesses an instance of ParamsIface to 
     """
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
+        """
+
+        :param app:
+        :param context:
+        :param parent:
+        :param params:
+        :param display_name:
+        :param provider_name:
+        :param int timer_speed: interval in ms for the timer
+        """
         QObject.__init__(self, parent)
         self.app = app  # necessary to avoid QPixmap bug: must construct a QGuiApplication before
         self.ctx = context
@@ -139,6 +149,7 @@ class PlayerInterface(BaseInterface):
         """
         Start video (timer) playback
         """
+        self.timer_speed = self.params.timer_period
         self.timer.start(self.timer_speed)
 
     @pyqtSlot()
@@ -522,7 +533,12 @@ class TrackerIface(BaseInterface):
             self.tracker.results.reset()   # reset between runs
 
     def pre_track(self):
+        """
+        A method to be overwritten to allow execution of custom code before start in
+        derived classes
+        """
         self.start_track_time = time()
+        # self.timer_speed = int(1 / self.tracker._stream.stream.fps)
         self.tracker.results.start_time = time()
 
     def post_track(self):
@@ -543,6 +559,7 @@ class TrackerIface(BaseInterface):
             self.set_tracker_params()
             self.set_tracker_rois()
             self.pre_track()
+            self.timer_speed = self.params.timer_period
             self.timer.start(self.timer_speed)
 
     @pyqtSlot()
@@ -848,6 +865,10 @@ class RecorderIface(TrackerIface):
         normalise = self.params.normalise
         extract_arena = self.params.extract_arena
 
+        requested_fps = round(1/(self.params.timer_period / 1000))  # convert period to seconds
+        if __debug__:
+            print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
+
         self.tracker = self.params.tracker_class(self, src_file_path=None, dest_file_path=self.params.dest_path,
                                                  threshold=threshold, min_area=min_area, max_area=max_area,
                                                  teleportation_threshold=teleportation_threshold,
@@ -856,7 +877,7 @@ class RecorderIface(TrackerIface):
                                                  clear_borders=clear_borders, normalise=normalise,
                                                  plot=True, fast=True, extract_arena=extract_arena,
                                                  camera_calibration=self.params.calib,
-                                                 callback=None)
+                                                 callback=None, requested_fps=requested_fps)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
         self._update_img_provider()
@@ -864,7 +885,8 @@ class RecorderIface(TrackerIface):
         self.tracker.set_roi(self.rois['tracking'])
 
         self.pre_track()
-        self.timer_speed = int(1 / self.tracker._stream.stream.fps)
+        period = round((1 / self.tracker._stream.stream.fps) * 1000)
+        self.timer_speed = period  # convert to ms
         self.timer.start(self.timer_speed)
         return True
         

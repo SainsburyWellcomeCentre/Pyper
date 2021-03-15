@@ -47,7 +47,7 @@ class Tracker(object):
                  clear_borders=False, normalise=False,
                  plot=False, fast=False, extract_arena=False,
                  infer_location=False,
-                 camera_calibration=None, callback=None):
+                 camera_calibration=None, callback=None, requested_fps=None):
         """
         :param str src_file_path: The source file path to read from (camera if None)
         :param str dest_file_path: The destination file path to save the video
@@ -79,11 +79,11 @@ class Tracker(object):
         if callback is not None: self.handle_object_in_tracking_roi = callback
         track_range_params = (bg_start, n_background_frames)
         self.raw_out_stream = None
-        if src_file_path is None:
+        if src_file_path is None:  # i.e. we record
             if IS_PI:
-                self._stream = PiVideoStream(dest_file_path, *track_range_params)
+                self._stream = PiVideoStream(dest_file_path, *track_range_params, requested_fps=requested_fps)
             else:
-                self._stream = UsbVideoStream(dest_file_path, *track_range_params)  # FIXME: fix fps
+                self._stream = UsbVideoStream(dest_file_path, *track_range_params, requested_fps=requested_fps)
                 base_path, ext = os.path.splitext(dest_file_path)
                 raw_out_path = "{}_raw{}".format(base_path, ext)
                 self.raw_out_stream = VideoWriter(raw_out_path,

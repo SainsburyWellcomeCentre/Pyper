@@ -10,6 +10,7 @@ import "../style"
 import "../config"
 
 Rectangle {
+    id: rectangle
     color: Theme.background
     anchors.fill: parent
 
@@ -159,44 +160,70 @@ Rectangle {
 
         Frame {
             id: controls
-            height: row1.height + 20
+            height: row1.height + vidSpeed.height + 20
 
-            Row {
-                id: row1
+            CustomColumn {
+                enabled: parent.enabled
+                anchors.centerIn: parent
+                spacing: 5
+                width: parent.width
+                height: parent.height
 
-                anchors.centerIn: controls
-                width: children[0].width *2 + spacing
-                height: children[0].height
-                spacing: 10
+                Row {
+                    id: row1
 
-                CustomButton {
-                    id: startTrackBtn
+                    width: children[0].width *2 + spacing
+                    height: children[0].height
+                    spacing: 10
 
-                    width: 45
-                    height: width
+                    CustomButton {
+                        id: startTrackBtn
 
-                    iconSource: IconHandler.getPath("play.png")
-                    pressedSource: IconHandler.getPath("play_pressed.png")
-                    tooltip: "Start tracking"
+                        width: 45
+                        height: width
 
-                    onPressed:{ splash.visible = true; }
-                    onClicked: { py_tracker.start() }
-                    onReleased:{
-                        py_tracker.load();
-                        splash.visible = false;
+                        iconSource: IconHandler.getPath("play.png")
+                        pressedSource: IconHandler.getPath("play_pressed.png")
+                        tooltip: "Start tracking"
+
+                        onPressed:{ splash.visible = true; }
+                        onClicked: { py_tracker.start() }
+                        onReleased:{
+                            py_tracker.load();
+                            splash.visible = false;
+                        }
+                    }
+                    CustomButton {
+                        id: stopTrackBtn
+
+                        width: startTrackBtn.width
+                        height: width
+
+                        iconSource: IconHandler.getPath("stop.png")
+                        pressedSource: IconHandler.getPath("stop_pressed.png")
+                        tooltip: "Stop tracking"
+
+                        onClicked: py_tracker.stop()
                     }
                 }
-                CustomButton {
-                    id: stopTrackBtn
+                IntInput {
+                    id: vidSpeed
 
-                    width: startTrackBtn.width
-                    height: width
+                    width: parent.width
+                    enabled: parent.enabled
 
-                    iconSource: IconHandler.getPath("stop.png")
-                    pressedSource: IconHandler.getPath("stop_pressed.png")
-                    tooltip: "Stop tracking"
-
-                    onClicked: py_tracker.stop()
+                    label: "Spd."
+                    tooltip: "Frame period in ms (1/FPS)"
+                    value: py_iface.get_timer_period()
+                    minimumValue: 8  // > 120 FPS
+                    onEdited: {
+                        py_iface.set_timer_period(value);
+                        reload();
+                    }
+                    function reload(){
+                        value = py_iface.get_timer_period();
+                        //root.updateTracker();
+                    }
                 }
             }
         }

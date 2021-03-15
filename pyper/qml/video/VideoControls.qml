@@ -7,8 +7,8 @@ import "../config"
 
 Item{
     id: controls
-    width: 120
-    height: 230
+    width: 160
+    height: 280
 
     property int sliderValue: slider.value
 
@@ -23,7 +23,7 @@ Item{
         anchors.fill: parent
         enabled: parent.enabled
 
-        Column{
+        Column {
             width: parent.width - 2*10
             height: parent.height - 2*10
 
@@ -38,7 +38,7 @@ Item{
             Grid {
                 id: grid
                 width: parent.width
-                height: parent.height * 0.7
+                height: parent.height * 0.55  // FIXME: should invert relationship (function of btns)
 
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -109,6 +109,27 @@ Item{
 
                 anchors.left: parent.left
                 anchors.right: parent.right
+            }
+            IntInput {
+                id: playbackSpeed
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                enabled: parent.enabled
+
+                label: "Spd"
+                tooltip: "Playback speed (period) in ms (1/FPS)"
+                value: py_iface.get_timer_period()
+                minimumValue: 8  // > 120 FPS
+                // boxWidth: 45
+                onEdited: {
+                    py_iface.set_timer_period(value);
+                    reload();
+                }
+                function reload(){
+                    value = py_iface.get_timer_period();
+                    //root.updateTracker();
+                }
             }
         }
     }

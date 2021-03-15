@@ -25,16 +25,19 @@ from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeE
 from pyper.utilities.utils import spin_progress_bar
 from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_frame import Frame
+from pyper.config import conf
 
 IS_PI = (platform.machine()).startswith('arm')
 if IS_PI:
     import picamera.array
     from pyper.camera.camera import CvPiCamera
 
+config = conf.config
+
     
 DEFAULT_CAM = 0
 CODEC = 'mp4v'  # TODO: check which codecs are available
-FPS = 30
+DEFAULT_FPS = config['global']['default_fps']
 DEFAULT_FRAME_SIZE = (256, 256)
 
 IS_GRAPHICAL = 'PyQt5' in sys.modules.keys()
@@ -259,12 +262,16 @@ class UsbVideoStream(VideoStream):
     """
     DEFAULT_FRAME_SIZE = (640, 480)
 
-    def __init__(self, save_path, bg_start, n_background_frames):
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
         :param int bg_start: The frame to use as background frames range start
         :param int n_background_frames: The number of frames to use for the background
         """
+        if requested_fps is None:
+            self.fps = DEFAULT_FPS
+        else:
+            self.fps = requested_fps
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
 
     def _start_video_capture_session(self, save_path):
@@ -280,13 +287,16 @@ class UsbVideoStream(VideoStream):
         """
         capture = VideoCapture(DEFAULT_CAM)
         try:
-            capture.set("fps", FPS)  # FIXME: replace by self.intended_fps (and set in GUI) (and use if FPS is None)
+            capture.set("fps", self.fps)
+            if capture.fps != self.fps:  # FIXME: use raise Warning
+                print("WARNING: Setting FPS to {} failed. Defaulting to {}.".format(self.fps, capture.fps))
+                self.fps = capture.fps
         except VideoCapturePropertySetError:
-            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(FPS, capture.fps))
+            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(self.fps, capture.fps))  # FIXME: raise warning
         try:
             capture.set("BRIGHTNESS", 100)
         except VideoCapturePropertySetError:
-            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get('brightness')))
+            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get('brightness')))  # FIXME: raise warning
 
         # Try custom resolution
         try:
@@ -307,7 +317,9 @@ class UsbVideoStream(VideoStream):
 
         actual_size = (actual_width, actual_height)  # All in openCV nomenclature
         self.size = actual_size
-        video_writer = VideoWriter(save_path, CODEC, FPS, actual_size, is_color=True)
+        if capture.fps is None:
+            raise VideoStreamIOException("FPS was not set in videocapture")
+        video_writer = VideoWriter(save_path, CODEC, capture.fps, actual_size, is_color=True)  # TEST: capture.fps
         return capture, video_writer
         
     def read(self):
@@ -341,12 +353,16 @@ class PiVideoStream(VideoStream):
     A subclass of VideoStream for the raspberryPi camera
     which isn't supported by opencv
     """
-    def __init__(self, save_path, bg_start, n_background_frames):
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
         :param int bg_start: The frame to use as background frames range start
         :param int n_background_frames: The number of frames to use for the background
         """
+        if requested_fps is None:
+            self.fps = DEFAULT_FPS
+        else:
+            self.fps = requested_fps
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
 
     def _init_cam(self):
@@ -371,7 +387,7 @@ class PiVideoStream(VideoStream):
         :return: array and video_writer object
         :type: (picamera.array.PiRGBArray, VideoWriter)
         """
-        video_writer = VideoWriter(save_path, CODEC, FPS, DEFAULT_FRAME_SIZE)
+        video_writer = VideoWriter(save_path, CODEC, self.fps, DEFAULT_FRAME_SIZE)
         stream = picamera.array.PiRGBArray(self._cam)
         return stream, video_writer
         

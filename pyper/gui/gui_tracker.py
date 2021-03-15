@@ -17,7 +17,7 @@ class GuiTracker(Tracker):
                  clear_borders=False, normalise=False,
                  plot=False, fast=False, extract_arena=False,
                  camera_calibration=None,
-                 callback=None):
+                 callback=None, requested_fps=None):
         """
         :param TrackerInterface ui_iface: the interface this tracker is called from
 
@@ -31,7 +31,7 @@ class GuiTracker(Tracker):
                          clear_borders=clear_borders, normalise=normalise,
                          plot=plot, fast=fast, extract_arena=extract_arena,
                          camera_calibration=camera_calibration,
-                         callback=callback)
+                         callback=callback, requested_fps=requested_fps)
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
         self.plt_curve = None
