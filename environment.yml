@@ -2,7 +2,7 @@ name: pyper_env
 channels:
   - conda-forge
 dependencies:
-  - python>=2.7
+  - python >= 3.6
   - numpy
   - scipy
   - matplotlib
@@ -13,5 +13,5 @@ dependencies:
   - scikit-image
   - tqdm
   - ffmpeg
-  - opencv=2.4.13.4
-  - pyqt=5.6
+  - opencv >= 3.1.0,<= 3.4.9
+  - pyqt >= 5.6
