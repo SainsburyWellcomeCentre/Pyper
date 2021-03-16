@@ -116,7 +116,8 @@ class Tracker(object):
 
         self.params = TrackingParams(threshold, max_area, teleportation_threshold, track_to, min_area=min_area,
                                      track_from=track_from, clear_borders=clear_borders, normalise=normalise,
-                                     fast=fast, extract_arena=extract_arena, infer_location=infer_location)
+                                     fast=fast, extract_arena=extract_arena, infer_location=infer_location,
+                                     n_erosions=n_erosions)
         # TODO: add n_erosions
         self.plot = plot
 
