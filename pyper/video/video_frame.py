@@ -76,8 +76,7 @@ class Frame(np.ndarray):
         if self.ndim == 2:  # Single channel images:
             return Frame(np.dstack([self]*3))
         elif self.ndim == 3 and self.shape[2] == 1:
-            raise NotImplementedError("Image is color but has only one channel."
-                                      "This type is not supported yet")
+            return Frame(np.dstack([self[:, :, 0]] * 3))
         else:
             if in_place:
                 return Frame(cv2.cvtColor(self, cv2.COLOR_BGR2GRAY))
