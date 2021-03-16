@@ -135,5 +135,5 @@ class EditorIface(QObject):
 
     @pyqtSlot(str, result=str)
     def highlight_code(self, code):
-        return highlight(code, PythonLexer(), HtmlFormatter(full=True, style='native'))
-
+        return highlight(code, PythonLexer(), HtmlFormatter(full=True, style='native', lineos='table',
+                                                            wrapcode=True, noclasses=True))

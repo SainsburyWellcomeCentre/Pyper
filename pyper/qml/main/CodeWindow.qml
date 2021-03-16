@@ -88,10 +88,14 @@ ApplicationWindow {
             textFormat: Text.RichText
             wrapMode: TextEdit.Wrap
             text: py_editor.load_plugin_template();
+            style: TextAreaStyle {
+                backgroundColor: Theme.codeBackground;
+            }
+
             // FIXME: creates infinite loop
-//            onTextChanged: {
-//                text = py_editor.highlight_code(getText(0, text.length));
-//            }
+            // onTextChanged: {
+            //      text = py_editor.highlight_code(getText(0, text.length));
+            // }
         }
     }
 }
