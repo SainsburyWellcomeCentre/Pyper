@@ -32,6 +32,7 @@ Rectangle {
     }
     ErrorScreen{
         id: videoErrorScreen
+        // @disable-check M16
         objectName: "videoLoadingErrorScreen"
 
         anchors.centerIn: trackerDisplay
@@ -70,6 +71,7 @@ Rectangle {
     }
     Video {
         id: trackerDisplay
+        // @disable-check M16
         objectName: "trackerDisplay"
 
         width: 640
@@ -139,6 +141,7 @@ Rectangle {
     }
     Graph {
         id: graph
+        // @disable-check M16
         objectName: "dataGraph"
 
         width: trackerDisplay.progressBarWidth

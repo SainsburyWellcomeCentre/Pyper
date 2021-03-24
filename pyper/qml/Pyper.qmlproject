@@ -3,7 +3,7 @@
 import QmlProject 1.1
 
 Project {
-    mainFile: "Pyper.qml"
+    mainFile: "./main/Pyper.qml"
 
     /* Include .qml, .js, and image files from current directory and subdirectories */
     QmlFiles {
@@ -16,5 +16,5 @@ Project {
         directory: "../../resources/icons/"
     }
     /* List of plugin directories passed to QML runtime */
-    // importPaths: [ "../exampleplugin" ]
+    importPaths: [ "./main", "./basic_types", "./config", "./help", "./popup_messages", "./roi", "./style", "./video" ]
 }

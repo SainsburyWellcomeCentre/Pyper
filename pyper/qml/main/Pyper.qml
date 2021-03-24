@@ -1,9 +1,10 @@
 import QtQuick 2.5
+import QtQuick.Window 2.2
+import QtQml.Models 2.2
+import QtQml 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.3
-import QtQuick.Window 2.2
 import QtQuick.Layouts 1.2
-import QtQml.Models 2.2
 import QtGraphicalEffects 1.0
 import QtQuick.Dialogs 1.2
 
@@ -344,6 +345,7 @@ ApplicationWindow {
                         title: "Preview"
                         PreviewTab {
                             id: previewWindow
+                            // @disable-check M16
                             objectName: "previewWindow"
                         }
                         property bool wasLoaded
@@ -357,6 +359,7 @@ ApplicationWindow {
                         title: "Track"
                         TrackerTab {
                             id: trackerWindow
+                            // @disable-check M16
                             objectName: "Tracker"
                         }
                         property bool wasLoaded
@@ -453,3 +456,9 @@ ApplicationWindow {
         id: helpWindow
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:750;width:880}
+}
+##^##*/

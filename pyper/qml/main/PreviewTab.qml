@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 
+
 import "../popup_messages"
 import "../basic_types"
 import "../video"
@@ -68,6 +69,7 @@ Rectangle {
 
     Video {
         id: previewImage
+        // @disable-check M16
         objectName: "preview"
 
         width: 640
@@ -98,6 +100,7 @@ Rectangle {
 
     SplashScreen{
         id: splash
+        // @disable-check M16
         objectName: "splash"
         width: 400
         height: 200
@@ -108,6 +111,7 @@ Rectangle {
     }
     ErrorScreen{
         id: videoErrorScreen
+        // @disable-check M16
         objectName: "viewerVideoLoadingErrorScreen"
 
         anchors.centerIn: previewImage
@@ -139,6 +143,7 @@ Rectangle {
 
         VideoControls {
             id: vidControl
+            // @disable-check M16
             objectName: "previewVidControls"
 
             anchors.left: parent.left
@@ -155,6 +160,7 @@ Rectangle {
         }
         Frame {
             id: frameControls
+            // @disable-check M16
             objectName: "viewerFrameControls"
             height: col.height + 20
 
@@ -210,3 +216,10 @@ Rectangle {
         }
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:750;width:880}
+}
+##^##*/
+
