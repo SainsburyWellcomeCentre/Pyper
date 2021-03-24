@@ -80,6 +80,7 @@ Frame {
 
                 text: roiLayout.name
                 verticalAlignment: Text.AlignVCenter
+                color: Theme.text
                 // help: a callback function will be triggered when the object enters this ROI
             }
             CheckBox {
@@ -315,6 +316,14 @@ Frame {
                 id: cbItems
             }
             width: 170
+            height: 25
+            style: ComboBoxStyle {
+                background: Frame {
+                    width: parent.width
+                    height: parent.height
+                }
+                textColor: Theme.text
+            }
             onCurrentIndexChanged: {
                 var currentItem = cbItems.get(currentIndex);
                 if (currentItem != undefined) {

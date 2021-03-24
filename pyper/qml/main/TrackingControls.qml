@@ -1,7 +1,10 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.3
+
 
 import "../basic_types"
+import "../style"
 
 Column {
     id: root
@@ -277,6 +280,18 @@ Column {
     ComboBox {
         id: cmbBox
         model: ["Raw", "Diff"]
+        height: 25
+        width: boolSetterContainer.width
+        style: ComboBoxStyle {
+            background: Frame {
+                width: parent.width
+                height: parent.height
+                color: Theme.spinBoxBackground
+            }
+            textColor: Theme.darkBackground
+            selectedTextColor: 'steelblue'
+            selectionColor: Theme.darkBackground
+        }
         onCurrentTextChanged:{
             root.py_tracking_iface.set_frame_type(currentText)
         }
