@@ -26,7 +26,7 @@ from PyQt5.QtGui import QIcon
 from pyper.video.transcoder import TranscoderIface
 from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface
 from pyper.gui.code_editor import EditorIface
-from pyper.gui.parameters import ParamsIface
+from pyper.gui.gui_parameters import ParamsIface
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider
 from pyper.config import conf
 

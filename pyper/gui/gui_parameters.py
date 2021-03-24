@@ -200,7 +200,7 @@ class ParamsIface(QObject):
     @pyqtSlot(QVariant)
     def set_n_bg_frames(self, n):
         self.n_bg_frames = int(n)
-        config['tracker']['sd_mode']['n_bg_frames']= int(n)
+        config['tracker']['sd_mode']['n_bg_frames'] = int(n)
 
     @pyqtSlot(result=QVariant)
     def get_n_bg_frames(self):
