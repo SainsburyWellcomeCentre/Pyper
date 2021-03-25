@@ -43,7 +43,7 @@ class PupilGuiTracker(GuiTracker):
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)
-            silhouette = diff.threshold(self.params.threshold)
+            silhouette = diff.threshold(self.params.detection_threshold)
         if self.params.clear_borders:
             silhouette.clearBorders()
         return silhouette, diff

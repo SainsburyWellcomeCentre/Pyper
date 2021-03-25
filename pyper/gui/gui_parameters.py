@@ -2,17 +2,15 @@ import os
 import sys
 from skimage.io import imread
 
-from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant
+from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant, pyqtSignal, pyqtProperty
 from PyQt5.QtWidgets import QFileDialog
 
+from pyper.config.parameters import Parameters
 from pyper.gui.tabs_interfaces import TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
-from pyper.config import conf
 from pyper.utilities.utils import un_file
 
-config = conf.config
 
-
-class ParamsIface(QObject):
+class GuiParameters(QObject, Parameters):
     """
     The QObject derived class that stores most of the parameters from the graphical interface
     for the other QT interfaces
@@ -23,6 +21,7 @@ class ParamsIface(QObject):
         :param context:
         :param parent: the parent window
         """
+        Parameters.__init__(self)
         QObject.__init__(self, parent)
         self.app = app  # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
         self.win = parent
@@ -34,34 +33,14 @@ class ParamsIface(QObject):
         self.calib = None
         self.tracker_class = TRACKER_CLASSES["GuiTracker"]
 
+        self._curve_update_period = self.config['gui']['update_period']
+
         self.ref = None
 
-        self._set_defaults()
+        self.min_threshold_rgb = [(0, 0, 0)] * 2  # FIXME: initialise better and append on new structure added
+        self.max_threshold_rgb = [(255, 255, 255)] * 2
 
-    def _set_defaults(self):
-        """
-        Reset the parameters to default.
-        To customise the defaults, users should do this in the config file.
-        """
-        self.bg_frame_idx = config['tracker']['frames']['ref']
-        self.n_bg_frames = config['tracker']['sd_mode']['n_background_frames']
-        self.start_frame_idx = self.bg_frame_idx + self.n_bg_frames
-        self.end_frame_idx = config['tracker']['frames']['end']
-
-        self.detection_threshold = config['tracker']['detection']['threshold']
-        self.objects_min_area = config['tracker']['detection']['min_area']
-        self.objects_max_area = config['tracker']['detection']['max_area']
-        self.teleportation_threshold = config['tracker']['detection']['teleportation_threshold']
-        self.n_erosions = config['tracker']['detection']['n_erosions']
-
-        self.n_sds = config['tracker']['sd_mode']['n_sds']
-
-        self.clear_borders = config['tracker']['checkboxes']['clear_borders']
-        self.normalise = config['tracker']['checkboxes']['normalise']
-        self.extract_arena = config['tracker']['checkboxes']['extract_arena']
-        self.infer_location = config['tracker']['checkboxes']['infer_location']
-
-        self.timer_period = config['global']['timer_period']
+        self.thresholding_mode = "simple"
 
     def __del__(self):
         """
@@ -69,25 +48,29 @@ class ParamsIface(QObject):
         """
         sys.stdout = sys.__stdout__
 
-    @pyqtSlot(int)
-    def set_timer_period(self, timer_period):
-        self.timer_period = timer_period
+    curve_update_period_signal = pyqtSignal()
+    @pyqtProperty(int, notify=curve_update_period_signal)
+    def curve_update_period(self):
+        return self._curve_update_period
 
-    @pyqtSlot(result=int)
-    def get_timer_period(self):
-        return self.timer_period
-        
+    @curve_update_period.setter
+    def curve_update_period(self, period):
+        self._curve_update_period = period
+        self.config['gui']['update_period'] = period
+
+
     @pyqtSlot(str)
-    def set_ref_source(self, ref_path):
-        ref_path = un_file(ref_path)
-        self.ref = imread(ref_path)
+    def set_thresholding_type(self, thresholding_type):
+        print("Thresholding type to be set: " + thresholding_type)
+        if thresholding_type.lower() == 'hsv':
+            self.set_tracker_type()
 
     @pyqtSlot()
     def write_defaults(self):
         """
         Writes defaults to the config file
         """
-        config.write()
+        self.config.write()
 
     @pyqtSlot(str)
     def set_tracker_type(self, tracker_type):
@@ -103,132 +86,6 @@ class ParamsIface(QObject):
     @pyqtSlot()
     def restore_cursor(self):
         self.app.restoreOverrideCursor()
-
-    # BOOLEAN OPTIONS
-    @pyqtSlot(bool)
-    def set_clear_borders(self, status):
-        self.clear_borders = status
-        config['tracker']['checkboxes']['clear_borders'] = status
-
-    @pyqtSlot(result=bool)
-    def get_clear_borders(self):
-        return self.clear_borders
-
-    @pyqtSlot(bool)
-    def set_normalise(self, status):
-        self.normalise = status
-        config['tracker']['checkboxes']['normalise'] = status
-
-    @pyqtSlot(result=bool)
-    def get_normalise(self):
-        return self.normalise
-
-    @pyqtSlot(bool)
-    def set_extract_arena(self, status):
-        self.extract_arena = status
-        config['tracker']['checkboxes']['extract_arena'] = status
-
-    @pyqtSlot(result=bool)
-    def get_extract_arena(self):
-        return self.extract_arena
-
-    @pyqtSlot(bool)
-    def set_infer_location(self, status):
-        self.infer_location = status
-        config['tracker']['checkboxes']['infer_location'] = status
-
-    @pyqtSlot(result=bool)
-    def get_infer_location(self):
-        return self.infer_location
-
-    # DETECTION OPTIONS
-    @pyqtSlot(result=QVariant)
-    def get_detection_threshold(self):
-        return self.detection_threshold
-
-    @pyqtSlot(QVariant)
-    def set_detection_threshold(self, threshold):
-        self.detection_threshold = int(threshold)
-        config['tracker']['detection']['threshold'] = int(threshold)
-
-    @pyqtSlot(result=QVariant)
-    def get_min_area(self):
-        return self.objects_min_area
-
-    @pyqtSlot(QVariant)
-    def set_min_area(self, area):
-        self.objects_min_area = int(area)
-        config['tracker']['detection']['min_area'] = int(area)
-
-    @pyqtSlot(result=QVariant)
-    def get_max_area(self):
-        return self.objects_max_area
-
-    @pyqtSlot(QVariant)
-    def set_max_area(self, area):
-        self.objects_max_area = int(area)
-        config['tracker']['detection']['max_area'] = int(area)
-
-    @pyqtSlot(result=QVariant)
-    def get_max_movement(self):
-        return self.teleportation_threshold
-
-    @pyqtSlot(QVariant)
-    def set_max_movement(self, movement):
-        self.teleportation_threshold = int(movement)
-        config['tracker']['detection']['teleportation_threshold'] = int(movement)
-
-    @pyqtSlot(result=QVariant)
-    def get_n_sds(self):
-        return self.n_sds
-
-    @pyqtSlot(QVariant)
-    def set_n_sds(self, n_sds):
-        self.n_sds = int(n_sds)
-        config['tracker']['sd_mode']['n_sds'] = int(n_sds)
-
-    # FRAME OPTIONS
-    @pyqtSlot(QVariant)
-    def set_bg_frame_idx(self, idx):
-        self.bg_frame_idx = int(idx)
-        config['tracker']['frames']['ref'] = int(idx)
-
-    @pyqtSlot(result=QVariant)
-    def get_bg_frame_idx(self):
-        return self.bg_frame_idx
-
-    @pyqtSlot(QVariant)
-    def set_n_bg_frames(self, n):
-        self.n_bg_frames = int(n)
-        config['tracker']['sd_mode']['n_bg_frames'] = int(n)
-
-    @pyqtSlot(result=QVariant)
-    def get_n_bg_frames(self):
-        return self.n_bg_frames
-
-    @pyqtSlot(QVariant)
-    def set_start_frame_idx(self, idx):
-        self.start_frame_idx = int(idx)
-        config['tracker']['frames']['start'] = int(idx)
-
-    @pyqtSlot(result=QVariant)
-    def get_start_frame_idx(self):
-        return self.start_frame_idx
-
-    @pyqtSlot(QVariant)
-    def set_end_frame_idx(self, idx):
-        idx = int(idx)
-        if idx > 0:
-            if idx <= self.start_frame_idx:
-                idx = self.start_frame_idx + self.n_bg_frames
-        else:
-            idx = -1
-        self.end_frame_idx = idx
-        config['tracker']['frames']['end'] = idx
-
-    @pyqtSlot(result=QVariant)
-    def get_end_frame_idx(self):
-        return self.end_frame_idx
 
     @pyqtSlot(result=QVariant)
     def open_video(self):
@@ -267,6 +124,12 @@ class ParamsIface(QObject):
             self.dest_path = dest_path
             return dest_path
 
+    @pyqtSlot(str)
+    def set_ref_source(self, ref_path):
+        ref_path = un_file(ref_path)
+        self.ref = imread(ref_path)
+
+
     @pyqtSlot(result=QVariant)
     def is_path_selected(self):
         return hasattr(self, "src_path") and self.src_path
@@ -284,11 +147,10 @@ class ParamsIface(QObject):
     def get_dest_path(self):
         return self.dest_path if hasattr(self, "dest_path") else ""
 
-    @pyqtSlot(result=int)
-    def get_n_erosions(self):
-        return self.n_erosions
+    @pyqtSlot(int, int, int, int)
+    def set_min_threshold(self, struct_idx, r, g, b):
+        self.min_threshold_rgb[struct_idx] = (r, g, b)
 
-    @pyqtSlot(int)
-    def set_n_erosions(self, n_erosions):
-        if n_erosions >= 0:
-            self.n_erosions = n_erosions
+    @pyqtSlot(int, int, int, int)
+    def set_max_threshold(self, struct_idx, r, g, b):
+        self.max_threshold_rgb[struct_idx] = (r, g, b)

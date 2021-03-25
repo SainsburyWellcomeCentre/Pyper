@@ -122,8 +122,8 @@ class TranscoderIface(TrackerIface):
         if self.codec is None:
             self.codec = self._infer_codec()
         try:
-            self.tracker = GuiTranscoder(self, src_file_path=self.source_path, dest_file_path=self.dest_file_path,
-                                         transcode_start=self.start_frame_idx, transcode_end=self.end_frame_idx,
+            self.tracker = GuiTranscoder(self, self.params, src_file_path=self.source_path,
+                                         dest_file_path=self.dest_file_path,
                                          camera_calibration=self.params.calib, codec=self.codec,
                                          roi=self.rois['restriction'], scale_params=self.scale_params)
         except VideoStreamIOException as err:
@@ -148,9 +148,9 @@ class TranscoderIface(TrackerIface):
     @pyqtSlot()
     def set_tracker_params(self):
         if self.tracker is not None:
-            self.tracker.params.track_from = self.start_frame_idx
+            self.params.start_frame_idx = self.start_frame_idx
             if self.end_frame_idx == -1:
-                self.tracker.params.track_to = self.tracker._stream.n_frames - 1
+                self.params.end_frame_idx = self.tracker._stream.n_frames - 1
 
             if self.rois['restriction'] is not None:
                 self.tracker.set_tracking_region_roi(self.rois['restriction'])
@@ -167,11 +167,9 @@ class GuiTranscoder(GuiTracker):
     It will convert the video to mp4v (destFilePath should match this extension) but this can be changed easily.
     You can also crop and scale the video at the same time.
     """
-    def __init__(self, ui_iface, src_file_path, dest_file_path,
-                 camera_calibration, roi, scale_params, codec,
-                 transcode_start=0, transcode_end=None):
-        GuiTracker.__init__(self, ui_iface, src_file_path=src_file_path, dest_file_path=dest_file_path,
-                            track_from=transcode_start, track_to=transcode_end,
+    def __init__(self, ui_iface, params, src_file_path, dest_file_path,
+                 camera_calibration, roi, scale_params, codec):
+        GuiTracker.__init__(self, ui_iface, params, src_file_path=src_file_path, dest_file_path=dest_file_path,
                             camera_calibration=camera_calibration)
         self.codec = [str(c) for c in codec]
         if roi is not None:
@@ -249,9 +247,9 @@ class GuiTranscoder(GuiTracker):
     def transcode_frame(self):
         frame = self._stream.read()
         original_frame = frame.copy()
-        if self._stream.current_frame_idx >= self.params.track_to:
+        if self._stream.current_frame_idx >= self.params.end_frame_idx:
             raise EOFError("End of tracking reached")
-        if self.params.track_from <= self._stream.current_frame_idx:
+        if self.params.start_frame_idx <= self._stream.current_frame_idx:
             frame = self._crop_frame(frame)
             frame = self._scale_frame(frame)
             self.video_writer.write(frame.astype(np.uint8))

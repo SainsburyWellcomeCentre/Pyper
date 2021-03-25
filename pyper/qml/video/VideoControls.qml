@@ -119,15 +119,15 @@ Item{
 
                 label: "Spd"
                 tooltip: "Playback speed (period) in ms (1/FPS)"
-                value: py_iface.get_timer_period()
+                value: py_iface.timer_period
                 minimumValue: 8  // > 120 FPS
                 // boxWidth: 45
                 onEdited: {
-                    py_iface.set_timer_period(value);
+                    py_iface.timer_period = value;
                     reload();
                 }
                 function reload(){
-                    value = py_iface.get_timer_period();
+                    value = py_iface.timer_period;
                     //root.updateTracker();
                 }
             }

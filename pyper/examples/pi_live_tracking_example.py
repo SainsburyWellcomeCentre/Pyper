@@ -4,6 +4,8 @@ from multiprocessing import Process
 from pyper.tracking.tracking import Tracker
 from pyper.contours.roi import Circle
 
+from pyper.config import conf
+
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
@@ -38,13 +40,8 @@ def rpi_call_back():
         p.daemon = True
         p.start()
 
-tracker = Tracker(dest_file_path='/home/pi/testTrack.mpg',
-                  threshold=threshold, teleportation_threshold=1000,
-                  plot=True, fast=False,
-                  min_area=50,
-                  bg_start=5, track_from=10,
-                  track_to=10000,
-                  callback=rpi_call_back)
+tracker = Tracker(params=conf.config, dest_file_path='/home/pi/testTrack.mpg',
+                  plot=True, callback=rpi_call_back)
 positions = tracker.track(roi=roi, record=True)
 
 GPIO.cleanup(ttlPin)

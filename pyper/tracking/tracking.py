@@ -35,69 +35,25 @@ IS_PI = (platform.machine()).startswith('arm')  # We assume all ARM is a raspber
 OPENCV_VERSION = int(cv2.__version__[0])
 
 
-class TrackingParams(object):
-    def __init__(self, threshold, max_area, teleportation_threshold, track_to, min_area=0, track_from=1,
-                 clear_borders=False, normalise=False, fast=False, extract_arena=False, infer_location=False,
-                 n_erosions=0):
-        self.threshold = threshold
-        self.max_area = max_area
-        self.teleportation_threshold = teleportation_threshold
-        self.track_to = track_to
-
-        self.min_area = min_area
-        self.track_from = track_from
-
-        self.clear_borders = clear_borders
-        self.normalise = normalise
-        self.fast = fast
-        self.extract_arena = extract_arena
-        self.infer_location = infer_location
-        self.n_erosions = n_erosions
-
-
 class Tracker(object):
     """
     A tracker object to track a specimen in a video stream
     """
-    def __init__(self, src_file_path=None, dest_file_path=None,
-                 threshold=20, min_area=100, max_area=5000,
-                 teleportation_threshold=10, n_erosions=0,
-                 bg_start=0, track_from=1, track_to=None,
-                 n_background_frames=1, n_sds=5.0,
-                 clear_borders=False, normalise=False,
-                 plot=False, fast=False, extract_arena=False,
-                 infer_location=False,
-                 camera_calibration=None, callback=None, requested_fps=None):
+    def __init__(self, params, src_file_path=None, dest_file_path=None,
+                 plot=False, camera_calibration=None,
+                 callback=None, requested_fps=None):
         """
+        :param GuiParameters params: The various configuration parameters to run the segmentation
         :param str src_file_path: The source file path to read from (camera if None)
         :param str dest_file_path: The destination file path to save the video
-        :param int threshold: The numeric threshold for the masks (0<t<256)
-        :param int min_area: The minimum area in pixels to be considered a valid specimen
-        :param teleportation_threshold: The maximum number of pixels the specimen can \
-        move in either dimension (x,y) between 2 frames.
-        :param int bg_start: The frame to use as first background frame
-        :param int n_background_frames: The number of frames to use for the background\
-        A number >1 means average
-        :param int n_sds: The number of standard deviations the signal has to be above\
-        to be considered above threshold. This option is not used if \
-        nBackgroundFrames < 2
-        :param int track_from: The frame to start tracking from
-        :param int track_to: The frame to stop tracking at
-        :param bool clear_borders: Whether to clear objects that touch the outer borders\
-        of the image.
-        :param bool normalise: TODO
-        :param bool plot: Whether to display the data during tracking:
-        :param bool fast: Whether to skip some processing (e.g. frame denoising) for \
-        the sake of acquisition speed.
-        :param bool extract_arena: Whether to detect the arena (it should be brighter than\
-        the surrounding) from the background as an ROI.
-        :param callback: The function to be executed upon finding the specimen in the ROI \
+        :param bool plot: Whether to display the data during tracking
+        :param camera_calibration:
+        :param function callback: The function to be executed upon finding the specimen in the ROI \
         during tracking.
-        :type callback: `function`
         """
-
+        self.params = params
         if callback is not None: self.handle_object_in_tracking_roi = callback
-        track_range_params = (bg_start, n_background_frames)
+        track_range_params = (self.params.bg_frame_idx, self.params.n_background_frames)
         self.raw_out_stream = None
         if src_file_path is None:  # i.e. we record
             if IS_PI:
@@ -114,14 +70,10 @@ class Tracker(object):
         else:
             self._stream = RecordedVideoStream(src_file_path, *track_range_params)
 
-        self.params = TrackingParams(threshold, max_area, teleportation_threshold, track_to, min_area=min_area,
-                                     track_from=track_from, clear_borders=clear_borders, normalise=normalise,
-                                     fast=fast, extract_arena=extract_arena, infer_location=infer_location,
-                                     n_erosions=n_erosions)
         # TODO: add n_erosions
         self.plot = plot
 
-        self.bg = Background(n_sds)
+        self.bg = Background(self.params.n_sds)
         
         self.camera_calibration = camera_calibration
 
@@ -157,7 +109,7 @@ class Tracker(object):
         :rtype: Roi
         """
         if self.params.extract_arena:
-            mask = self.bg.to_mask(self.params.threshold)
+            mask = self.bg.to_mask(self.params.detection_threshold)
             cnt = self._get_biggest_contour(mask)
             arena = Circle(*cv2.minEnclosingCircle(cnt))  # TODO: make more generic
             self.arena = arena
@@ -185,7 +137,7 @@ class Tracker(object):
         return fid < self._stream.bg_start_frame
 
     def is_after_frame(self, fid):
-        return self.params.track_to and (fid > self.params.track_to)
+        return self.params.end_frame_idx and (fid > self.params.end_frame_idx)
         
     def track(self, roi=None, record=False, check_fps=False, reset=True):
         """The main function. Loops until the end of the recording (ctrl+c if acquiring).
@@ -248,10 +200,10 @@ class Tracker(object):
                 self.bg.build(frame)
                 self.arena = self._extract_arena()
                 if record: self._stream.save(frame)
-            elif self._stream.bg_end_frame < fid < self.params.track_from:
+            elif self._stream.bg_end_frame < fid < self.params.start_frame_idx:
                 if record: self._stream.save(frame)
             else:  # Tracked frame
-                if fid == self.params.track_from: self.bg.finalise()
+                if fid == self.params.start_frame_idx: self.bg.finalise()
                 contour_found, sil = self._track_frame(frame, 'b', requested_output=requested_output)
                 self.after_frame_track()
                 self.silhouette = self.update_img(self.silhouette, sil)
@@ -452,7 +404,7 @@ class Tracker(object):
         if not self.results.has_non_default_position():  # No tracking yet
             return
         last_vector = self.results.get_last_movement_vector()
-        if (last_vector > self.params.teleportation_threshold).any():
+        if (last_vector > self.params.max_movement).any():
             # if self.params.infer_location:
             #     self.positions[-1] = self.positions[-2]
             # else:
@@ -514,7 +466,7 @@ class Tracker(object):
             silhouette = silhouette.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)  # OPTIMISE
-            silhouette = diff.threshold(self.params.threshold)
+            silhouette = diff.threshold(self.params.detection_threshold)
         if self.params.n_erosions:
             silhouette = silhouette.erode(self.params.n_erosions)
         if self.params.clear_borders:

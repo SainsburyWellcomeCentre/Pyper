@@ -64,12 +64,12 @@ class BaseInterface(QObject):
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         """
 
-        :param app:
-        :param context:
-        :param parent:
-        :param params:
-        :param display_name:
-        :param provider_name:
+        :param QApplication app:
+        :param QQmlContext context:
+        :param QObject parent:
+        :param pyper.gui.gui_parameters.GuiParameters params:
+        :param str display_name:
+        :param str provider_name:
         :param int timer_speed: interval in ms for the timer
         """
         QObject.__init__(self, parent)
@@ -129,6 +129,10 @@ class BaseInterface(QObject):
         pyQT slot to return the number of frames of the current display
         """
         return self.n_frames
+
+    def clip_end_frame_idx(self):
+        if self.params.end_frame_idx in (0, -1):
+            self.params.end_frame_idx = self.n_frames
         
     def _update_img_provider(self):
         """
@@ -416,11 +420,11 @@ class TrackerIface(BaseInterface):
         Load the video and create the GuiTracker object (or subclass)
         Also registers the analysis image providers (for the analysis tab) with QT
         """
+        self.params.fast = True
         try:
-            self.tracker = self.params.tracker_class(self, src_file_path=self.params.src_path, dest_file_path=None,
-                                                     n_background_frames=1, plot=True,
-                                                     fast=True, camera_calibration=self.params.calib,
-                                                     callback=None)
+            self.params.n_background_frames = 1
+            self.tracker = self.params.tracker_class(self, self.params, src_file_path=self.params.src_path, dest_file_path=None,
+                                                     plot=True, camera_calibration=self.params.calib, callback=None)
         except VideoStreamIOException:
             self.tracker = None
             error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
@@ -431,9 +435,8 @@ class TrackerIface(BaseInterface):
 
         self.n_frames = self.tracker._stream.n_frames - 1
         self.current_frame_idx = self.tracker._stream.current_frame_idx
-        
-        if self.params.end_frame_idx == -1:
-            self.params.end_frame_idx = self.n_frames
+
+        self.clip_end_frame_idx()
         
         self._set_display()
         self._set_display_max()
@@ -488,23 +491,9 @@ class TrackerIface(BaseInterface):
     def set_tracker_params(self):
         if self.tracker is not None:
             self.tracker._stream.bg_start_frame = self.params.bg_frame_idx
-            n_background_frames = self.params.n_bg_frames
-            self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + n_background_frames - 1
-            self.tracker.params.track_from = self.params.start_frame_idx
-            self.tracker.params.track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
+            self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + self.params.n_bg_frames - 1
+            self.clip_end_frame_idx()
             self.tracker.bg.source = self.params.ref  # TODO: add check for validity of frame size/type in tracker
-
-            self.tracker.params.threshold = self.params.detection_threshold
-            self.tracker.params.min_area = self.params.objects_min_area
-            self.tracker.params.max_area = self.params.objects_max_area
-            self.tracker.params.teleportation_threshold = self.params.teleportation_threshold
-            self.tracker.params.n_erosions = self.params.n_erosions
-
-            self.tracker.params.clear_borders = self.params.clear_borders
-            self.tracker.params.normalise = self.params.normalise
-            self.tracker.n_sds = self.params.n_sds
-            self.tracker.params.extract_arena = self.params.extract_arena
-            self.tracker.params.infer_location = self.params.infer_location
 
     def _set_tracker_roi(self, roi_type, tracker_method):
         """
@@ -620,7 +609,7 @@ class TrackerIface(BaseInterface):
             raise NotImplementedError("Unknown ROI shape: {}".format(source_type))
         return roi
         
-    @pyqtSlot(QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant, QVariant)
+    @pyqtSlot(str, str, float, float, float, float, float, float)
     def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
         """
         Sets the ROI (in which to check for the specimen) from the one drawn in QT
@@ -637,8 +626,6 @@ class TrackerIface(BaseInterface):
         :param float roi_width: The width of the ROI
         :param float roi_height: The height of the ROI
         """
-
-        source_type = str(source_type)
         source_type = qurl_to_str(source_type)
         if self.tracker is not None:
             roi = self._get_roi(source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height)
@@ -849,36 +836,16 @@ class RecorderIface(TrackerIface):
             return False
 
         self._reset_measures()
-        
-        bg_start = self.params.bg_frame_idx
-        n_background_frames = self.params.n_bg_frames
-        track_from = self.params.start_frame_idx
-        track_to = self.params.end_frame_idx if (self.params.end_frame_idx > 0) else None
-        # FIXME: add bg.source
-        
-        threshold = self.params.detection_threshold
-        min_area = self.params.objects_min_area
-        max_area = self.params.objects_max_area
-        teleportation_threshold = self.params.teleportation_threshold
-        n_erosions = self.param.n_erosions
-        
-        n_sds = self.params.n_sds
-        clear_borders = self.params.clear_borders
-        normalise = self.params.normalise
-        extract_arena = self.params.extract_arena
+
+        self.clip_end_frame_idx()
+        self.params.fast = True
 
         requested_fps = round(1/(self.params.timer_period / 1000))  # convert period to seconds
         if __debug__:
             print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
 
-        self.tracker = self.params.tracker_class(self, src_file_path=None, dest_file_path=self.params.dest_path,
-                                                 threshold=threshold, min_area=min_area, max_area=max_area,
-                                                 teleportation_threshold=teleportation_threshold, n_erosions=n_erosions,
-                                                 bg_start=bg_start, track_from=track_from, track_to=track_to,
-                                                 n_background_frames=n_background_frames, n_sds=n_sds,
-                                                 clear_borders=clear_borders, normalise=normalise,
-                                                 plot=True, fast=True, extract_arena=extract_arena,
-                                                 camera_calibration=self.params.calib,
+        self.tracker = self.params.tracker_class(self, self.params, src_file_path=None, dest_file_path=self.params.dest_path,
+                                                 plot=True,  camera_calibration=self.params.calib,
                                                  callback=None, requested_fps=requested_fps)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
