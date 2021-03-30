@@ -22,10 +22,12 @@ class Background(object):
         self.n_sds = 2
         self.use_sd = False
 
-    def build(self, frame):
+    def build(self, frame, color=False):
         if __debug__:
             print("Building background")
-        bg = frame.denoise().blur().gray()
+        bg = frame.denoise().blur()
+        if not color:
+            bg = bg.gray()
         if self.source is None:
             if self.data is None:
                 self.data = bg
@@ -33,8 +35,10 @@ class Background(object):
                 self.data = Frame(np.dstack((self.data, bg)))
         else:
             self.data = Frame(self.source.astype(np.float32))
-            self.data = self.data.denoise().blur().gray()
-            if self.data.ndim == 3:
+            self.data = self.data.denoise().blur()
+            if not color:
+                self.data = self.data.gray()
+            if self.data.ndim == 3 and not color:
                 self.data = self.data.mean(2)
 
     def finalise(self):
