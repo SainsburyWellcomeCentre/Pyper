@@ -1,7 +1,8 @@
 import numpy as np
 import os
 import platform
-from scipy import misc
+
+from skimage.io import imread
 
 import cv2
 
@@ -61,7 +62,7 @@ class CameraCalibration(object):
         img_paths = []
         for fname in images_names:
             img_path = os.path.join(src_folder, fname)
-            imgs.append(misc.imread(img_path))
+            imgs.append(imread(img_path))
             img_paths.append(img_path)
         if len(imgs) == 0:
             raise IOError("No images found in folder {}. Please check you path".format(src_folder))
