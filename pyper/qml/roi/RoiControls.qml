@@ -172,7 +172,7 @@ Frame {
                         isDown = false;
                         sourceRoi.finalise();
                     } else {  // activate
-                        roiLayout.pythonObject.chg_cursor();
+                        roiLayout.pythonObject.chg_cursor("cross");
                         isDown = true;
                         roiLayout.pressed();
                     }

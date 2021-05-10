@@ -5,7 +5,7 @@ import sys
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
-from pyper.gui.tabs_interfaces import TRACKER_CLASSES
+from pyper.gui.tabs_interfaces import STRUCTURE_TRACKER_CLASSES
 
 try:
     from pygments import highlight
@@ -33,7 +33,7 @@ class EditorIface(QObject):
         self.src_path = None
 
         self.plugin_dir = os.path.abspath("config/plugins/")  # FIXME: improve (currently dependant on start folder)
-        self.plugins = TRACKER_CLASSES
+        self.plugins = STRUCTURE_TRACKER_CLASSES  # FIXME: rewrite plugins
         # self.scrape_plugins_dir()
 
     @pyqtSlot(result=str)

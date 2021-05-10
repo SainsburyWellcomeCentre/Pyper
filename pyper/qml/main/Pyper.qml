@@ -19,7 +19,7 @@ ApplicationWindow {
     id: main
     title: "Pyper"
     width: 880
-    height: 750
+    height: 820
 
     menuBar: MenuBar {
         id: pyperTopMenuBar

@@ -14,6 +14,18 @@ from skimage.segmentation import clear_border
 from scipy import misc
 
 
+def update_img(dest_img, src_img):  # FIXME: check if works if dest_img is None (e.g. update_img(self.frame, frame) if self.frame == None
+    if dest_img is None or dest_img.ndim != src_img.ndim:
+        dest_img = src_img.copy()
+    if src_img.ndim == 2:
+        dest_img[:] = src_img
+    elif src_img.ndim == 3:
+        dest_img[::] = src_img
+    else:
+        raise NotImplementedError("Images must be 1 or 2 color 2D images")
+    return dest_img
+
+
 class Frame(np.ndarray):
     """
     A subclass of numpy ndarray that will have
@@ -178,11 +190,20 @@ class Frame(np.ndarray):
         if text:
             text_origin = (5, 30)
             cv2.putText(self, text, text_origin, 2, 1, text_color)
-        if len(curve) > 1 or isinstance(curve, np.ndarray):  # REFACTOR: clean up
+        if len(curve) > 1 or isinstance(curve, np.ndarray) or isinstance(curve[0], np.ndarray):  # REFACTOR: clean up
             # OPTIMISE: probably slow function could be already in TrackingResults
             if not isinstance(curve, np.ndarray):
                 curve = np.int32([curve])
-            cv2.polylines(self, curve, 0, curve_color)
+            if curve.ndim > 2:
+                for i, _curve in enumerate(curve):
+                    # print(_curve, _curve.shape, _curve.dtype)
+                    # print(_curve)
+                    f = ((i + 1) / (curve.shape[2] + 1))
+                    _color = tuple(np.array(curve_color) * f)
+                    cv2.polylines(self, np.array([_curve]), 0, _color)
+                    # print("success")
+            else:
+                cv2.polylines(self, curve, 0, curve_color)
         
     def display(self, win_name='', text='', curve=(), delay=1, get_code=False):
         """
