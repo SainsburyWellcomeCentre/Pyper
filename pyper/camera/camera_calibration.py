@@ -93,14 +93,15 @@ class CameraCalibration(object):
                 print('Image {}, corners found'.format(img_path))
                 obj_points.append(objp)
                 if sub_pixel:
-                    corners = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), self.criteria)
+                    corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), self.criteria)
                 img_points.append(corners)
                 src_imgs.append(img.copy())
                 cv2.drawChessboardCorners(img, (self.chess_width, self.chess_height), corners, found)
                 detected_imgs.append(img)
             else:
                 print('Image {}, no corners found'.format(img_path))
-        calibration_results = cv2.calibrateCamera(obj_points, img_points, gray.shape[::-1])
+        # calibration_results = cv2.calibrateCamera(obj_points, img_points, gray.shape[::-1])  # Check opencv version
+        calibration_results = cv2.calibrateCamera(obj_points, img_points, gray.shape[::-1], None, None)
         flag = calibration_results[0]
         if not flag:
             raise CameraCalibrationException("Calibration failed")

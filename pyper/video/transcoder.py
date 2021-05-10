@@ -195,7 +195,7 @@ class GuiTranscoder(GuiTracker):
                                         output_size[::-1],  # invert size with openCV
                                         True)
 
-    def set_tracking_region_roi(self, roi):
+    def set_tracking_region_roi(self, roi):  # FIXME: signatures does not match parent
         self.tracking_region_roi = roi
         self._update_video_writer()
 
