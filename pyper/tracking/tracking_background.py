@@ -32,7 +32,7 @@ class Background(object):
             if self.data is None:
                 self.data = bg
             else:
-                self.data = Frame(np.dstack((self.data, bg)))
+                self.data = Frame(np.dstack((self.data, bg)))  # FIXME: won't work for colour
         else:
             self.data = Frame(self.source.astype(np.float32))
             self.data = self.data.denoise().blur()
@@ -57,7 +57,7 @@ class Background(object):
         """
         return self.std * self.n_sds
 
-    def diff(self, frame):
+    def diff(self, frame):  # WARNING: shape of frame and self.data must match
         return Frame(cv2.absdiff(frame, self.data))
 
     def to_mask(self, threshold):
