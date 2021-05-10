@@ -41,7 +41,7 @@ def rpi_call_back():
         p.start()
 
 tracker = Tracker(params=conf.config, dest_file_path='/home/pi/testTrack.mpg',
-                  plot=True, callback=rpi_call_back)
+                  plot=True, callback=rpi_call_back)  # FIXME: plot and callback are deprecated
 positions = tracker.track(roi=roi, record=True)
 
 GPIO.cleanup(ttlPin)

@@ -16,7 +16,7 @@ Creates the graphical interface
 import os
 import sys
 
-from OpenGL import GL # WARNING: Hack necessary to get qtQuick working
+from OpenGL import GL  # WARNING: Hack necessary to get qtQuick working
 
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtWidgets import QApplication
