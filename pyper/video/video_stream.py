@@ -19,10 +19,10 @@ import sys
 import numpy as np
 import cv2
 from skimage.transform import rescale
+from tqdm import tqdm
 
 from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrabError, VideoCapturePropertySetError
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
-from pyper.utilities.utils import spin_progress_bar
 from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_frame import Frame
 from pyper.config import conf
@@ -191,19 +191,20 @@ class RecordedVideoStream(VideoStream):
         else:
             n_frames = 0
 
-        print("Computing number of frames, this may take some time.")
-        while True:
-            try:
-                stream.read()
-                if not IS_GRAPHICAL:
-                    spin_progress_bar(n_frames)
-                n_frames += 1
-            except VideoCaptureGrabError as err:
-                break
-        if n_frames == 0:
-            raise VideoStreamIOException("Could not read video")
-        else:
-            return n_frames
+        msg = "Computing number of frames, this may take some time."
+        with tqdm(desc=msg, ascii=" |/-\\!✔", mininterval=0.5) as pbar:
+            while True:
+                try:
+                    stream.read()
+                    if not IS_GRAPHICAL:
+                        pbar.update(n_frames)
+                    n_frames += 1
+                except VideoCaptureGrabError as err:
+                    break
+            if n_frames == 0:
+                raise VideoStreamIOException("Could not read video")
+            else:
+                return n_frames
 
     def seek(self, frame_id):
         self.stream.seek(frame_id)  # FIXME: because of read
