@@ -22,6 +22,17 @@ from PyQt5.QtQuick import QQuickImageProvider
 from pyper.utilities.utils import write_structure_not_found_msg
 
 
+def np_to_qimg(img, size):
+    w, h = size
+    if img.shape[2] == 3:
+        qimg = QImage(img, h, w, img[0].nbytes, QImage.Format_RGB888)
+    elif img.shape[2] == 4:
+        qimg = QImage(img, h, w, img[0].nbytes, QImage.Format_RGBA8888)
+    else:
+        raise NotImplementedError('Unhandled image shape {}'.format(img.shape))
+    return qimg
+
+
 class TrackingImageProvider(QQuickImageProvider):
     """
     Abstract class to supply image sequences (videos) to the QT interface
@@ -113,7 +124,7 @@ class CvImageProvider(TrackingImageProvider):
                 img = self._stream.read()
                 # FIXME: check is hacky and implies dependency
                 if hasattr(self._stream, 'should_update_vid'):  # It is a tracker (not viewer)
-                    do_update = self._stream.should_update_vid()
+                    do_update = self._stream.should_update_vid
                 else:
                     do_update = True
 
@@ -137,9 +148,7 @@ class CvImageProvider(TrackingImageProvider):
                 size = img.shape[:2]
             else:
                 img = self.getRndmImg(size)
-        w, h = size
-        qimg = QImage(img, h, w, QImage.Format_RGB888)
-        return qimg
+        return np_to_qimg(img, size)
 
 
 class PyplotImageProvider(TrackingImageProvider):
@@ -181,6 +190,4 @@ class PyplotImageProvider(TrackingImageProvider):
             size = img.shape[:2]
         else:
             img = self.getRndmImg(size)
-        w, h = size
-        qimg = QImage(img, h, w, QImage.Format_RGB888)
-        return qimg
+        return np_to_qimg(img, size)
