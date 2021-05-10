@@ -15,3 +15,5 @@ resources/recording.avi
 *.qmlproject.user
 /build/
 *.egg-info
+*owncloud*
+*sync*.db*
