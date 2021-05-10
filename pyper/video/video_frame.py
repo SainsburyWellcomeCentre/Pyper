@@ -115,9 +115,9 @@ class Frame(np.ndarray):
         :return: the binary mask (8bits)
         :rtype: video_frame.Frame
         """
-#        code, silhouette = cv2.threshold(self, threshold, 255, cv2.THRESH_TOZERO)
-        code, silhouette = cv2.threshold(self, threshold, 255, cv2.THRESH_BINARY)
-        return Frame(silhouette)
+#        code, mask = cv2.threshold(self, threshold, 255, cv2.THRESH_TOZERO)
+        code, mask = cv2.threshold(self, threshold, 255, cv2.THRESH_BINARY)
+        return Frame(mask)
         
     def normalise(self, ref_avg=75):
         """

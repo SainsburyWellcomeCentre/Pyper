@@ -18,15 +18,13 @@ class PupilGuiTracker(GuiTracker):
         treated_frame = treated_frame.blur(1)
         return treated_frame
 
-    def _get_silhouette(self, frame):
+    def get_mask(self, frame):
         """
         Get the binary mask (8bits) of the pupil
         from the thresholded difference between frame and the background
 
-        :param frame: The current frame to analyse
-        :type frame: video_frame.Frame
-
-        :returns: silhouette (the binary mask)
+        :param video_frame.Frame frame: The current frame to analyse
+        :returns: mask (the binary mask)
         :rtype: video_frame.Frame
         """
         if PupilGuiTracker.WHITE_FRAME is None:
@@ -39,12 +37,12 @@ class PupilGuiTracker(GuiTracker):
 
         if self.bg.use_sd:
             threshold = self.bg.get_std_threshold()
-            silhouette = diff > threshold
-            silhouette = silhouette.astype(np.uint8) * 255
+            mask = diff > threshold
+            mask = mask.astype(np.uint8) * 255
         else:
             diff = diff.astype(np.uint8)
-            silhouette = diff.threshold(self.params.detection_threshold)
+            mask = diff.threshold(self.params.detection_threshold)
         if self.params.clear_borders:
-            silhouette.clearBorders()
-        return silhouette, diff
+            mask.clearBorders()
+        return mask, diff
 

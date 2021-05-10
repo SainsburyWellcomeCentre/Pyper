@@ -14,7 +14,7 @@ class TemplateTracker(GuiTracker):
         treated_frame = treated_frame.blur(1)
         return treated_frame
 
-    def _get_silhouette(self, frame):
+    def get_mask(self, frame):
         """
         Get the binary mask (8bits) of the specimen
         from the thresholded difference between frame and the background
@@ -22,11 +22,11 @@ class TemplateTracker(GuiTracker):
         :param frame: The current frame to analyse
         :type frame: video_frame.Frame
 
-        :returns: silhouette (the binary mask)
+        :returns: mask (the binary mask)
         :rtype: video_frame.Frame
         """
         diff = Frame(np.full(frame.shape, 255, dtype=np.uint8) - frame)  # Negative
 
         diff = diff.astype(np.uint8)
-        silhouette = diff.threshold(self.params.detection_threshold)
-        return silhouette, diff
+        mask = diff.threshold(self.params.detection_threshold)
+        return mask, diff
