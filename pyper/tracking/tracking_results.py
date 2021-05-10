@@ -10,7 +10,7 @@ class TrackingResults(object):
         self.xs = []
         self.ys = []
         self.measures = []
-        self.areas = []  # The area of the tracked object  # FIXME: make mutliple
+        self.areas = []  # The area of the tracked object
         self.distances_from_arena_xs = []
         self.distances_from_arena_ys = []
         self.in_tracking_roi = []
@@ -39,16 +39,16 @@ class TrackingResults(object):
 
     @property
     def positions(self):
-        return np.array((self.xs, self.ys), dtype=np.int32)
+        return np.array((self.xs, self.ys), dtype=np.int32).T
 
     def trim_positions(self):
         return self.positions[self.non_default_pos_idx()]
 
     def non_default_pos_idx(self):
-        return (self.positions == self.default_pos).all(axis=0)
+        return np.logical_not((self.positions == self.default_pos).all(axis=1))
 
-    def plot_positions(self):
-        # pos = self.trim_positions()  # FIXME: put trimming as option
+    def plotting_positions(self):
+        # pos = self.trim_positions()  # TODO: put trimming as option
         # return np.int32([pos])
         return self.trim_positions()
 
@@ -89,9 +89,15 @@ class TrackingResults(object):
     def get_frame_results(self):
         return self.get_last_position(), self.get_last_dist_from_arena_pair()
 
-    def get_last_position(self):
+    def get_last_position(self, skip_defaults=False):
         if len(self) > 0:
-            return self.xs[-1], self.ys[-1]  # TODO: check if needs parentheses
+            if not skip_defaults:
+                return self.xs[-1], self.ys[-1]  # TODO: check if needs parentheses
+            else:
+                for i in range(1, len(self)):
+                    pos = self.xs[-i], self.ys[-i]
+                    if pos != (-1, -1):
+                        return pos
         else:
             return None  # TODO: see if prefer exception
 
@@ -105,7 +111,7 @@ class TrackingResults(object):
     def overwrite_last_pos(self, position):
         self.xs[-1] = position[0]
         self.ys[-1] = position[1]
-        if position != self.default_pos:
+        if (position != self.default_pos).all():
             self.only_defaults = False  # REFACTOR: replace by
 
     def overwrite_last_measure(self, measure):
