@@ -506,6 +506,10 @@ class ImageListVideoStream(object):
         """
         self.imgs = imgs_list
         self.current_frame_idx = 0
+        self.seekable = True
+
+    def seek(self, frame_id):
+        self.current_frame_idx = frame_id
 
     def read(self):
         """
@@ -516,7 +520,7 @@ class ImageListVideoStream(object):
         
         :raises: EOFError when end of stream is reached
         """
-        if self.current_frame_idx > (len(self.imgs) - 2):
+        if self.current_frame_idx > (len(self.imgs) - 1):
             raise EOFError("End of recording reached")
         img = self.imgs[self.current_frame_idx]
         frame = Frame(img)
