@@ -19,6 +19,8 @@ from math import radians, cos, sin, sqrt
 import cv2
 from cv2 import norm
 
+from pyper.contours.object_contour import ObjectContour
+
 try:
     from cv2 import cv
     FILLED = cv.CV_FILLED
@@ -85,7 +87,11 @@ class Roi(object):
     It is used to obtain information about points relative to itself.
     """
     def __init__(self):
-        pass
+        self.points = None
+        self.centre = None
+        self.width = None
+        self.height = None
+        self.contour = None
     
     def contains_point(self, point):
         """
@@ -151,8 +157,8 @@ class Roi(object):
     @staticmethod
     def from_data(data):
         roi_class = data[0].strip()
-        centre_x, centre_y, width, height = [float(l.strip()) for l in data[1:5]]
-        points = [[(float(p.strip())) for p in l.split(',')] for l in data[5:]]
+        centre_x, centre_y, width, height = [float(ln.strip()) for ln in data[1:5]]
+        points = [[(float(p.strip())) for p in ln.split(',')] for ln in data[5:]]
         if roi_class == 'ellipse':
             return Ellipse(centre_x, centre_y, width, height)
         elif roi_class == 'rectangle':
@@ -189,6 +195,7 @@ class Circle(Roi):
         self.radius = radius
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
+        self.contour = ObjectContour(self.points, contour_type='circle')
         
     def circle_point(self, angle):
         """
@@ -225,6 +232,7 @@ class Rectangle(Roi):
         self.centre = (int(top_left_x + (width / 2)), int(top_left_y + (height / 2)))
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
+        self.contour = ObjectContour(self.points, contour_type='rectangle')
 
     def get_points(self):
         n_points = 4  # the 4 corners
@@ -254,6 +262,7 @@ class Ellipse(Roi):
         self.height = height
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
+        self.contour = ObjectContour(self.points, contour_type='ellipse')
 
     def __compute_ellipse(self, semi_major, semi_minor, xs):
         return np.array([(semi_major / semi_minor) * sqrt(semi_minor**2 - x**2) for x in xs])
@@ -286,6 +295,7 @@ class FreehandRoi(Roi):
         self.__bounding_rect = cv2.boundingRect(self.points)
         self.width, self.height = self.get_width_height()
         self.centre = self.get_centre()
+        self.contour = ObjectContour(self.points, contour_type='raw')
 
     def get_width_height(self):
         return self.__bounding_rect[2], self.__bounding_rect[3]
@@ -293,3 +303,10 @@ class FreehandRoi(Roi):
     def get_centre(self):
         return self.__bounding_rect[:2]
 
+
+roi_classes = {
+    'circle': Circle,
+    'ellipse': Ellipse,
+    'rectangle': Rectangle,
+    'freehand': FreehandRoi
+}

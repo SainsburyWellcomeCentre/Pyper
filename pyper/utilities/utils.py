@@ -27,6 +27,14 @@ def spin_progress_bar(val):
         sys.stdout.write('\b|')
     sys.stdout.flush()
 
+colors = {'w': (255, 255, 255),
+          'r': (0, 0, 255),
+          'g': (0, 255, 0),
+          'b': (255, 0, 0),
+          'y': (0, 255, 255),
+          'c': (255, 255, 0),
+          'm': (255, 0, 255)}
+
 
 class HtmlStripper(HTMLParser):
     """
@@ -126,4 +134,3 @@ def un_file(file_path):
             file_path = file_path[1:]
         file_path = os.path.normpath(file_path)
     return file_path
-
