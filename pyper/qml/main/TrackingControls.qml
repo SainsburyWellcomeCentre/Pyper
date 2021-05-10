@@ -22,6 +22,7 @@ Column {
     function updateTracker() {
         py_tracking_iface.set_tracker_params();
     }
+    signal advancedThresholdingSelected;
 
     Frame {
         id: frameSetterContainer
@@ -135,8 +136,25 @@ Column {
         CustomColumn {
             id: col3
 
+            BoolLabel {
+                id: advancedThresholding
+                label: "Advanced"
+                width: parent.width
+                tooltip: "Advanced (e.g. color) thresholding options."
+                checked: false;
+                onClicked: {
+                    root.advancedThresholdingSelected(checked);
+                    // root.updateTracker();
+                }
+                function reload() {
+                    checked = false;
+                    // root.updateTracker();
+                }
+            }
+
             IntInput {
                 width: parent.width
+                enabled: !advancedThresholding.checked
                 label: "Thrsh"
                 tooltip: "Detection threshold"
                 value: root.py_params_iface.detection_threshold
@@ -153,6 +171,7 @@ Column {
             }
             IntInput {
                 width: parent.width
+                enabled: !advancedThresholding.checked
                 label: "Min"
                 tooltip: "Minimum object area"
                 value: root.py_params_iface.min_area
@@ -168,6 +187,7 @@ Column {
             }
             IntInput {
                 width: parent.width
+                enabled: !advancedThresholding.checked
                 label: "Max"
                 tooltip: "Maximum object area"
                 value: root.py_params_iface.max_area
@@ -183,6 +203,7 @@ Column {
             }
             IntInput {
                 width: parent.width
+//                enabled: !advancedThresholding.checked
                 label: "Mvmt"
                 tooltip: "Maximum displacement (between frames) threshold"
                 value: root.py_params_iface.max_movement
@@ -198,7 +219,8 @@ Column {
             }
             IntInput {
                 width: parent.width
-                label: "N erosions"
+//                enabled: !advancedThresholding.checked
+                label: "Erosions"
                 tooltip: "Number of erosions to perform on the mask"
                 value: root.py_params_iface.n_erosions
                 minimumValue: 0

@@ -223,8 +223,9 @@ class RecordedVideoStream(VideoStream):
         if self.current_frame_idx > self.n_frames:
             raise EOFError("End of recording reached")
         frame = self.stream.read()
-        return Frame(frame.astype(np.float32))  # TODO: see if should change exception to VideoStreamFrameException
-        
+        # return Frame(frame.astype(np.float32)) # FIXME: see why was float32 # TODO: see if should change exception to VideoStreamFrameException
+        return Frame(frame.astype(np.uint8))  # TODO: see if should change exception to VideoStreamFrameException
+
     def time_str_to_frame_idx(self, time_str):
         """
         timeStr Time string in format mm:ss.

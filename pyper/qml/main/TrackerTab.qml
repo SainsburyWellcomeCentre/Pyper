@@ -32,7 +32,6 @@ Rectangle {
     }
     ErrorScreen{
         id: videoErrorScreen
-        // @disable-check M16
         objectName: "videoLoadingErrorScreen"
 
         anchors.centerIn: trackerDisplay
@@ -71,7 +70,6 @@ Rectangle {
     }
     Video {
         id: trackerDisplay
-        // @disable-check M16
         objectName: "trackerDisplay"
 
         width: 640
@@ -87,6 +85,20 @@ Rectangle {
 
         onSizeChanged: {
             py_tracker.prevent_video_update();  // prevents loading next frame on a simple resize
+        }
+
+        MouseArea {
+            id: colourPicking
+            objectName: "trackerColourPicking"
+            anchors.fill: parent
+            enabled: false
+            onClicked: {
+                var rgb_colour = py_tracker.get_pixel_colour(width, height, mouseX, mouseY);
+                for (var i=0; i < 3; i++) {
+                    py_iface.set_current_threshold(i, parseInt(rgb_colour[i]));
+                }
+                py_iface.set_picking_colour('', false, '');
+            }
         }
 
         RoiFactory {
@@ -141,7 +153,6 @@ Rectangle {
     }
     Graph {
         id: graph
-        // @disable-check M16
         objectName: "dataGraph"
 
         width: trackerDisplay.progressBarWidth
@@ -241,6 +252,9 @@ Rectangle {
             py_tracking_iface: py_tracker
 
             visualisationOptions: ["Raw", "Diff", "Mask"]
+            onAdvancedThresholdingSelected: {
+                advancedThresholdingManager.visible=true;
+            }
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -284,8 +298,13 @@ Rectangle {
 
         roisControlsModelsList: [
             RoiControlsModel { sourceRoi: callbackRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
-            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},
-            RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}
+            RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'},  // FIXME: use colors from theme
+            RoiControlsModel { sourceRoi: measurementRoi; name: "Measurement ROI"; drawingType: "rectangle"; drawingColor: 'orange'}  // FIXME: use colors from theme
         ]
+    }
+    AdvancedThresholdingManager {
+        id: advancedThresholdingManager
+        pythonObject: py_iface
+        visible: false
     }
 }

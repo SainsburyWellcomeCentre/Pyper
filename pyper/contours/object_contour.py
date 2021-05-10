@@ -148,3 +148,51 @@ class ObjectContour(object):
         with open(path, 'a') as out_file:
             out_file.write('{}\t'.format(frame_idx))
             out_file.write('{}\t{}\t'.format(*self.centre))
+
+
+class MultiContour(object):
+    def __init__(self, contours=None):
+        if contours is None:
+            contours = []
+        self.contours = self.__make_object_contours(contours)
+
+    def __make_object_contours(self, contours):
+        _cnts = []
+        for cnt in contours:
+            if not isinstance(cnt, ObjectContour):
+                _cnts.append(ObjectContour(cnt))
+            else:
+                _cnts.append(cnt)
+        return _cnts
+
+    def __bool__(self):
+        return len(self) != 0
+
+    __nonzero__ = __bool__  # For python 2
+
+    def __getitem__(self, item):
+        return self.contours[item]
+
+    def __len__(self):
+        return len(self.contours)
+
+    def append(self, cnt):
+        if not isinstance(cnt, ObjectContour):
+            cnt = ObjectContour(cnt)
+        self.contours.append(cnt)
+
+    @property
+    def centres(self):
+        return [cnt.centre for cnt in self.contours]
+
+    @property
+    def areas(self):
+        return [cnt.area for cnt in self.contours]
+
+    def set_params(self, frame, contour_type=None, color=None, line_thickness=None):
+        for cnt in self.contours:
+            cnt.set_params(frame, contour_type, color, line_thickness)
+
+    def draw(self):
+        for cnt in self.contours:
+            cnt.draw()  # OPTIMISE: see if can do in batch

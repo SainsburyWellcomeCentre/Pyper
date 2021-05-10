@@ -20,24 +20,22 @@ import numpy as np
 from scipy.io import loadmat
 from skimage.io import imsave
 
+from pyper.gui.gui_tracker import GuiTracker
+
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
 
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
-from pyper.utilities.utils import qurl_to_str
-from pyper.utilities.utils import un_file
-from pyper.gui.gui_tracker import GuiTracker
-from pyper.tracking.tracker_plugins import PupilGuiTracker
-from pyper.video.video_stream import QuickRecordedVideoStream
-from pyper.video.video_stream import RecordedVideoStream
-from pyper.video.video_stream import ImageListVideoStream
+from pyper.utilities.utils import qurl_to_str, un_file
+from pyper.video.video_stream import RecordedVideoStream, QuickRecordedVideoStream, ImageListVideoStream
+from pyper.tracking.structure_tracker import ColorStructureTracker, StructureTrackerGui, HsvStructureTracker
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
-from pyper.analysis import video_analysis
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 from pyper.video.cv_wrappers import helpers as cv_helpers
+from pyper.analysis import video_analysis
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
@@ -46,10 +44,13 @@ config = conf.config
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg *.mp4)"
 VIDEO_FORMATS = ('.avi', '.h264', '.mpg', '.mp4')
 
-Tracker = GuiTracker
-TRACKER_CLASSES = {
-    'GuiTracker': GuiTracker,
-    'PupilGuiTracker': PupilGuiTracker
+STRUCTURE_TRACKER_CLASSES = {
+    'default': StructureTrackerGui,
+    'b&w': StructureTrackerGui,
+    'hsv': HsvStructureTracker,
+    'rgb': ColorStructureTracker,  # OPTIMISE: split based on colour order
+    'bgr': ColorStructureTracker
+        # FIXME: add pupil structuretracker PupilGuiTracker
 }
 
 
@@ -142,6 +143,19 @@ class BaseInterface(QObject):
         engine = self.ctx.engine()
         self.image_provider = CvImageProvider(requestedImType='pixmap', stream=self.stream)
         engine.addImageProvider(self.provider_name, self.image_provider)
+
+    @pyqtSlot(int, int, int, int, result=QVariant)
+    def get_pixel_colour(self, img_width, img_height, pixel_x, pixel_y):
+        src_height, src_width = self.image_provider.img.shape[:2]  # OpenCV coordinates
+        pixel_x *= src_width / img_width
+        pixel_x = round(pixel_x)
+        pixel_y *= src_height / img_height
+        pixel_y = round(pixel_y)
+        # pixel = self.image_provider.img[pixel_x-5: pixel_x+5, pixel_y-5:pixel_y+5, :]
+        pixel = self.image_provider.img[pixel_y, pixel_x, :]
+        # colour = [int(v) for v in pixel.mean(axis=(0, 1))]
+        colour = [int(v) for v in pixel]  # QML only understands pure python
+        return colour
 
 
 class PlayerInterface(BaseInterface):
@@ -256,7 +270,7 @@ class CalibrationIface(PlayerInterface):
         self.src_folder = ""
         
         self._set_display()
-        self._set_display()
+        self._set_display()  # TODO check why 2
 
     @pyqtSlot()
     def calibrate(self):
@@ -308,7 +322,7 @@ class CalibrationIface(PlayerInterface):
     @pyqtSlot(QVariant)
     def set_matrix_type(self, matrix_type):
         """
-        Set the matrix type to be saved. Resolution independant (normal) or dependant (optimized)
+        Set the matrix type to be saved. Resolution independent (normal) or dependant (optimized)
         
         :param string matrix_type: The type of matrix to be saved. One of ['normal', 'optimized']
         """
@@ -368,7 +382,7 @@ class TrackerIface(BaseInterface):
 
         self.tracker = None
 
-        self.rois = {'tracking': None,
+        self.rois = {'tracking': None,  # FIXME: multiple (f(structure)
                      'restriction': None,
                      'measurement': None}
         self.roi_params = {k: None for k in self.rois.keys()}
@@ -399,7 +413,7 @@ class TrackerIface(BaseInterface):
         """
         idx = int(idx)
         try:
-            results = self.tracker.results
+            results = self.tracker.multi_results
         except AttributeError as err:
             print("No tracker instance, make sure you have selected the correct result type; {}".format(err))
             return -1
@@ -421,10 +435,11 @@ class TrackerIface(BaseInterface):
         Also registers the analysis image providers (for the analysis tab) with QT
         """
         self.params.fast = True
+        self.params.plot = True
         try:
             self.params.n_background_frames = 1
-            self.tracker = self.params.tracker_class(self, self.params, src_file_path=self.params.src_path, dest_file_path=None,
-                                                     plot=True, camera_calibration=self.params.calib, callback=None)
+            self.tracker = GuiTracker(self, self.params, src_file_path=self.params.src_path,
+                                      dest_file_path=None, camera_calibration=self.params.calib)
         except VideoStreamIOException:
             self.tracker = None
             error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
@@ -505,13 +520,15 @@ class TrackerIface(BaseInterface):
         if roi_type not in self.rois.keys():
             return
         if self.rois[roi_type] is not None:
-            tracker_method(self.rois[roi_type])
+            for idx in range(len(self.tracker.structures)):  # OPTIMISE: improve to set specifically in the future
+                tracker_method(self.rois[roi_type], idx)
         else:
             if self.roi_params[roi_type] is not None:
-                tracker_method(self._get_roi(*self.roi_params[roi_type]))
+                for idx in range(len(self.tracker.structures)):
+                    tracker_method(self._get_roi(*self.roi_params[roi_type]), idx)  # OPTIMISE: improve to set specifically in the future
 
     @pyqtSlot()
-    def set_tracker_rois(self):  # REFACTOR: refactor tracking.Tracker to use roi dictionary and extract method
+    def set_tracker_rois(self):  # REFACTOR: refactor tracking.Tracker to use roi dictionary and extract method  # FIXME: do for != structures
         if self.tracker is not None:
             # self.tracker.set_rois(self.rois)  # REFACTOR:
             self._set_tracker_roi('tracking', self.tracker.set_roi)
@@ -520,7 +537,7 @@ class TrackerIface(BaseInterface):
 
     def _reset_measures(self):
         if self.tracker is not None:
-            self.tracker.results.reset()   # reset between runs
+            self.tracker.reset_measures()   # reset between runs
 
     def pre_track(self):
         """
@@ -529,7 +546,7 @@ class TrackerIface(BaseInterface):
         """
         self.start_track_time = time()
         # self.timer_speed = int(1 / self.tracker._stream.stream.fps)
-        self.tracker.results.start_time = time()
+        self.tracker.set_start_time(self.start_track_time)
 
     def post_track(self):
         self.end_track_time = time()
@@ -610,7 +627,7 @@ class TrackerIface(BaseInterface):
         return roi
         
     @pyqtSlot(str, str, float, float, float, float, float, float)
-    def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):
+    def set_roi(self, roi_type, source_type, img_width, img_height, roi_x, roi_y, roi_width, roi_height):  # FIXME: do for != structures
         """
         Sets the ROI (in which to check for the specimen) from the one drawn in QT
         Scaling is applied to match the (resolution difference) between the representation 
@@ -718,7 +735,7 @@ class TrackerIface(BaseInterface):
                                          initialFilter="Text (*.csv)")
         dest_path = dest_path[0]
         if dest_path:
-            self.tracker.results.to_csv(dest_path)
+            self.tracker.multi_results.to_csv(dest_path)
 
     @pyqtSlot(result=bool)
     def load_graph_data(self):
@@ -762,29 +779,29 @@ class TrackerIface(BaseInterface):
         self.output_type = output_type.lower()
 
     @pyqtSlot()
-    def analyse_angles(self):
+    def analyse_angles(self):  # FIXME: move to results/analysis object
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
         if self.tracker is not None:
             fig, ax = plt.subplots()
-            angles = video_analysis.get_angles(self.tracker.results.positions)
+            angles = video_analysis.get_angles(self.tracker.multi_results.positions)
             video_analysis.plot_angles(angles, self.get_sampling_freq())
             self.analysis_image_provider._fig = fig
 
     @pyqtSlot()
-    def analyse_distances(self):
+    def analyse_distances(self):  # FIXME: move to results/analysis object
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
         if self.tracker is not None:
             fig, ax = plt.subplots()
-            distances = video_analysis.pos_to_distances(self.tracker.results.positions)
+            distances = video_analysis.pos_to_distances(self.tracker.multi_results.positions)
             video_analysis.plot_distances(distances, self.get_sampling_freq())
             self.analysisImageProvider2._fig = fig
 
     @pyqtSlot()
-    def save_angles_fig(self):
+    def save_angles_fig(self):  # FIXME: move to results/analysis object
         """
         Save the graph as a png or jpeg image
         """
@@ -839,14 +856,14 @@ class RecorderIface(TrackerIface):
 
         self.clip_end_frame_idx()
         self.params.fast = True
+        self.params.plot = True
 
         requested_fps = round(1/(self.params.timer_period / 1000))  # convert period to seconds
         if __debug__:
             print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
 
         self.tracker = self.params.tracker_class(self, self.params, src_file_path=None, dest_file_path=self.params.dest_path,
-                                                 plot=True,  camera_calibration=self.params.calib,
-                                                 callback=None, requested_fps=requested_fps)
+                                                 camera_calibration=self.params.calib, requested_fps=requested_fps)
         self.stream = self.tracker  # to comply with BaseInterface
         self._set_display()
         self._update_img_provider()
