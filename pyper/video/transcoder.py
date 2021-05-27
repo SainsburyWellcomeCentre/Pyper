@@ -13,8 +13,7 @@ import math
 import os
 
 import numpy as np
-# from scipy.misc import imresize
-from skimage.transform import resize as imresize
+from skimage.transform import resize
 from tqdm import trange
 import cv2
 
@@ -52,6 +51,7 @@ class TranscoderIface(TrackerIface):
         self.source_path = self.params.src_path
 
         self.tracker = None
+        self.tracking_region_roi = None  # to comply with TrackerTab interface
         self.rois = {'restriction': None}
         self.roi_params = {'restriction': None}
 
@@ -122,6 +122,7 @@ class TranscoderIface(TrackerIface):
         if self.codec is None:
             self.codec = self._infer_codec()
         try:
+            self.params.n_background_frames = 1
             self.tracker = GuiTranscoder(self, self.params, src_file_path=self.source_path,
                                          dest_file_path=self.dest_file_path,
                                          camera_calibration=self.params.calib, codec=self.codec,
@@ -172,13 +173,18 @@ class GuiTranscoder(GuiTracker):
         GuiTracker.__init__(self, ui_iface, params, src_file_path=src_file_path, dest_file_path=dest_file_path,
                             camera_calibration=camera_calibration)
         self.codec = [str(c) for c in codec]
+
+        # WARNING: these params needs to be before call to set_tracking_region_roi
+        self.scale_params = np.array(scale_params)  # (scale_x, scale_y), e.g. (0.5, 0.75)
+        self.dest_file_path = dest_file_path
+
         if roi is not None:
             self.set_tracking_region_roi(roi)
-        self.scale_params = np.array(scale_params)  # (scale_x, scale_y), e.g. (0,5, 0.2)
+        else:
+            self.tracking_region_roi = None  # To comply w/ interface
+
         self.crop_params = self._get_crop_params()
         output_size = self._get_final_size()
-
-        self.dest_file_path = dest_file_path
 
         self.video_writer = VideoWriter(self.dest_file_path,
                                         self.codec,
@@ -241,7 +247,7 @@ class GuiTranscoder(GuiTracker):
 
     def _scale_frame(self, frame):
         scale = np.concatenate((self.scale_params, np.array([1]))) * frame.shape  # REFACTOR: make more "numpyic"
-        scaled_frame = imresize(frame, scale.astype(int), interp='bilinear')
+        scaled_frame = resize(frame, scale.astype(int), preserve_range=True, anti_aliasing=True)
         return scaled_frame
     
     def transcode_frame(self):
@@ -279,7 +285,7 @@ class GuiTranscoder(GuiTracker):
         return img
 
 
-class Transcoder(RecordedVideoStream):
+class Transcoder(RecordedVideoStream):  # FIXME: does not seem to be used
     """
     The Transcoder class.
 
@@ -314,7 +320,7 @@ class Transcoder(RecordedVideoStream):
             frame = self.read()
             frame = frame[crop_params[0][0]: -crop_params[0][1], crop_params[1][0]: -crop_params[1][1]]
             scale = np.concatenate((self.scale_params, np.array([1]))) * frame.shape
-            frame = imresize(frame, scale.astype(int), interp='bilinear')
+            frame = resize(frame, scale.astype(int), preserve_range=True, anti_aliasing=True)
             self.video_writer.write(frame)
         # self.video_writer.write(np.uint8(np.dstack([frame]*3)))
         self.video_writer.release()
