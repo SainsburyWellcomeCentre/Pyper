@@ -132,7 +132,7 @@ class StructureTracker(object):
         if contour_found:
             contours.set_params(frame=plot_silhouette, contour_type='raw', color=color)
             if self.params.plot:
-                contours.draw()  # even if wrong size to help spot issues
+                contours.draw(2)  # even if wrong size to help spot issues
                 self._draw_subregion_roi(plot_silhouette)
 
             self.multi_results.multi_update(self.arena, contours, self.measure_callback(frame))
@@ -141,7 +141,7 @@ class StructureTracker(object):
                 self._stream.stop_recording(err_msg)
                 raise EOFError(err_msg)
         else:
-            print("No contour found")
+            # print("No contour found")
             if self.contours_handler.not_in_range:
                 self._handle_bad_size_contour(plot_silhouette)
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
@@ -185,7 +185,7 @@ class StructureTracker(object):
     def _handle_bad_size_contour(self, img):
         area = self.contours_handler.get_biggest_area()
         if not area:
-            print("FIXME: no contour found")  # FIXME:
+            # print("FIXME: no contour found")  # FIXME:
             return
         if area > self.thresholding_params.max_area:
             msg = 'Biggest structure too big ({} > {})'.format(area, self.thresholding_params.max_area)

@@ -193,6 +193,7 @@ class MultiContour(object):
         for cnt in self.contours:
             cnt.set_params(frame, contour_type, color, line_thickness)
 
-    def draw(self):
+    def draw(self, line_thickness=1):
         for cnt in self.contours:
+            cnt.line_thickness = line_thickness
             cnt.draw()  # OPTIMISE: see if can do in batch
