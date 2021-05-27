@@ -24,6 +24,8 @@ from pyper.utilities.utils import write_structure_not_found_msg
 
 def np_to_qimg(img, size):
     w, h = size
+    if w == 0:  # FIXME: hack for analysis tab
+        return QImage(img, w, h, QImage.Format_RGB888)
     if img.shape[2] == 3:
         qimg = QImage(img, h, w, img[0].nbytes, QImage.Format_RGB888)
     elif img.shape[2] == 4:
