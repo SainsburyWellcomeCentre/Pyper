@@ -93,7 +93,8 @@ Row {
             } else if (parent.colorMode == "HSV") {
                 _color = Qt.hsva(parent.children[0].value/255, parent.children[1].value/255, parent.children[2].value/255, 1);
             } else {
-                console.log("Unknow color mode " + parent.colorMode);
+                console.log("Unknown color mode " + parent.colorMode + " defaulting to RGB");
+                _color = Qt.rgba(parent.children[0].value/255, parent.children[1].value/255, parent.children[2].value/255, 1);
             }
             return _color;
         }

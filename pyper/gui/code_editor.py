@@ -2,10 +2,9 @@ import imp
 import os
 
 import sys
-from PyQt5.QtCore import QObject, pyqtSlot
-from PyQt5.QtWidgets import QFileDialog
 
-from pyper.gui.tabs_interfaces import STRUCTURE_TRACKER_CLASSES
+from PyQt5.QtCore import QObject, pyqtSlot, QVariant
+from PyQt5.QtWidgets import QFileDialog
 
 try:
     from pygments import highlight
@@ -19,7 +18,7 @@ except ImportError:
 
 
 class EditorIface(QObject):
-    def __init__(self, app, context, parent):
+    def __init__(self, app, context, parent, params):
         """
         :param app: The QT application
         :param context:
@@ -29,11 +28,12 @@ class EditorIface(QObject):
         self.app = app  # necessary to avoid QPixmap bug: Must construct a QGuiApplication before
         self.win = parent
         self.ctx = context
+        self.params = params
 
         self.src_path = None
 
         self.plugin_dir = os.path.abspath("config/plugins/")  # FIXME: improve (currently dependant on start folder)
-        self.plugins = STRUCTURE_TRACKER_CLASSES  # FIXME: rewrite plugins
+        self.plugins = self.params.structure_tracker_classes
         # self.scrape_plugins_dir()
 
     @pyqtSlot(result=str)
@@ -88,7 +88,12 @@ class EditorIface(QObject):
         cls = getattr(plugin, class_name)
         sys.modules[class_name.lower()] = plugin
         exec("from {} import {} as cls".format(class_name.lower(), class_name))
-        self.plugins[class_name] = cls
+        self.plugins[class_name.lower()] = cls
+
+    @pyqtSlot(result=QVariant)
+    def get_plugin_names(self):
+        names = self.plugins.keys()
+        return ";".join(names)
 
     @pyqtSlot()
     def scrape_plugins_dir(self):
@@ -116,7 +121,7 @@ class EditorIface(QObject):
         if PYGMENTS_IMPORTED:
             code = strip_html_tags(code)
         class_name = self.get_class_name(code)
-        if not class_name:
+        if not class_name or class_name.lower() == "default":
             return ''
         else:
             try:

@@ -44,7 +44,8 @@ class GuiParameters(QObject, Parameters):
         self.dest_path = ''
 
         self.calib = None
-        self.tracker_class = STRUCTURE_TRACKER_CLASSES["default"]  # TODO: remove
+        self.structure_tracker_classes = STRUCTURE_TRACKER_CLASSES
+        self.tracker_class = self.structure_tracker_classes["default"]  # TODO: remove
 
         self._curve_update_period = self.config['gui']['update_period']
 
@@ -98,7 +99,7 @@ class GuiParameters(QObject, Parameters):
     @pyqtSlot(str, str)
     def set_thresholding_type(self, structure_name, thresholding_type):
         thresholding_type = thresholding_type.lower()
-        if thresholding_type in STRUCTURE_TRACKER_CLASSES.keys():
+        if thresholding_type in self.structure_tracker_classes.keys():
             self.set_tracker_type(thresholding_type, structure_name)
         else:
             raise NotImplementedError("Unknown thresholding method {}".format(thresholding_type))
@@ -114,11 +115,11 @@ class GuiParameters(QObject, Parameters):
     def set_tracker_type(self, tracker_type, structure_name=''):
         try:
             if isinstance(tracker_type, str):
-                tracker_class = STRUCTURE_TRACKER_CLASSES[tracker_type]
+                tracker_class = self.structure_tracker_classes[tracker_type]
             else:
                 tracker_class = tracker_type
         except KeyError:
-            print("Type must be one of {}, got: {}".format(STRUCTURE_TRACKER_CLASSES.keys(), tracker_type))
+            print("Type must be one of {}, got: {}".format(self.structure_tracker_classes.keys(), tracker_type))
             return
 
         if structure_name:

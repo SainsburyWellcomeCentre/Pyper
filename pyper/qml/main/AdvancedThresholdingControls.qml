@@ -116,35 +116,70 @@ Frame {
                 }
             }
         }
-        ComboBox {
-            width: 170
-            height: 25
-            model: ListModel {
-                id: cbItems
-                ListElement { text: "B&W" }
-                ListElement { text: "BGR" }
-                ListElement { text: "HSV" }
-                ListElement { text: "RGB" }
-            }
-            style: ComboBoxStyle {
-                background: Frame {
-                    width: parent.width
-                    height: parent.height
-                    color: Theme.spinBoxBackground
+        Row {
+            height: 30
+            spacing: 5
+            ComboBox {
+                width: 170
+                height: 25
+                id: thresholdingMethods
+                model: ListModel {
+                    id: cbItems
+                    ListElement { text: "B&W" }
+                    ListElement { text: "BGR" }
+                    ListElement { text: "HSV" }
+                    ListElement { text: "RGB" }
                 }
-                textColor: Theme.text
-                selectedTextColor: 'steelblue'
-                selectionColor: Theme.darkBackground
-            }
+                function has_item(elementName) {
+                    console.log(elementName);
+                    if (elementName == "DEFAULT") {
+                        return true;
+                    }
 
-            onCurrentIndexChanged: {
-                var currentItem = cbItems.get(currentIndex);
-                console.log("Changing item ", currentItem.text);
-                if (currentItem != undefined) {
-                    if (root.parentWindow.visible) {
-                        pythonObject.set_thresholding_type(root.name, currentItem.text);
-                        thresholdMin.colorMode = currentItem.text;
-                        thresholdMax.colorMode = currentItem.text;
+                    for (var i = 0; i < model.count; ++i) {
+                        var item = cbItems.get(i)
+                        if ((item.text == elementName) || (item.text.toLowerCase() == elementName)) {
+                            return true;
+                        }
+                    }
+                    return false
+                }
+                style: ComboBoxStyle {
+                    background: Frame {
+                        width: parent.width
+                        height: parent.height
+                        color: Theme.spinBoxBackground
+                    }
+                    textColor: Theme.text
+                    selectedTextColor: 'steelblue'
+                    selectionColor: Theme.darkBackground
+                }
+
+                onCurrentIndexChanged: {
+                    var currentItem = cbItems.get(currentIndex);
+                    console.log("Changing item ", currentItem.text);
+                    if (currentItem != undefined) {
+                        if (root.parentWindow.visible) {
+                            pythonObject.set_thresholding_type(root.name, currentItem.text);
+                            thresholdMin.colorMode = currentItem.text;
+                            thresholdMax.colorMode = currentItem.text;
+                        }
+                    }
+                }
+            }
+            CustomLabeledButton {
+                width: 120
+                height: 25
+                label: "Update plugins"
+                tooltip: "Add a custom tracking method"
+                onClicked: {
+                    py_editor.scrape_plugins_dir();
+                    var plugin_names = py_editor.get_plugin_names().split(";");
+                    for (var i=0; i < plugin_names.length; i++) {
+                        var plugin_name = plugin_names[i].toUpperCase()
+                        if (! (thresholdingMethods.has_item(plugin_name))) {
+                            cbItems.append({text: plugin_name});  // FIXME: avoid duplicates (case insensitive)
+                        }
                     }
                 }
             }

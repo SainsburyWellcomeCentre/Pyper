@@ -101,7 +101,7 @@ def main():
                              analysis_image_provider, analysis_image_provider2)
     calibrater = CalibrationIface(app, context, win, params, "calibrationDisplay", "calibrationprovider")
     transcoder = TranscoderIface(app, context, win, params, "transcodingDisplay", "transcoderprovider")
-    editor = EditorIface(app, context, win)
+    editor = EditorIface(app, context, win, params)
 
     context.setContextProperty('py_iface', params)
     context.setContextProperty('py_viewer', viewer)
