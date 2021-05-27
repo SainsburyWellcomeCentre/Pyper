@@ -1,13 +1,17 @@
 import os
-import sys
 import time
 import platform
 
+import cv2
+
 try:
     from HTMLParser import HTMLParser
+    from StringIO import StringIO
+    PYTHON_VERSION = 2
 except ImportError:
     from html.parser import HTMLParser
-import cv2
+    from io import StringIO
+    PYTHON_VERSION = 3
 
 
 colors = {'w': (255, 255, 255),
@@ -24,28 +28,27 @@ class HtmlStripper(HTMLParser):
     Inspired from https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
     """
     def __init__(self):
+        if PYTHON_VERSION == 3:
+            super().__init__()
         self.reset()
-        self.fed = []
+        if PYTHON_VERSION == 3:
+            self.strict = False
+            self.convert_charrefs = True
+        self.text = StringIO()
 
-    def handle_data(self, data):
-        if "p, li { white-space: pre-wrap; }" in data:  # skip css tags
-            return
-        self.fed.append(data)
+    def handle_data(self, d):
+        self.text.write(d)
 
-    def handle_entityref(self, name):
-        if name == "quot":
-            self.fed.append('"')
-        else:
-            print(name)
-
-    def strip(self):
-        return ''.join(self.fed)
+    def get_data(self):
+        data = self.text.getvalue().splitlines(keepends=True)
+        data = data[3:]
+        return "".join(data)
 
 
 def strip_html_tags(html):
     stripper = HtmlStripper()
     stripper.feed(html)
-    stripped_text = stripper.strip()
+    stripped_text = stripper.get_data()
     return stripped_text
 
 
