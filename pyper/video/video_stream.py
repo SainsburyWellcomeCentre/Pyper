@@ -25,6 +25,7 @@ from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrab
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
 from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_frame import Frame
+from pyper.video.kinect_cam import KinectCam
 from pyper.config import conf
 
 IS_PI = (platform.machine()).startswith('arm')
@@ -528,3 +529,58 @@ class ImageListVideoStream(object):
         frame = Frame(img)
         self.current_frame_idx += 1
         return frame
+
+
+class KinectV2RgbVideoStream(VideoStream):
+    DEFAULT_FRAME_SIZE = (640, 480)  # FIXME: put kinect default
+
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
+        """
+        :param str save_path: The destination file path to save the video to
+        :param int bg_start: The frame to use as background frames range start
+        :param int n_background_frames: The number of frames to use for the background
+        """
+        if requested_fps is None:
+            self.fps = DEFAULT_FPS
+        else:
+            self.fps = requested_fps
+        VideoStream.__init__(self, save_path, bg_start, n_background_frames)
+
+    def _init_cam(self):
+        self.stream = KinectCam()
+
+    def read(self):
+        try:
+            frame = self.stream.read()
+        except VideoCaptureGrabError:
+            raise VideoStreamFrameException("KinectV2RrbVideoStream frame not found")
+        self.current_frame_idx += 1
+        return Frame(frame.astype(np.float32))
+
+    def _start_video_capture_session(self, save_path):
+        """
+        Initiates a VideoCapture object to supply the frames to read
+        (from the default usb camera)
+        and a VideoWriter object to save a potential output
+
+        :param str save_path: the destination file path
+
+        :return: capture and video_writer object
+        :type: (VideoCapture, VideoWriter)
+        """
+        self.size = self.stream.get_shape()
+        # if capture.fps is None:
+        #     raise VideoStreamIOException("FPS was not set in videocapture")
+        video_writer = VideoWriter(save_path, CODEC, self.stream.max_fps, self.size, is_color=True)
+        return self.stream, video_writer
+
+    def stop_recording(self, msg):
+        """
+        Stops recording and performs cleanup actions
+
+        :param str msg: The message to print upon closing.
+        """
+        self.stream.close()
+        VideoStream.stop_recording(self, msg)
+        self.current_frame_idx = -1
+

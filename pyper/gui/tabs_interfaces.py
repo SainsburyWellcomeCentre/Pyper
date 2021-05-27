@@ -882,13 +882,19 @@ class RecorderIface(TrackerIface):
         Return the sampling frequency (note this is a maximum and can be limited by a slower CPU)
         """
         return 1.0 / (self.timer_speed / 1000.0)  # timer speed in ms
-        
-    @pyqtSlot(result=QVariant)
-    def cam_detected(self):
+
+    @pyqtSlot(str)
+    def set_camera(self, cam_name):
+        if cam_name == "kinect" or cam_name.startswith("usb"):  # TODO: add pi
+            self.camera = cam_name
+
+
+    @pyqtSlot(int, result=QVariant)
+    def cam_detected(self, cam_idx):
         """
         Check if a camera is available
         """
-        return cv_helpers.camera_available()
+        return cv_helpers.camera_available(cam_idx)
 
     def get_img(self):
         self.display.reload()
