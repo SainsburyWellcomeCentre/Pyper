@@ -14,6 +14,8 @@ QtObject {
     readonly property color terminalSelection: "steelblue"
     readonly property color terminalSelectedText: "cyan"
 
+    readonly property color graphCurve: Qt.rgba(0.275, 0.51, 0.706)  // (Steelblue) For speed
+
     readonly property color codeBackground: "#202020"  // Same as code backgound from pygments 'native' template
     readonly property color codeTextColor: "white"
 
