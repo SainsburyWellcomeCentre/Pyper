@@ -46,17 +46,17 @@ Rectangle {
     function scalePath(xs, ys) {
         var minX = Math.min.apply(null, xs);
         var maxX = Math.max.apply(null, xs);
+        var scalingX = graph.width / (maxX - minX);  // FIXME: use width - prograsbarlabel.width
+
         var minY = Math.min.apply(null, ys);
         var maxY = Math.max.apply(null, ys);
-        var scalingY = (50 - 10) / (maxY - minY);  // the graph height in pixels  // FIXME: use height
-        var scalingX = graph.width / (maxX - minX);  // FIXME: use width - prograsbarlabel.width
+        var scalingY = (defaultHeight - 10) / (maxY - minY);  // the graph height in pixels  // FIXME: use height
         
         for (var i=0; i < ys.length; i++) {
             ys[i] -= minY;
-            ys[i] *= scalingY;
-            ys[i] +=5; // FIXME:
+            ys[i] *= -scalingY;
+            ys[i] += defaultHeight; //  canvas is top left w/ inverted y axis compared to graph
             
-            //                xs[i] -= minX;
             xs[i] *= scalingX;
         }
     }
