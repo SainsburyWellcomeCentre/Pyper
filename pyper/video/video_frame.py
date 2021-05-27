@@ -186,7 +186,7 @@ class Frame(np.ndarray):
         """
         misc.imsave(path, self)
         
-    def paint(self, text='', curve=(), text_color=(255, 255, 255), curve_color=(0, 255, 0)):  # OPTIMISE:
+    def paint(self, text='', curve=(), text_color=(255, 255, 255), curve_color=(0, 255, 0), line_width=1):  # OPTIMISE:
         if text:
             text_origin = (5, 30)
             cv2.putText(self, text, text_origin, 2, 1, text_color)
@@ -196,14 +196,11 @@ class Frame(np.ndarray):
                 curve = np.int32([curve])
             if curve.ndim > 2:
                 for i, _curve in enumerate(curve):
-                    # print(_curve, _curve.shape, _curve.dtype)
-                    # print(_curve)
                     f = ((i + 1) / (curve.shape[2] + 1))
                     _color = tuple(np.array(curve_color) * f)
-                    cv2.polylines(self, np.array([_curve]), 0, _color)
-                    # print("success")
+                    cv2.polylines(self, np.array([_curve]), 0, _color, line_width)
             else:
-                cv2.polylines(self, curve, 0, curve_color)
+                cv2.polylines(self, curve, 0, curve_color, line_width)
         
     def display(self, win_name='', text='', curve=(), delay=1, get_code=False):
         """
