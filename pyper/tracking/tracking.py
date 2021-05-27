@@ -47,7 +47,7 @@ class Tracker(object):
         self.params = params
         self.arena = None
 
-        track_range_params = (self.params.bg_frame_idx, self.params.n_background_frames)
+        track_range_params = (self.params.bg_frame_idx, self.params.n_background_frames)  # FIXME: should be whole for e.g. transcode
         self.raw_out_stream = None
         if src_file_path is None:  # i.e. we record
             if IS_PI:
@@ -191,7 +191,6 @@ class Tracker(object):
             else:  # Tracked frame
                 if fid == self.params.start_frame_idx: self.bg.finalise()
                 for struct_idx, struct in enumerate(self.structures):
-                    print("Struct: ", struct_idx, struct.name, struct.thresholding_params.max_threshold)
                     contour_found, _sil = struct.track_frame(frame, 'b', requested_output=requested_output)
                     if struct_idx == 0:  # TO superimpose tracking. TODO: find better solution
                         sil = _sil
@@ -205,7 +204,7 @@ class Tracker(object):
                         if record: self._stream.save(frame)
                         utils.write_structure_not_found_msg(sil, sil.shape[:2], self.current_frame_idx)
                     else:
-                        struct.check_specimen_in_roi()
+                        struct.check_specimen_in_roi(sil)
                         struct.paint_frame(sil, self.should_update_vid)
                         if record: self._stream.save(struct.mask)  # FIXME: needs n_structures streams. No use raw and append to frame
                 self.after_frame_track()

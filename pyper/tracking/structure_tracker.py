@@ -39,26 +39,28 @@ class StructureTracker(object):
         self.multi_results.reset()
         # TODO: see if reset self.contour_handler ...
 
-    def check_specimen_in_roi(self):
+    def check_specimen_in_roi(self, sil):
         """
         Checks whether the specimen is within the specified ROI and
         calls the specified callback method if so.
         """
+        in_roi = False
         if self.roi is not None:
             if self.multi_results.last_pos_is_default():
                 return
             for i, pos in enumerate([res.get_last_position() for res in self.multi_results.results]):
                 if self.roi.contains_point(pos):
-                    self.handle_object_in_tracking_roi(i)
-                    self.mask = self.mask.copy()  # OPTIMISE:  # FIXME: why here
+                    self.handle_object_in_tracking_roi(i, sil)
+                    in_roi = True
+        return in_roi
 
-    def handle_object_in_tracking_roi(self, struct_idx):  # REFACTOR: part of roi add Callback class with call method
+    def handle_object_in_tracking_roi(self, struct_idx, frame):  # REFACTOR: part of roi add Callback class with call method
         """
         The method called when the specimen is found in the roi.
         This method is meant to be overwritten in subclasses of Tracker.
         """
         self.multi_results.results[struct_idx].overwrite_last_in_tracking_roi(True)
-        self.bottom_square.frame = self.mask
+        self.bottom_square.frame = frame
         self.bottom_square.draw()
 
     def measure_callback(self, frame):  # REFACTOR: part of roi
