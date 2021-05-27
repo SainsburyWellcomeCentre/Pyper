@@ -7,6 +7,7 @@ import "../basic_types"
 import "../video"
 import "../roi"
 import "../style"
+import "../config"
 
 Rectangle {
     color: Theme.background
@@ -79,7 +80,8 @@ Rectangle {
         anchors.left: controlsLayout.right
         anchors.right: parent.right
         anchors.top: vidTitle.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: graph.top
+        anchors.bottomMargin: 5
 
         enabled: false
 
@@ -90,12 +92,28 @@ Rectangle {
             var stepSize = vidControl.sliderValue * angleDelta
             py_viewer.move(stepSize)
         }
+        onValueChanged: {
+            if (graph.displayed) {
+                graph.highlightPoint(value);
+            }
+        }
+
         Roi{
             anchors.fill: parent.previewImage
             onReleased: {
                 py_tracker.set_roi(roiX, roiY, roiWidth)
             }
         }
+    }
+    Graph {
+        id: graph
+        // @disable-check M16
+        objectName: "viewerDataGraph"
+
+        width: previewImage.progressBarWidth
+        anchors.left: previewImage.left
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
     }
 
     SplashScreen{
@@ -214,12 +232,33 @@ Rectangle {
                 }
             }
         }
+        Frame {
+            height: loadGraphBtn.height + 20
+            CustomButton {
+                id: loadGraphBtn
+
+                anchors.centerIn: parent
+
+                width: 50
+                height: width
+
+                iconSource: IconHandler.getPath('document-open.png')
+
+                tooltip: "Select a source of data to be displayed alongside the video."
+                onClicked: {
+                    var loaded = py_viewer.load_graph_data("viewerDataGraph");
+                    if (loaded) {
+                        graph.height = graph.defaultHeight;
+                    }
+                }
+            }
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;height:750;width:880}
+    D{i:0;autoSize:true;height:480;width:640}
 }
 ##^##*/
 

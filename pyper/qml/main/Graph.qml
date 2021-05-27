@@ -11,14 +11,39 @@ import "../config"
 
 Rectangle {    
     color: Theme.background
+
+    property alias displayed: graphCanvas.curveSet
     
     property string points
+
+    property int defaultHeight: 50
 
     onPointsChanged: {
         setPath(points);
     }
     onWidthChanged: {
         setPath(points);
+    }
+
+    Rectangle {
+        id: redDot
+
+        visible: false
+        width: 7
+        height: width
+        radius: width/2
+        color: 'red'
+        x: 0
+        y: 0
+        z: 10
+    }
+
+    function highlightPoint(idx) {
+        var currentPoint = graphCanvas.path[idx];
+        if (currentPoint !== "undefined") {
+            redDot.x = Math.round(currentPoint.x - redDot.width/2.0);
+            redDot.y = Math.round(currentPoint.y - redDot.height/2.0);
+        }
     }
     
     function setPath(points) {
@@ -66,23 +91,30 @@ Rectangle {
         
         anchors.fill: parent
         
-        property color drawingColor: 'lightBlue'
+        property color drawingColor: Theme.graphCurve
         
         visible: parent.visible
         
         property real lastX
         property real lastY
+
+        property bool curveSet: false
         
         property var path: []
         
         function resetPath() {
             graphCanvas.path = [];
         }
+
         function drawPath() {
             if (available) {
                 var currentPoint = path[0];
                 lastX = currentPoint.x;
                 lastY = currentPoint.y;
+
+                redDot.x = lastX;
+                redDot.y = lastY;
+                redDot.visible = true;
 
                 var ctx = getContext('2d');
                 ctx.lineWidth = 3.0;
@@ -99,6 +131,7 @@ Rectangle {
                     lastY = currentPoint.y;
                 }
                 ctx.stroke();
+                curveSet = true;
             }
         }
         function clearCanvas() {
@@ -111,3 +144,9 @@ Rectangle {
         }
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+##^##*/

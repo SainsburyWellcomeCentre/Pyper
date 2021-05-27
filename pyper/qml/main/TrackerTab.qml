@@ -83,6 +83,12 @@ Rectangle {
 
         source: "image://trackerprovider/img"
 
+        onValueChanged: {
+            if (graph.displayed) {
+                graph.highlightPoint(value);
+            }
+        }
+
         onSizeChanged: {
             py_tracker.prevent_video_update();  // prevents loading next frame on a simple resize
         }
@@ -153,7 +159,7 @@ Rectangle {
     }
     Graph {
         id: graph
-        objectName: "dataGraph"
+        objectName: "trackerDataGraph"
 
         width: trackerDisplay.progressBarWidth
         anchors.left: trackerDisplay.left
@@ -282,9 +288,9 @@ Rectangle {
 
                 tooltip: "Select a source of data to be displayed alongside the video."
                 onClicked: {
-                    var loaded = py_tracker.load_graph_data();
+                    var loaded = py_tracker.load_graph_data("trackerDataGraph");
                     if (loaded) {
-                        graph.height = 50;
+                        graph.height = graph.defaultHeight;
                     }
                 }
             }

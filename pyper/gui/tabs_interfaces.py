@@ -152,10 +152,42 @@ class BaseInterface(QObject):
         pixel_y *= src_height / img_height
         pixel_y = round(pixel_y)
         # pixel = self.image_provider.img[pixel_x-5: pixel_x+5, pixel_y-5:pixel_y+5, :]
-        pixel = self.image_provider.img[pixel_y, pixel_x, :]
         # colour = [int(v) for v in pixel.mean(axis=(0, 1))]
+        pixel = self.image_provider.img[pixel_y, pixel_x, :]
         colour = [int(v) for v in pixel]  # QML only understands pure python
         return colour
+
+    @pyqtSlot(str, result=bool)
+    def load_graph_data(self, graph_obj_name):
+        """
+        Load a 1 dimensional vector to display alongside the tracking.
+        If the sampling is not the same, it should be a multiple of the video frame rate.
+        """
+        diag = QFileDialog()
+        src_path = diag.getOpenFileName(parent=diag,
+                                        caption='Choose data file',
+                                        directory=os.getenv('HOME'),
+                                        filter="Data (*.mat *.npy *.csv)",
+                                        initialFilter="Data (*.npy)")
+
+        src_path = src_path[0]
+        if src_path:
+            extension = os.path.splitext(src_path)[-1]
+            if extension == '.npy':
+                self.graph_data = np.load(src_path)
+            elif extension == '.mat':
+                self.graph_data = loadmat(src_path)  # TEST:
+            elif extension == '.csv':
+                self.graph_data = np.genfromtext(src_path, delimiter=',')  # TEST:
+            else:
+                raise PyperError("Unknown extension: {}".format(extension))
+            graph_object = self.win.findChild(QObject, graph_obj_name)
+            data_str = ";".join([str(d) for d in self.graph_data])
+            graph_object.setProperty("points", data_str)
+            return True
+        else:
+            return False
+        # FIXME: add resampling to fit video length
 
 
 class PlayerInterface(BaseInterface):
@@ -737,37 +769,6 @@ class TrackerIface(BaseInterface):
         if dest_path:
             self.tracker.multi_results.to_csv(dest_path)
 
-    @pyqtSlot(result=bool)
-    def load_graph_data(self):
-        """
-        Load a 1 dimensional vector to display alongside the tracking.
-        If the sampling is not the same, it should be a multiple of the video frame rate.
-        """
-        diag = QFileDialog()
-        src_path = diag.getOpenFileName(parent=diag,
-                                        caption='Choose data file',
-                                        directory=os.getenv('HOME'),
-                                        filter="Data (*.mat *.npy *.csv)",
-                                        initialFilter="Data (*.npy)")
-
-        src_path = src_path[0]
-        if src_path:
-            extension = os.path.splitext(src_path)[-1]
-            if extension == '.npy':
-                self.graph_data = np.load(src_path)
-            elif extension == '.mat':
-                self.graph_data = loadmat(src_path)  # TEST:
-            elif extension == '.csv':
-                self.graph_data = np.genfromtext(src_path, delimiter=',')  # TEST:
-            else:
-                raise PyperError("Unknown extension: {}".format(extension))
-            graph_object = self.win.findChild(QObject, "dataGraph")
-            data_str = ";".join([str(d) for d in self.graph_data])
-            graph_object.setProperty("points", data_str)
-            return True
-        else:
-            return False
-        # FIXME: add resampling to fit video length
 
     @pyqtSlot(QVariant)
     def set_frame_type(self, output_type):
