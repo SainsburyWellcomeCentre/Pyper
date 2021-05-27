@@ -20,6 +20,7 @@ import numpy as np
 from scipy.io import loadmat
 from skimage.io import imsave
 
+from pyper.analysis.video_analysis import VideoAnalyser
 from pyper.gui.gui_tracker import GuiTracker
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
@@ -413,6 +414,7 @@ class TrackerIface(BaseInterface):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
 
         self.tracker = None
+        self.video_analyser = None
 
         self.rois = {'tracking': None,  # FIXME: multiple (f(structure)
                      'restriction': None,
@@ -421,7 +423,7 @@ class TrackerIface(BaseInterface):
         self.rois_vault = {k: {} for k in self.rois.keys()}  # FIXME: inner is ordered dict
 
         self.analysis_image_provider = analysis_provider_1
-        self.analysisImageProvider2 = analysis_provider_2
+        self.analysis_image_provider2 = analysis_provider_2
 
         self.graph_data = None
 
@@ -436,21 +438,23 @@ class TrackerIface(BaseInterface):
         if hasattr(self, 'image_provider'):
             self.image_provider.reuse_on_next_load = True
 
-    @pyqtSlot(QVariant, result=QVariant)
-    def get_row(self, idx):  # TODO: see id idx could be declared as int
+    @pyqtSlot(int, result=QVariant)
+    def get_row(self, idx):
         """
         Get the data (position ... from the TrackingResults object) at row idx
         
         :param int idx: The index of the row to return
         """
-        idx = int(idx)
-        try:
-            results = self.tracker.multi_results
-        except AttributeError as err:
-            print("No tracker instance, make sure you have selected the correct result type; {}".format(err))
+        if self.video_analyser is None:
+            print("No tracker instance, make sure you have selected the correct result type")
             return -1
-        if 0 <= idx < len(results):
-            return map(str, results.get_row(idx))
+
+        if self.video_analyser.row_in_range(idx):
+            row = self.video_analyser.get_row(idx)
+            if row:
+                return row
+            else:
+                return -1
         else:
             return -1
 
@@ -484,6 +488,8 @@ class TrackerIface(BaseInterface):
         self.current_frame_idx = self.tracker._stream.current_frame_idx
 
         self.clip_end_frame_idx()
+
+        self.video_analyser = VideoAnalyser(self.tracker, self.get_sampling_freq())
         
         self._set_display()
         self._set_display_max()
@@ -780,41 +786,28 @@ class TrackerIface(BaseInterface):
         self.output_type = output_type.lower()
 
     @pyqtSlot()
-    def analyse_angles(self):  # FIXME: move to results/analysis object
+    def analyse_angles(self):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
         """
         if self.tracker is not None:
-            fig, ax = plt.subplots()
-            angles = video_analysis.get_angles(self.tracker.multi_results.positions)
-            video_analysis.plot_angles(angles, self.get_sampling_freq())
-            self.analysis_image_provider._fig = fig
+            self.analysis_image_provider._fig = self.video_analyser.analyse_angles()
 
     @pyqtSlot()
-    def analyse_distances(self):  # FIXME: move to results/analysis object
+    def analyse_distances(self):
         """
         Compute and plot the distances between the points Pn and Pn+1
         """
         if self.tracker is not None:
-            fig, ax = plt.subplots()
-            distances = video_analysis.pos_to_distances(self.tracker.multi_results.positions)
-            video_analysis.plot_distances(distances, self.get_sampling_freq())
-            self.analysisImageProvider2._fig = fig
+            self.analysis_image_provider2._fig = self.video_analyser.analyse_distances()
 
     @pyqtSlot()
-    def save_angles_fig(self):  # FIXME: move to results/analysis object
+    def save_angles_fig(self):
         """
         Save the graph as a png or jpeg image
         """
         if self.tracker is not None:
-            diag = QFileDialog()
-            dest_path = diag.getSaveFileName(parent=diag,
-                                             caption='Save file',
-                                             directory=os.getenv('HOME'),
-                                             filter="Image (*.png *.jpg)")
-            dest_path = dest_path[0]
-            if dest_path:
-                imsave(dest_path, self.analysis_image_provider.get_array())
+            self.video_analyser.save_fig(self.analysis_image_provider.get_array())
 
     def get_sampling_freq(self):
         return self.tracker._stream.fps
@@ -863,9 +856,8 @@ class RecorderIface(TrackerIface):
         if __debug__:
             print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
 
-        self.tracker = self.params.tracker_class(self, self.params, src_file_path=None, dest_file_path=self.params.dest_path,
-                                                 camera_calibration=self.params.calib, requested_fps=requested_fps)
-        self.stream = self.tracker  # to comply with BaseInterface
+        self.video_analyser = VideoAnalyser(self.tracker, self.get_sampling_freq())
+
         self._set_display()
         self._update_img_provider()
         

@@ -7,18 +7,75 @@ This module is supplied for basic analysis of the position data. It should be us
 trajectory behaviour. However, please note that analysis is not the main goal of this software package so functionality
 is limited in this module.
 
-:author: crousse
+:author: crousseau
 """
 
 from __future__ import division
 
 import math
-import matplotlib.cm as cm
+import os
+
 import numpy as np
 import numpy.linalg as la
+
 from matplotlib import pyplot as plt
+import matplotlib.cm as cm
+
+from skimage.io import imsave
 from scipy.integrate import cumtrapz
 from scipy.ndimage.filters import gaussian_filter
+
+from PyQt5.QtWidgets import QFileDialog
+
+
+class VideoAnalyser(object):
+    def __init__(self, tracker, sampling_freq):
+        self.tracker = tracker
+        self.sampling_freq = sampling_freq
+
+    def row_in_range(self, row_idx):
+        return 0 <= row_idx < len(self.tracker.structures[0].multi_results)
+
+    def get_row(self, idx):
+        row = []
+        for struct in self.tracker.structures:
+            row.extend(struct.multi_results.get_row(idx))
+        return row
+
+    def analyse_angles(self):
+        """
+        Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2
+        """
+        fig, ax = plt.subplots()
+        for struct in self.tracker.structures:  # FIXME: add column names
+            for instance_pos in struct.multi_results.get_positions():
+                angles = get_angles(instance_pos)
+                plot_angles(angles, self.sampling_freq)
+        return fig
+
+    def analyse_distances(self):
+        """
+        Compute and plot the distances between the points Pn and Pn+1
+        """
+        fig, ax = plt.subplots()
+        for struct in self.tracker.structures:  # FIXME: add column names
+            for instance_pos in struct.multi_results.get_positions():
+                distances = pos_to_distances(instance_pos)
+                plot_distances(distances, self.sampling_freq)
+        return fig
+
+    def save_fig(self, fig):
+        """
+        Save the graph as a png or jpeg image
+        """
+        diag = QFileDialog()
+        dest_path = diag.getSaveFileName(parent=diag,
+                                         caption='Save file',
+                                         directory=os.getenv('HOME'),
+                                         filter="Image (*.png *.jpg)")
+        dest_path = dest_path[0]
+        if dest_path:
+            imsave(dest_path, fig)
 
 
 def vectors_to_angle(v1, v2):
@@ -66,6 +123,7 @@ def plot_track(positions, background_img):
 
 def pos_to_distances(positions):
     """Extracts distances form the positions list"""
+    positions = positions.astype(np.float64)
     distances = []
     for i in range(1, len(positions)):
         p1 = tuple(positions[i - 1])
