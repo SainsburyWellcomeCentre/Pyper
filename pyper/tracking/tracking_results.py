@@ -75,15 +75,15 @@ class TrackingResults(object):
         #         writer.writerow(self.get_row(i))
 
     def get_row(self, idx):
-        row = [idx]
+        row = ["{}".format(idx)]
         row.append("{0:.3f}".format(self.times[idx]))
         row.append("{0:.2f}".format(self.xs[idx]))
         row.append("{0:.2f}".format(self.ys[idx]))
         row.append("{0:.2f}".format(self.areas[idx]))
-        row.extend("{0:.1f}".format(self.distances_from_arena_xs[idx]))
-        row.extend("{0:.1f}".format(self.distances_from_arena_ys[idx]))
+        row.append("{0:.1f}".format(self.distances_from_arena_xs[idx]))
+        row.append("{0:.1f}".format(self.distances_from_arena_ys[idx]))
         row.append("{0:.3f}".format(self.measures[idx]))
-        row.append(self.in_tracking_roi[idx])
+        row.append("{}".format(self.in_tracking_roi[idx]))
         return row
 
     def get_frame_results(self):

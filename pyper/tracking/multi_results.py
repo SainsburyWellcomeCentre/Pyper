@@ -12,6 +12,9 @@ class MultiResults(object):
 
     # def append_default_measure(self):
 
+    def __len__(self):
+        return len(self.results[0])
+
     def reset(self):
         for res in self.results:
             res.reset()
@@ -98,8 +101,19 @@ class MultiResults(object):
             self.results[src_idx].update(pos, areas[i], measures[i], arena_distances)
         # TODO: Check that sizes match with previous round
 
+    def get_row(self, idx):
+        for i, res in enumerate(self.results):
+            if i == 0:
+                row = res.get_row(idx)
+            else:
+                row.extend(res.get_row(idx)[2:])
+        return row
+
+    def get_positions(self):
+        return np.stack([res.positions for res in self.results])
+
     def plotting_positions(self):
-        pos = np.stack([res.positions for res in self.results])
+        pos = self.get_positions()
         non_default_pos_idx = np.column_stack([res.non_default_pos_idx() for res in self.results])
         non_default_pos_idx = non_default_pos_idx.all(axis=1)
         trimmed_pos = pos[:, non_default_pos_idx, :]
