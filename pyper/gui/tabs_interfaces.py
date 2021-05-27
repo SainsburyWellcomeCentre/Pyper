@@ -856,12 +856,23 @@ class RecorderIface(TrackerIface):
         if __debug__:
             print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
 
+        try:
+            self.params.n_background_frames = 1
+            self.tracker = GuiTracker(self, self.params, src_file_path=None, dest_file_path=self.params.dest_path,
+                                      camera_calibration=self.params.calib, requested_fps=requested_fps)
+        except VideoStreamIOException as err:
+            self.tracker = None
+            print("Error starting capture, ", err.args)
+            # error_screen = self.win.findChild(QObject, 'videoLoadingErrorScreen')
+            # error_screen.setProperty('doFlash', True)
+            return
+        self.stream = self.tracker  # To comply with BaseInterface
         self.video_analyser = VideoAnalyser(self.tracker, self.get_sampling_freq())
 
         self._set_display()
         self._update_img_provider()
         
-        self.tracker.set_roi(self.rois['tracking'])
+        self.tracker.set_roi(self.rois['tracking'], 0)  # FIXME:
 
         self.pre_track()
         period = round((1 / self.tracker._stream.stream.fps) * 1000)
