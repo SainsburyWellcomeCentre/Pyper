@@ -109,7 +109,7 @@ class EditorIface(QObject):
                 except SyntaxError:
                     continue
                 algo_menu = self.win.findChild(QObject, "trackingAlgorithmMenu")
-                algo_menu.setProperty("lastAddedEndtry", class_name)
+                algo_menu.setProperty("lastAddedEntry", class_name)
 
     @pyqtSlot(str, result=str)
     def export_code_to_plugins(self, code):

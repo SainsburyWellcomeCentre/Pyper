@@ -67,17 +67,17 @@ ApplicationWindow {
                 py_editor.scrape_plugins_dir();
             }
 
-            property string lastAddedEndtry
-            onLastAddedEndtryChanged: {
+            property string lastAddedEntry
+            onLastAddedEntryChanged: {
                 var menuComponent = Qt.createComponent("AlgorithmMenuItem.qml");
                 if(menuComponent.status === Component.Ready) {
-                    if (lastAddedEndtry == "") {  // skip missing
+                    if (lastAddedEntry == "") {  // skip missing
                         return
                     } // skip if already exists
-                    menuComponent.className = lastAddedEndtry;
+                    menuComponent.className = lastAddedEntry;
                     var menuItem = menuComponent.createObject(main);
-                    menuItem.className = lastAddedEndtry;
-                    menuItem.text = lastAddedEndtry;
+                    menuItem.className = lastAddedEntry;
+                    menuItem.text = lastAddedEntry;
                     menuItem.exclusiveGroup = trackingAlgorithmExclusiveGroup;
                     menuItem.checked = false;
                     menuItem.pythonObject = py_iface;
