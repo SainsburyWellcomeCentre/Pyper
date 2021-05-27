@@ -1,32 +1,20 @@
+import cv2
 import numpy as np
 
 from pyper.video.video_frame import Frame
-from pyper.gui.gui_tracker import GuiTracker
+from pyper.tracking.structure_tracker import StructureTrackerGui
 
 
-class TemplateTracker(GuiTracker):
-    """
-    A subclass of GuiTracker
-    """
+class TemplateStructureTracker(StructureTrackerGui):
 
     def _pre_process_frame(self, frame):
-        treated_frame = Frame(frame.gray().astype(np.uint8))
-        treated_frame = treated_frame.blur(1)
-        return treated_frame
+        return cv2.blur(frame, (5, 5))
 
     def get_mask(self, frame):
-        """
-        Get the binary mask (8bits) of the specimen
-        from the thresholded difference between frame and the background
-
-        :param frame: The current frame to analyse
-        :type frame: video_frame.Frame
-
-        :returns: mask (the binary mask)
-        :rtype: video_frame.Frame
-        """
-        diff = Frame(np.full(frame.shape, 255, dtype=np.uint8) - frame)  # Negative
-
-        diff = diff.astype(np.uint8)
-        mask = diff.threshold(self.params.detection_threshold)
+        mask = cv2.inRange(frame,
+                           np.array(self.thresholding_params.min_threshold),
+                           np.array(self.thresholding_params.max_threshold))
+        mask = Frame(mask)
+        mask = self._post_process_mask(mask)
+        diff = Frame(frame.copy())
         return mask, diff
