@@ -131,7 +131,6 @@ Frame {
                     ListElement { text: "RGB" }
                 }
                 function has_item(elementName) {
-                    console.log(elementName);
                     if (elementName == "DEFAULT") {
                         return true;
                     }
@@ -157,7 +156,6 @@ Frame {
 
                 onCurrentIndexChanged: {
                     var currentItem = cbItems.get(currentIndex);
-                    console.log("Changing item ", currentItem.text);
                     if (currentItem != undefined) {
                         if (root.parentWindow.visible) {
                             pythonObject.set_thresholding_type(root.name, currentItem.text);

@@ -349,10 +349,7 @@ ApplicationWindow {
                             objectName: "previewWindow"
                         }
                         property bool wasLoaded
-                        onLoaded: {
-                            console.log("Loading preview");
-                            wasLoaded = true;
-                        }
+                        onLoaded: {wasLoaded = true}
                     }
                     Tab {
                         id: trackTab
