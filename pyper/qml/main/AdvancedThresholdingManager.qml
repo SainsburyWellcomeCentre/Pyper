@@ -9,7 +9,7 @@ import "../basic_types"
 import "../popup_messages"
 import "../style"
 
-ApplicationWindow {
+Window {
     id: root
     width: 430  // FIXME: put in config
     height: 700
@@ -18,8 +18,6 @@ ApplicationWindow {
     property variant pythonObject
 
     property bool drawingMode: false
-
-//    property list<ThresholdingControlsModel> thresholdingControlsModelsList
 
     function getCurrentStructure() {
         var idx = getCurrentStructureIndex();
@@ -32,9 +30,6 @@ ApplicationWindow {
                 return i;
             }
         }
-    }
-
-    onClosing: {
     }
 
     Rectangle {
