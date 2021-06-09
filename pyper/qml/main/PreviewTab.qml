@@ -96,6 +96,9 @@ Rectangle {
             if (graph.displayed) {
                 graph.highlightPoint(value);
             }
+            if (ethogram.displayed) {
+                ethogram.highlightPoint(value);
+            }
         }
 
         Roi{
@@ -109,6 +112,15 @@ Rectangle {
         id: graph
         // @disable-check M16
         objectName: "viewerDataGraph"
+
+        width: previewImage.progressBarWidth
+        anchors.left: previewImage.left
+        anchors.bottom: ethogram.top
+        anchors.bottomMargin: 5
+    }
+    Ethogram {
+        id: ethogram
+        objectName: "viewerEthogram"
 
         width: previewImage.progressBarWidth
         anchors.left: previewImage.left
@@ -234,24 +246,62 @@ Rectangle {
         }
         Frame {
             height: loadGraphBtn.height + 20
-            CustomButton {
-                id: loadGraphBtn
-
+            Row{
                 anchors.centerIn: parent
+                spacing: 20
+                CustomButton {
+                    id: loadGraphBtn
 
-                width: 50
-                height: width
+                    width: 50
+                    height: width
 
-                iconSource: IconHandler.getPath('document-open.png')
+                    iconSource: IconHandler.getPath('document-open.png')
 
-                tooltip: "Select a source of data to be displayed alongside the video."
-                onClicked: {
-                    var loaded = py_viewer.load_graph_data("viewerDataGraph");
-                    if (loaded) {
-                        graph.height = graph.defaultHeight;
+                    tooltip: "Select a source of data to be displayed alongside the video."
+                    onClicked: {
+                        var loaded = py_viewer.load_graph_data("viewerDataGraph");
+                        if (loaded) {
+                            graph.height = graph.defaultHeight;
+                        }
+                    }
+                }
+                CustomButton {
+                    id: loadEthogramBtn
+
+                    width: 50
+                    height: width
+
+                    iconSource: IconHandler.getPath('document-open.png')
+
+                    tooltip: "Select a source of data to be displayed alongside the video."
+                    onClicked: {
+                        var loaded = py_viewer.load_ethogram_data("viewerEthogram");
+                        if (loaded) {
+                            ethogram.height = ethogram.defaultHeight;
+                        }
                     }
                 }
             }
+        }
+        Frame {
+            height: behaviourBtn.height + 10
+
+            CustomLabeledButton {
+                id: behaviourBtn
+                label: "bhv mgr"
+                tooltip: "Start the behaviour manager"
+                anchors.centerIn: parent
+                height: 25
+                width: 100
+                onClicked: {
+                    ethogramManager.visible = !ethogramManager.visible;
+                }
+            }
+        }
+        EthogramControlsManager {
+            id: ethogramManager
+            pythonObject: py_iface
+            visible: false
         }
     }
 }

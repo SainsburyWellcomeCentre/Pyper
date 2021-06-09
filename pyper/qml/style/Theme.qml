@@ -37,4 +37,6 @@ QtObject {
     readonly property color toolButtonActiveBackground: "#DBDBDB"
 
     readonly property string defaultFont: "Verdana"
+
+    property var ethogramColours: [background, "orange", "pink", "green", "purple", "red", "white", "blue", "yellow"]
 }

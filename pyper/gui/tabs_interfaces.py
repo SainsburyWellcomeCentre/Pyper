@@ -182,13 +182,87 @@ class BaseInterface(QObject):
                 self.graph_data = np.genfromtext(src_path, delimiter=',')  # TEST:
             else:
                 raise PyperError("Unknown extension: {}".format(extension))
-            graph_object = self.win.findChild(QObject, graph_obj_name)
             data_str = ";".join([str(d) for d in self.graph_data])
+
+            graph_object = self.win.findChild(QObject, graph_obj_name)
             graph_object.setProperty("points", data_str)
             return True
         else:
             return False
         # FIXME: add resampling to fit video length
+
+
+    @pyqtSlot(str, result=bool)
+    def load_ethogram_data(self, ethograph_obj_name):
+        diag = QFileDialog()
+        src_path = diag.getOpenFileName(parent=diag,
+                                        caption='Choose data file',
+                                        directory=os.getenv('HOME'),
+                                        filter="Data (*.mat *.npy *.csv)",
+                                        initialFilter="Data (*.npy)")
+
+        src_path = src_path[0]
+        if src_path:
+            extension = os.path.splitext(src_path)[-1]
+            if extension == '.npy':
+                self.ethogram_data = np.load(src_path)
+            elif extension == '.mat':
+                self.ethogram_data = loadmat(src_path)  # TEST:
+            elif extension == '.csv':
+                self.ethogram_data = np.genfromtext(src_path, delimiter=',')  # TEST:
+            else:
+                raise PyperError("Unknown extension: {}".format(extension))
+            self.__send_ethogram(ethograph_obj_name)
+            self.current_behaviour = 0
+            return True
+        else:
+            return False
+
+    def __get_ethograph_obj(self, ethograph_obj_name):
+        return self.win.findChild(QObject, ethograph_obj_name)
+
+    def __send_ethogram(self, ethograph_obj_name):
+        data_str = ";".join([str(d) for d in self.ethogram_data])
+        graph_object = self.__get_ethograph_obj(ethograph_obj_name)
+        graph_object.setProperty("points", data_str)
+
+    @pyqtSlot(str)
+    def create_empty_ethogram(self, ethograph_obj_name):
+        self.ethogram_data = np.zeros(round(self.n_frames))
+        self.current_behaviour = 0
+        self.__send_ethogram(ethograph_obj_name)
+
+    @pyqtSlot(str, int)
+    def switch_ethogram_state(self, ethograph_obj_name, behaviour_id):  # REFACTOR: use ethogram object
+        if behaviour_id == self.current_behaviour:  # closing
+            # print("Closing behaviour {} from {} to {}"
+            #       .format(behaviour_id, self.first_behaviour_frame, self.stream.current_frame_idx))
+            self.ethogram_data[self.first_behaviour_frame:self.stream.current_frame_idx] = behaviour_id
+            self.current_behaviour = 0
+            self.__send_ethogram(ethograph_obj_name)
+        else:
+            self.first_behaviour_frame = self.stream.current_frame_idx
+            self.current_behaviour = behaviour_id
+
+    @pyqtSlot(str)
+    def save_ethogram(self, ethograph_obj_name):
+        ethograph_obj = self.__get_ethograph_obj(ethograph_obj_name)
+        data_str = ethograph_obj.property("points")
+        data = np.array(data_str.split(";"), dtype=np.float64)
+        diag = QFileDialog()
+        dest_path = diag.getSaveFileName(parent=diag,
+                                         caption='Choose data file',
+                                         directory=os.getenv('HOME'),
+                                         filter="Data (*.mat *.npy *.csv)",
+                                         initialFilter="Data (*.npy)")
+
+        dest_path = dest_path[0]
+        if dest_path:
+            extension = os.path.splitext(dest_path)[-1]
+            if extension == '.npy':
+                np.save(dest_path, data)
+            else:
+                raise NotImplementedError("Please implement methods for other extensions")
 
 
 class PlayerInterface(BaseInterface):
