@@ -205,42 +205,42 @@ Rectangle {
                     enabled: parent.enabled
                     label: "Ref"
                     tooltip: "Select the reference frame"
-                    text: py_iface.get_bg_frame_idx()
+                    text: py_iface.bg_frame_idx
                     onTextChanged: {
-                        py_iface.set_bg_frame_idx(text);
+                        py_iface.bg_frame_idx = text;
                         reload();
                     }
                     onClicked: { text = py_viewer.get_frame_idx() }
                     onEnabledChanged: reload()
-                    function reload(){ text = py_iface.get_bg_frame_idx() }
+                    function reload(){ text = py_iface.bg_frame_idx }
                 }
                 IntButton {
                     width: parent.width
                     enabled: parent.enabled
                     label: "Start"
                     tooltip: "Select the first data frame"
-                    text: py_iface.get_start_frame_idx()
+                    text: py_iface.start_frame_idx
                     onTextChanged: {
-                        py_iface.set_start_frame_idx(text);
+                        py_iface.start_frame_idx = text;
                         reload();
                     }
                     onClicked: { text = py_viewer.get_frame_idx() }
                     onEnabledChanged: reload()
-                    function reload(){ text = py_iface.get_start_frame_idx() }
+                    function reload(){ text = py_iface.start_frame_idx }
                 }
                 IntButton {
                     width: parent.width
                     enabled: parent.enabled
                     label: "End"
                     tooltip: "Select the last data frame"
-                    text: py_iface.get_end_frame_idx()
+                    text: py_iface.end_frame_idx
                     onTextChanged: {
-                        py_iface.set_end_frame_idx(text);
+                        py_iface.end_frame_idx = text;
                         reload();
                     }
                     onClicked: { text = py_viewer.get_frame_idx() }
                     onEnabledChanged: reload()
-                    function reload(){ text = py_iface.get_end_frame_idx() }
+                    function reload(){ text = py_iface.end_frame_idx }
                 }
             }
         }
