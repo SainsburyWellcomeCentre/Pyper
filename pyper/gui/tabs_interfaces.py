@@ -24,6 +24,7 @@ from skimage.io import imsave
 from pyper.analysis.video_analysis import VideoAnalyser
 from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.gui_tracker import GuiTracker
+from pyper.gui.gui_live_cam import GuiPreviewer
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
@@ -1020,6 +1021,11 @@ class RecorderIface(TrackerIface):
         self.stream = self.tracker  # To comply with BaseInterface
         self.video_analyser = VideoAnalyser(self.tracker, self.get_sampling_freq())
 
+        if self.tracker is not None:  # TODO: check if necessary
+            self.tracker._stream.bg_start_frame = self.params.bg_frame_idx
+            self.tracker._stream.bg_end_frame = self.params.bg_frame_idx + self.params.n_bg_frames - 1
+            self.tracker.bg.source = self.params.ref  # TODO: add check for validity of frame size/type in tracker
+
         self._set_display()
         self._update_img_provider()
         
@@ -1028,6 +1034,41 @@ class RecorderIface(TrackerIface):
         self.pre_track()
         period = round((1 / self.tracker._stream.stream.fps) * 1000)
         self.timer_speed = period  # convert to ms
+        return True
+
+    @pyqtSlot()
+    def stop(self):
+        super().stop()
+        self.tracker.raw_out_stream.release()
+
+    @pyqtSlot(result=QVariant)
+    def preview(self):
+        """
+        Start the recording and tracking.
+
+        :returns: The recording was started status code
+        """
+        requested_fps = 30  # FIXME: round(1 / (self.params.timer_period / 1000))  # convert period to seconds
+        if __debug__:
+            print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
+
+        try:
+            self.params.n_background_frames = 1
+            self.tracker = GuiPreviewer(self, self.params,
+                                        camera_calibration=self.params.calib, requested_fps=requested_fps)
+        except VideoStreamIOException as err:
+            self.tracker = None
+            print("Error starting capture, ", err.args)
+            return
+        self.stream = self.tracker  # To comply with BaseInterface
+        self.video_analyser = VideoAnalyser(self.tracker, self.get_sampling_freq())
+
+        self._set_display()
+        self._update_img_provider()
+
+        # period = round((1 / self.tracker._stream.stream.fps) * 1000)
+        # self.timer_speed = period  # convert to ms
+        self.timer_speed = self.params.timer_period  # FIXME:
         self.timer.start(self.timer_speed)
         return True
         

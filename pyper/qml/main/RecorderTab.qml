@@ -40,7 +40,7 @@ Rectangle {
 
         Frame {
             id: controls
-            height: row1.height + vidSpeed.height + 20
+            height: row1.height + row2.height + vidSpeed.height + 20*2
 
             CustomColumn {
                 enabled: parent.enabled
@@ -96,10 +96,46 @@ Rectangle {
                         onClicked:{
                             py_recorder.stop()
                             recordBtn.enabled = true;
+                            liveBtn.enabled = true;
                             enabled = false;
                         }
                     }
                 }
+                Row {
+                    id: row2
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    width: (children[0].width * 2) + spacing
+                    height: children[0].height
+                    spacing: 10
+                    CustomButton {
+                        id: liveBtn
+
+                        width: 45
+                        height: width
+
+                        iconSource: IconHandler.getPath("live_stream.png")
+                        pressedSource: IconHandler.getPath("live_stream.png")
+                        tooltip: "Live stream from camera without recording"
+
+                        enabled: false
+                        onClicked: {  // FIXME: should have both ROIs and probably embed in factory
+                            if (camSelect.model.count > 0){
+//                                if (trackingRoi.isDrawn){
+//                                    py_recorder.set_roi(trackingRoi.width, trackingRoi.height, trackingRoi.roiX, trackingRoi.roiY, trackingRoi.roiWidth);
+//                                }
+                                if (py_recorder.preview()) {
+                                    enabled = false;
+                                    stopBtn.enabled = true;
+                                }
+                            } else {
+                                errorScreen.flash(3000);
+                            }
+                        }
+                    }
+
+                }
+
                 IntInput {
                     id: vidSpeed
 
@@ -162,6 +198,7 @@ Rectangle {
             if (camSelect !== null) {  // if not yet defined
                 if (camSelect.model.count > 0){
                     recordBtn.enabled = true;
+                    liveBtn.enabled = true
                 } else {
                     errorScreen.flash(3000);
                 }
@@ -222,11 +259,13 @@ Rectangle {
                     }
                     i += 1;
                 }
-
             }
 
             onCurrentTextChanged:{
                 py_recorder.set_camera(currentText);
+                if (model.count > 0) {
+                    liveBtn.enabled = true;
+                }
             }
         }
 
@@ -289,5 +328,10 @@ Rectangle {
             RoiControlsModel { sourceRoi: trackingRoi; name: "Callback ROI"; drawingType: "ellipse"; drawingColor: Theme.roiDefault; checked: true},
             RoiControlsModel { sourceRoi: restrictionRoi; name: "Restriction ROI"; drawingType: "rectangle"; drawingColor: 'red'}
         ]
+    }
+    AdvancedThresholdingManager {
+        id: advancedThresholdingManager
+        pythonObject: py_iface
+        visible: false
     }
 }
