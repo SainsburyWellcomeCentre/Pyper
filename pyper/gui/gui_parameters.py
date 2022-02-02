@@ -9,6 +9,7 @@ from PyQt5.uic.pyuic import Version
 
 from pyper.config.parameters import Parameters
 from pyper.config.conf import config
+from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.tabs_interfaces import STRUCTURE_TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
 from pyper.utilities.utils import un_file
 from pyper.camera.kinect_cam import KINECT_AVAILABLE
@@ -191,11 +192,40 @@ class GuiParameters(QObject, Parameters):
             self.dest_path = dest_path
             return dest_path
 
-    @pyqtSlot(str)
-    def set_ref_source(self, ref_path):
+    @pyqtSlot(bool)
+    def set_ref_source(self, prompt=True):
+        if prompt:
+            ref_path = self._prompt_ref_source()
+        else:
+            for d in CONFIG_DIRS:
+                if os.path.exists(d):
+                    ref_path = os.path.abspath(os.path.join(d, 'ref.png'))
+                    break
         ref_path = un_file(ref_path)
-        self.ref = imread(ref_path)
+        if os.path.splitext(ref_path)[1]:
+            self.ref = imread(ref_path)
+        else:
+            print("Canceled")  # FIXME: Dialog
 
+    def _prompt_ref_source(self):
+        diag = QFileDialog()
+        default_dir = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
+        ref_path = diag.getOpenFileName(parent=diag,
+                                        caption='Choose data file',
+                                        directory=default_dir,
+                                        filter="PNG (*.png);;JPEG (*.jpg);;All files (*)",
+                                        initialFilter="PNG (*.png)",
+                                        options=opt)
+        ref_path = ref_path[0]
+        return ref_path
+
+    @pyqtSlot()
+    def reset_ref_source(self):
+        self.ref = None
 
     @pyqtSlot(result=QVariant)
     def is_path_selected(self):

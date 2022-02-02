@@ -19,7 +19,7 @@ ApplicationWindow {
     id: main
     title: "Pyper"
     width: 880
-    height: 820
+    height: 890
 
     menuBar: MenuBar {
         id: pyperTopMenuBar
@@ -114,12 +114,60 @@ ApplicationWindow {
             title: qsTr("&Reference")
             MenuItem {
                 text: qsTr("Load")
-                onTriggered: { loadRefDialog.visible = true; }
+                shortcut: "Ctrl+Shift+O"
+                onTriggered: { py_iface.set_ref_source(true); }
+            }
+            MenuItem {
+                text: qsTr("Auto load")
+                shortcut: "Alt+O"
+                onTriggered: { py_iface.set_ref_source(false); }
             }
             MenuItem {
                 text: qsTr("Save")
                 shortcut: "Ctrl+Shift+S"
-                onTriggered: { saveRefDialog.visible = true; }
+                function startsWith(str, prefix) {
+                    return str.indexOf(prefix, 0) !== -1;
+                }
+
+                onTriggered: {
+                    var currentTabName = tabs.getTab(tabs.currentIndex).title;
+
+                    if (startsWith(currentTabName, "Track")) {
+                        py_tracker.save_ref_source(true);
+                    } else if (startsWith(currentTabName, "Record")) {
+                        py_recorder.save_ref_source(true);
+                    } else if (startsWith(currentTabName, "Preview")) {
+                        py_viewer.save_ref_source(true);
+                    } else {
+                        console.error("Unknown tab " + currentTabName);
+                    }
+                }
+            }
+            MenuItem {
+                text: qsTr("Auto save")
+                shortcut: "Alt+S"
+                function startsWith(str, prefix) {
+                    return str.indexOf(prefix, 0) !== -1;
+                }
+
+                onTriggered: {
+                    var currentTabName = tabs.getTab(tabs.currentIndex).title;
+
+                    if (startsWith(currentTabName, "Track")) {
+                        py_tracker.save_ref_source(false);
+                    } else if (startsWith(currentTabName, "Record")) {
+                        py_recorder.save_ref_source(false);
+                    } else if (startsWith(currentTabName, "Preview")) {
+                        py_viewer.save_ref_source(false);
+                    } else {
+                        console.error("Unknown tab " + currentTabName);
+                    }
+                }
+            }
+            MenuItem {
+                text: qsTr("Reset")
+                shortcut: "Ctrl+Shift+R"
+                onTriggered: { py_iface.reset_ref_source(); }
             }
         }
 
@@ -406,47 +454,6 @@ ApplicationWindow {
                     selectedTextColor: Theme.terminalSelectedText
                 }
             }
-        }
-    }
-    FileDialog {
-        id: loadRefDialog
-        title: "Select reference image"
-
-        selectExisting: true
-
-        nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
-        onAccepted: {
-            py_iface.set_ref_source(fileUrl);
-            visible = false;  // TODO: see if necessary
-        }
-        onRejected: { }
-    }
-    FileDialog {
-        id: saveRefDialog
-        title: "Select reference image"
-
-        selectExisting: false
-
-        nameFilters: [ "Image files (*.jpg *.png)", "All files (*)" ]
-        function startsWith(str, prefix) {
-            return str.indexOf(prefix, 0) !== -1;
-        }
-        onAccepted: {
-            var currentTabName = tabs.getTab(tabs.currentIndex).title;
-            if (startsWith(currentTabName, "Track")) {
-                py_tracker.save_ref_source(fileUrl);
-            } else if (startsWith(currentTabName, "Record")) {
-                py_recorder.save_ref_source(fileUrl);
-            } else if (startsWith(currentTabName, "Preview")) {
-                py_viewer.save_ref_source(fileUrl);
-            } else {
-                console.error("Unknown tab " + currentTabName); // FIXME: handle preview
-            }
-
-            visible = false;  // TODO: see if necessary
-        }
-        onRejected: {
-            console.log("Save aborted");
         }
     }
     HelpWindow {

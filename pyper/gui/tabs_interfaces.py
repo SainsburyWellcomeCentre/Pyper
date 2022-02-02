@@ -12,6 +12,7 @@ It essentially implements a class for each graphical interface tab.
 
 import os
 import re
+import sys
 import uuid
 from time import time
 
@@ -21,6 +22,7 @@ from scipy.io import loadmat
 from skimage.io import imsave
 
 from pyper.analysis.video_analysis import VideoAnalyser
+from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.gui_tracker import GuiTracker
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
@@ -264,6 +266,41 @@ class BaseInterface(QObject):
             else:
                 raise NotImplementedError("Please implement methods for other extensions")
 
+    @pyqtSlot(bool)
+    def save_ref_source(self, prompt=True):
+        self.timer.stop()
+        dest_path = None
+        if prompt:
+            dest_path = self._prompt_ref_save()
+        else:
+            for d in CONFIG_DIRS:
+                if os.path.exists(d):
+                    dest_path = os.path.abspath(os.path.join(d, 'ref.png'))
+                    break
+        if dest_path:
+            if self.stream.seekable:
+                self.stream.seek(self.stream.current_frame_idx - 1)
+            if hasattr(self.stream, 'current_frame') and self.stream.current_frame is not None:
+                ref_frame = self.stream.current_frame
+            else:
+                ref_frame = self.stream.read()
+            imsave(dest_path, ref_frame)
+        self.timer.start(self.timer_speed)
+
+    def _prompt_ref_save(self):
+        diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
+        dest_path = diag.getSaveFileName(parent=diag,
+                                         caption='Select reference destination',
+                                         directory=os.path.expanduser('~'),
+                                         filter="PNG (*.png);; JPEG (*.jpg);; All files (*)",
+                                         # initialFilter="PNG (*.png)",
+                                         options=opt)
+        return dest_path[0]
+
 
 class PlayerInterface(BaseInterface):
     """
@@ -351,13 +388,6 @@ class ViewerIface(PlayerInterface):
         self._set_display()
         self._set_display_max()
         self._update_img_provider()
-
-    @pyqtSlot(str)  # FIXME: make inherited by all but calib ?
-    def save_ref_source(self, dest_path):
-        dest_path = un_file(dest_path)
-        self.stream.seek(self.stream.current_frame_idx - 1)
-        frame = self.stream.read()
-        imsave(dest_path, frame)
 
 
 class CalibrationIface(PlayerInterface):
@@ -531,12 +561,6 @@ class TrackerIface(BaseInterface):
                 return -1
         else:
             return -1
-
-    @pyqtSlot(str)
-    def save_ref_source(self, dest_path):
-        if self.stream.current_frame is not None:
-            dest_path = un_file(dest_path)
-            imsave(dest_path, self.stream.current_frame)
 
     @pyqtSlot()
     def load(self):
