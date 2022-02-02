@@ -167,11 +167,16 @@ class BaseInterface(QObject):
         If the sampling is not the same, it should be a multiple of the video frame rate.
         """
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         src_path = diag.getOpenFileName(parent=diag,
                                         caption='Choose data file',
-                                        directory=os.getenv('HOME'),
+                                        directory=os.path.expanduser('~'),
                                         filter="Data (*.mat *.npy *.csv)",
-                                        initialFilter="Data (*.npy)")
+                                        initialFilter="Data (*.npy)",
+                                        options=opt)
 
         src_path = src_path[0]
         if src_path:
@@ -197,11 +202,16 @@ class BaseInterface(QObject):
     @pyqtSlot(str, result=bool)
     def load_ethogram_data(self, ethograph_obj_name):
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         src_path = diag.getOpenFileName(parent=diag,
                                         caption='Choose data file',
-                                        directory=os.getenv('HOME'),
+                                        directory=os.path.expanduser('~'),
                                         filter="Data (*.mat *.npy *.csv)",
-                                        initialFilter="Data (*.npy)")
+                                        initialFilter="Data (*.npy)",
+                                        options=opt)
 
         src_path = src_path[0]
         if src_path:
@@ -252,11 +262,16 @@ class BaseInterface(QObject):
         data_str = ethograph_obj.property("points")
         data = np.array(data_str.split(";"), dtype=np.float64)
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_path = diag.getSaveFileName(parent=diag,
                                          caption='Choose data file',
-                                         directory=os.getenv('HOME'),
+                                         directory=os.path.expanduser('~'),
                                          filter="Data (*.mat *.npy *.csv)",
-                                         initialFilter="Data (*.npy)")
+                                         initialFilter="Data (*.npy)",
+                                         options=opt)
 
         dest_path = dest_path[0]
         if dest_path:
@@ -452,7 +467,14 @@ class CalibrationIface(PlayerInterface):
     def get_folder_path(self):
         """Get the path to the folder where the images with the pattern are stored"""
         diag = QFileDialog()
-        src_folder = diag.getExistingDirectory(parent=diag, caption="Chose directory", directory=os.getenv('HOME'))
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
+        src_folder = diag.getExistingDirectory(parent=diag,
+                                               caption="Chose directory",
+                                               directory=os.path.expanduser('~'),
+                                               options=opt)
         self.src_folder = src_folder
         return src_folder
 
@@ -475,10 +497,15 @@ class CalibrationIface(PlayerInterface):
         Save the camera matrix selected as self.matrixType
         """
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_path = diag.getSaveFileName(parent=diag,
                                          caption='Save matrix',
-                                         directory=os.getenv('HOME'),
-                                         filter='Numpy (.npy)')
+                                         directory=os.path.expanduser('~'),
+                                         filter='Numpy (.npy)',
+                                         options=opt)
         dest_path = dest_path[0]
         if dest_path:
             if self.matrix_type == 'normal':
@@ -596,12 +623,17 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def save_roi_vault(self, roi_type):
         diag = QFileDialog()
-        default_dir = os.getenv('HOME')
+        default_dir = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_file_path = diag.getSaveFileName(parent=diag,
                                               caption='Choose data file',
                                               directory=default_dir,
                                               filter="Archive (*.tar *.bz2 *.gzip *.zip)",
-                                              initialFilter="Archive (*.bz2)")
+                                              initialFilter="Archive (*.bz2)",
+                                              options=opt)
         dest_file_path = dest_file_path[0]
         vault = RoiCollection(self.rois_vault[roi_type].values())
         vault.compress(dest_file_path)
@@ -609,12 +641,17 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(QVariant)
     def load_roi_vault(self, roi_type):
         diag = QFileDialog()
-        default_dir = os.getenv('HOME')
+        default_dir = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         src_file_path = diag.getOpenFileName(parent=diag,
                                              caption='Choose data file',
                                              directory=default_dir,
                                              filter="Archive (*.tar *.bz2 *.gzip *.zip)",
-                                             initialFilter="Archive (*.bz2)")
+                                             initialFilter="Archive (*.bz2)",
+                                             options=opt)
         src_file_path = src_file_path[0]
         self.load_roi_vault_from_path(roi_type, src_file_path)
 
@@ -828,11 +865,16 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(str)
     def save_roi(self, roi_type):
         diag = QFileDialog()
-        default_dest = os.getenv('HOME')
+        default_dest = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_path = diag.getSaveFileName(parent=diag,
                                          caption='Save file',
                                          directory=default_dest,
-                                         filter="ROI (*.roi)")
+                                         filter="ROI (*.roi)",
+                                         options=opt)
         dest_path = dest_path[0]
         if dest_path:
             roi = self.rois[roi_type]
@@ -844,11 +886,16 @@ class TrackerIface(BaseInterface):
     @pyqtSlot(result=QVariant)
     def load_roi(self):
         diag = QFileDialog()
-        default_src = os.getenv('HOME')
+        default_src = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         src_path = diag.getOpenFileName(parent=diag,
                                         caption='Load file',
                                         directory=default_src,
-                                        filter="ROI (*.roi)")
+                                        filter="ROI (*.roi)",
+                                        options=opt)
         src_path = src_path[0]
         if src_path:
             return Roi.load(src_path)
@@ -864,12 +911,17 @@ class TrackerIface(BaseInterface):
         if default_dest:
             default_dest = os.path.splitext(default_dest)[0] + '.csv'
         else:
-            default_dest = os.getenv('HOME')
+            default_dest = os.path.expanduser('~')
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_path = diag.getSaveFileName(parent=diag,
                                          caption='Save file',
                                          directory=default_dest,
                                          filter="Text (*.txt *.dat *.csv)",
-                                         initialFilter="Text (*.csv)")
+                                         initialFilter="Text (*.csv)",
+                                         options=opt)
         dest_path = dest_path[0]
         if dest_path:
             self.tracker.multi_results.to_csv(dest_path)
