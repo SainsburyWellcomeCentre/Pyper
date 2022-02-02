@@ -10,11 +10,14 @@ import "../roi"
 import "../popup_messages"
 import "../style"
 
-ApplicationWindow {
+Window {
     id: root
     width: 210  // FIXME: put in config
     height: 700
     title: "ROI Manager"
+
+    x: Screen.desktopAvailableWidth - (width + 20)
+    y: 40
 
     property variant pythonObject
 
