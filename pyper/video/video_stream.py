@@ -266,16 +266,14 @@ class UsbVideoStream(VideoStream):
     """
     DEFAULT_FRAME_SIZE = (640, 480)
 
-    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
+    def __init__(self, save_path, bg_start, n_background_frames, requested_fps=DEFAULT_FPS, cam_nb=DEFAULT_CAM):
         """
         :param str save_path: The destination file path to save the video to
         :param int bg_start: The frame to use as background frames range start
         :param int n_background_frames: The number of frames to use for the background
         """
-        if requested_fps is None:
-            self.fps = DEFAULT_FPS
-        else:
-            self.fps = requested_fps
+        self.fps = requested_fps
+        self.cam_nb = cam_nb
         VideoStream.__init__(self, save_path, bg_start, n_background_frames)
 
     def _start_video_capture_session(self, save_path):
@@ -289,18 +287,20 @@ class UsbVideoStream(VideoStream):
         :return: capture and video_writer object
         :type: (VideoCapture, VideoWriter)
         """
-        capture = VideoCapture(DEFAULT_CAM)
+        capture = VideoCapture(self.cam_nb)
         try:
             capture.set("fps", self.fps)
             if capture.fps != self.fps:  # FIXME: use raise Warning
                 print("WARNING: Setting FPS to {} failed. Defaulting to {}.".format(self.fps, capture.fps))
                 self.fps = capture.fps
         except VideoCapturePropertySetError:
-            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(self.fps, capture.fps))  # FIXME: raise warning
+            print("WARNING: could not set FPS to {}. Defaulting to {}.".format(self.fps,
+                                                                               capture.fps))  # FIXME: raise warning
         try:
             capture.set("BRIGHTNESS", 100)
         except VideoCapturePropertySetError:
-            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get('brightness')))  # FIXME: raise warning
+            print("WARNING: could not set brightness to {}. Defaulting to {}.".format(100, capture.get(
+                'brightness')))  # FIXME: raise warning
 
         # Try custom resolution
         try:
