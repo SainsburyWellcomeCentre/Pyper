@@ -149,25 +149,25 @@ class Tracker(object):
         return fid < self._stream.bg_start_frame
 
     def __is_after_frame(self, fid):
-        return self.params.end_frame_idx and (fid > self.params.end_frame_idx)
-        
+        return self.params.end_frame_idx >= 0 and (fid > self.params.end_frame_idx)
+
     def track(self, roi=None, record=False, check_fps=False, reset=True):
         """The main function. Loops until the end of the recording (ctrl+c if acquiring).
-        
+
         :param roi: optional roi e.g. Circle((250, 350), 25)
         :type roi: roi sub-class
         :param bool check_fps: Whether to print the current frame per second processing speed
         :param bool record: Whether to save the frames being processed
         :param bool reset: whether to reset the recording (restart the background and arena ...).\
         If this parameter is False, the recording will continue from the previous frame.
-        
+
         :returns list positions:
         """
         if len(self.structures) == 1:
             self.set_roi(roi, 0)
         else:
             raise NotImplementedError('Multiple structures not supported yet for this function')
-        
+
         is_recording = type(self._stream) == RecordedVideoStream
         self.bg.clear()
         if is_recording:
@@ -186,6 +186,7 @@ class Tracker(object):
 
     def track_frame(self, pbar=None, record=False,
                     requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
+        fid = None  # if undefined before exception
         try:
             frame = self._stream.read()
             sil = frame  # Default to frame if untracked
