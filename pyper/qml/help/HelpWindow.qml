@@ -23,15 +23,8 @@ ApplicationWindow {
     Loader {
         id: webview
         anchors.fill: parent
-        source: "WebKitHelpWindow.qml"
+        source: py_iface.qt_version > 5.6 ? "WebKitHelpWindow.qml" : "WebEngineHelpWindow.qml"
 
-        onStatusChanged: {
-            if (webview.progress == 1) {
-                if (webview.status == Loader.Error) {  // Finished loading but failed
-                    source = "WebEngineHelpWindow.qml";  // try webengine instead
-                }
-            }
-        }
         onLoaded: {
             b1.target = webview.item;
         }

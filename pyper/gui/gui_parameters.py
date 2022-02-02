@@ -1,9 +1,11 @@
 import os
 import sys
+
 from skimage.io import imread
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt, QVariant, pyqtSignal, pyqtProperty
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.uic.pyuic import Version
 
 from pyper.config.parameters import Parameters
 from pyper.config.conf import config
@@ -294,3 +296,11 @@ class GuiParameters(QObject, Parameters):
     @pyqtSlot(result=bool)
     def kinect_cam_available(self):
         return KINECT_AVAILABLE
+
+    qt_version_signal = pyqtSignal()
+    @pyqtProperty(float, notify=qt_version_signal)
+    def qt_version(self):
+        version = Version
+        version = version.split(' ')[-1]
+        version = float('.'.join(version.split('.')[:2]))
+        return version
