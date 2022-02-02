@@ -25,16 +25,16 @@ class Background(object):
     def build(self, frame, color=False):
         if __debug__:
             print("Building background")
-        bg = frame.denoise().blur()
-        if not color:
-            bg = bg.gray()
         if self.source is None:
+            bg = frame.denoise().blur()
+            if not color:
+                bg = bg.gray()
             if self.data is None:
                 self.data = bg
             else:
                 self.data = Frame(np.dstack((self.data, bg)))  # FIXME: won't work for colour
         else:
-            self.data = Frame(self.source.astype(np.float32))
+            self.data = Frame(self.source.astype(frame.dtype))
             self.data = self.data.denoise().blur()
             if not color:
                 self.data = self.data.gray()
