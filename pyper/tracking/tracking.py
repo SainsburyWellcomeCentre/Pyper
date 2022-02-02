@@ -22,11 +22,12 @@ from pyper.contours import object_contour
 from tqdm import tqdm
 
 from pyper.contours.contours_manager import ContoursManager
+from pyper.exceptions.exceptions import VideoStreamTypeException
 from pyper.tracking.structure_tracker import StructureTracker
 from pyper.tracking.tracking_background import Background
 from pyper.video.video_frame import Frame, update_img
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException, \
-    IS_PI
+    IS_PI, RealSenseRgbVideoStream, KinectV2RgbVideoStream
 from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.utilities import utils
 
@@ -35,6 +36,7 @@ class Tracker(object):
     """
     A tracker object to track a specimen in a video stream
     """
+
     def __init__(self, params, src_file_path=None, dest_file_path=None,
                  camera_calibration=None, requested_fps=None):
         """
@@ -47,13 +49,26 @@ class Tracker(object):
         self.params = params
         self.arena = None
 
-        track_range_params = (self.params.bg_frame_idx, self.params.n_background_frames)  # FIXME: should be whole for e.g. transcode
+        track_range_params = (self.params.bg_frame_idx,
+                              self.params.n_background_frames)  # FIXME: should be whole for e.g. transcode
         self.raw_out_stream = None
         if src_file_path is None:  # i.e. we record
             if IS_PI:
                 self._stream = PiVideoStream(dest_file_path, *track_range_params, requested_fps=requested_fps)
             else:
-                self._stream = UsbVideoStream(dest_file_path, *track_range_params, requested_fps=requested_fps)
+                cam_name = self.params.cam_name.lower()
+                if cam_name.startswith("usb"):
+                    self._stream = UsbVideoStream(dest_file_path, *track_range_params, requested_fps=requested_fps,
+                                                  cam_nb=int(self.params.cam_name[-1]))
+                elif cam_name == "kinect":
+                    self._stream = KinectV2RgbVideoStream(dest_file_path, *track_range_params,
+                                                          requested_fps=requested_fps)
+                elif cam_name == "realsense":
+                    self._stream = RealSenseRgbVideoStream(dest_file_path, *track_range_params,
+                                                           requested_fps=requested_fps)
+                else:
+                    raise VideoStreamTypeException('"{}" is not a valid camera type. Supported types are {}'
+                                                   .format(cam_name, ("usbX", "kinect", "realsense")))
                 base_path, ext = os.path.splitext(dest_file_path)
                 raw_out_path = "{}_raw{}".format(base_path, ext)
                 self.raw_out_stream = VideoWriter(raw_out_path,
@@ -65,7 +80,7 @@ class Tracker(object):
             self._stream = RecordedVideoStream(src_file_path, *track_range_params)
 
         self.bg = Background(self.params.n_sds)
-        
+
         self.camera_calibration = camera_calibration
 
         self.current_frame_idx = 0
@@ -97,12 +112,12 @@ class Tracker(object):
 
     def set_measure_roi(self, roi, idx):
         self.structures[idx].measure_roi = roi
-        
+
     def _extract_arena(self, shape='circle'):
         """
         Finds the arena in the current background frame and
         converts it to an roi object.
-        
+
         :return: arena
         :rtype: Roi
         """
@@ -110,7 +125,7 @@ class Tracker(object):
             mask = self.bg.to_mask(self.params.detection_threshold)
             cnt_manager = ContoursManager.from_mask(mask)
             self.arena = contour_to_roi(cnt_manager.get_biggest(), shape)
-        
+
     def get_bottom_square(self, square_width=50):
         """
         Creates a set of diagonally opposed points to use as the corners
@@ -165,10 +180,11 @@ class Tracker(object):
             except EOFError:
                 return [struct.multi_results.positions for struct in self.structures]
 
-    def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
+    def track_frame(self, pbar=None, record=False,
+                    requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         try:
             frame = self._stream.read()
-            sil = frame  # Defautl to frame if untracked
+            sil = frame  # Default to frame if untracked
             self.current_frame = update_img(self.current_frame, frame)
             for struct in self.structures:
                 struct.set_default_results()
@@ -189,7 +205,7 @@ class Tracker(object):
             elif self._stream.bg_end_frame < fid < self.params.start_frame_idx:
                 if record: self._stream.save(frame)
             else:  # Tracked frame
-                if fid == self.params.start_frame_idx: self.bg.finalise()
+                if fid == self.params.start_frame_idx: self.bg.finalise()  # FIXME: does not seem to work for bg with source
                 for struct_idx, struct in enumerate(self.structures):
                     contour_found, _sil = struct.track_frame(frame, 'b', requested_output=requested_output)
                     if struct_idx == 0:  # TO superimpose tracking. TODO: find better solution

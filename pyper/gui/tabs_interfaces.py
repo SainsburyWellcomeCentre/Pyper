@@ -962,9 +962,9 @@ class RecorderIface(TrackerIface):
 
     @pyqtSlot(str)
     def set_camera(self, cam_name):
-        if cam_name == "kinect" or cam_name.startswith("usb"):  # TODO: add pi
-            self.camera = cam_name
-
+        cam_name = cam_name.lower()
+        if cam_name in ("kinect", "realsense") or cam_name.startswith("usb"):  # TODO: add pi
+            self.params.cam_name = cam_name
 
     @pyqtSlot(int, result=QVariant)
     def cam_detected(self, cam_idx):

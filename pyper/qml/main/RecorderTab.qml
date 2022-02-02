@@ -69,7 +69,7 @@ Rectangle {
 
                         enabled: false
                         onClicked: {  // FIXME: should have both ROIs and probably embed in factory
-                            if (py_recorder.cam_detected(0)){
+                            if (camSelect.model.count > 0){
                                 if (trackingRoi.isDrawn){
                                     py_recorder.set_roi(trackingRoi.width, trackingRoi.height, trackingRoi.roiX, trackingRoi.roiY, trackingRoi.roiWidth);
                                 }
@@ -159,10 +159,12 @@ Rectangle {
         spacing: 5
 
         function updatePath() {
-            if (py_recorder.cam_detected(0)){
-                recordBtn.enabled = true;
-            } else {
-                errorScreen.flash(3000);
+            if (camSelect !== null) {  // if not yet defined
+                if (camSelect.model.count > 0){
+                    recordBtn.enabled = true;
+                } else {
+                    errorScreen.flash(3000);
+                }
             }
         }
 
@@ -200,20 +202,22 @@ Rectangle {
             }
             Component.onCompleted: {
                 if (py_iface.kinect_cam_available()) {
-                    model.append("kinect");
-                } else {
-                    console.log("Kinect unavailable")
+                    model.append({text: "kinect"});
+                }
+
+                if (py_iface.realsense_cam_available()) {
+                    model.append({text: "realsense"});
                 }
 
                 var i = 0;
                 while (true) {
-                    console.log("Checking camera " + i);
+                    // console.log("Checking camera " + i);
                     var camDetected = py_recorder.cam_detected(i);
-                    console.log(camDetected);
+                    // console.log(camDetected);
                     if (camDetected) {
                         model.append({text: "usb"+i});
                     } else {
-                        console.log("USB cam " + i + " unavailable");
+                        // console.log("USB cam " + i + " unavailable");
                         break;
                     }
                     i += 1;

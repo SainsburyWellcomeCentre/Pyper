@@ -11,7 +11,8 @@ from pyper.config.parameters import Parameters
 from pyper.config.conf import config
 from pyper.gui.tabs_interfaces import STRUCTURE_TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
 from pyper.utilities.utils import un_file
-from pyper.video.kinect_cam import KINECT_AVAILABLE
+from pyper.camera.kinect_cam import KINECT_AVAILABLE
+from pyper.camera.realsense_cam import REALSENSE_AVAILABLE
 
 
 class AdvancedThresholdingParameters(object):
@@ -296,6 +297,10 @@ class GuiParameters(QObject, Parameters):
     @pyqtSlot(result=bool)
     def kinect_cam_available(self):
         return KINECT_AVAILABLE
+
+    @pyqtSlot(result=bool)
+    def realsense_cam_available(self):
+        return REALSENSE_AVAILABLE
 
     qt_version_signal = pyqtSignal()
     @pyqtProperty(float, notify=qt_version_signal)
