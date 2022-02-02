@@ -25,7 +25,7 @@ from pyper.video.cv_wrappers.video_capture import VideoCapture, VideoCaptureGrab
 from pyper.exceptions.exceptions import VideoStreamIOException, VideoStreamTypeException, VideoStreamFrameException
 from pyper.video.cv_wrappers.video_writer import VideoWriter
 from pyper.video.video_frame import Frame
-from pyper.video.kinect_cam import KinectCam
+from pyper.camera.kinect_cam import KinectCam
 from pyper.config import conf
 
 IS_PI = (platform.machine()).startswith('arm')
