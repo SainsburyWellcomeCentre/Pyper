@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from scipy.spatial import distance
 
@@ -14,6 +16,16 @@ class MultiResults(object):
 
     def __len__(self):
         return len(self.results[0])
+
+    def save(self, struct_name='', dest_folder=None):
+        if dest_folder is None:
+            dest_folder = os.path.dirname(self.params.dest_path)
+        base_name = os.path.splitext(os.path.basename(self.params.dest_path))[0]
+        for i, res in enumerate(self.results):
+            f_name = "{}_structure_{}_instance_{}.fthr".format(base_name, struct_name, i)
+            dest_path = os.path.join(dest_folder, f_name)
+            df = res.as_df()
+            df.reset_index().to_feather(dest_path)  # TEST:
 
     def reset(self):
         for res in self.results:

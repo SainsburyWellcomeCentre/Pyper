@@ -97,6 +97,10 @@ class Tracker(object):
         for struct in self.structures:
             struct.reset()
 
+    def save_results(self):
+        for struct in self.structures:
+            struct.multi_results.save(struct_name=struct.name)
+
     def set_start_time(self, start_time):
         for struct in self.structures:
             struct.multi_results.set_start_time(start_time)

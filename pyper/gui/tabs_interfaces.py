@@ -691,6 +691,7 @@ class TrackerIface(BaseInterface):
             duration = float(self.end_track_time - self.start_track_time)
             fps = n_frames / duration
             print("Handled {0} frames in {1:.2f} seconds (fps={2:.2f})".format(n_frames, duration, fps))
+        self.tracker.save_results()
 
     @pyqtSlot()
     def start(self):
