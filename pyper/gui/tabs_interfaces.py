@@ -954,6 +954,13 @@ class TrackerIface(BaseInterface):
             self.analysis_image_provider2._fig = self.video_analyser.analyse_distances()
 
     @pyqtSlot()
+    def analyse_times(self):
+        if self.tracker is not None:
+            figs = self.video_analyser.analyse_times()
+            self.analysis_image_provider._fig = figs[0]
+            self.analysis_image_provider2._fig = figs[1]
+
+    @pyqtSlot()
     def save_angles_fig(self):
         """
         Save the graph as a png or jpeg image
