@@ -146,12 +146,18 @@ class GuiParameters(QObject, Parameters):
         if hasattr(self, 'src_path'):  # FIXME: should check vs None
             src_dir = os.path.dirname(self.src_path)
         else:
-            src_dir = os.getenv('HOME')
+            src_dir = os.path.expanduser('~')  # HOME may not be set in windows
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         path = diag.getOpenFileName(parent=diag,
                                     caption='Open file',
                                     directory=src_dir,
-                                    filter=VIDEO_FILTERS)
+                                    filter=VIDEO_FILTERS,
+                                    initialFilter='',
+                                    options=opt)
         src_path = path[0]
         if src_path:
             self.src_path = src_path
@@ -162,12 +168,19 @@ class GuiParameters(QObject, Parameters):
     def set_save_path(self, path):
         """ The QT dialog to select the path to save the recorded video """
         diag = QFileDialog()
+        default_dir = os.path.expanduser('~')  # os.getenv('HOME') is not always populated on Windows
+        default_dir = default_dir if default_dir is not None else ''
         if not path:
+            if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+                opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+            else:
+                opt = QFileDialog.Options()
             path = diag.getSaveFileName(parent=diag,
                                         caption='Save file',
-                                        directory=os.getenv('HOME'),
+                                        directory=default_dir,
                                         filter=VIDEO_FILTERS,
-                                        initialFilter="Videos (*.avi)")
+                                        initialFilter="Videos (*.avi)",
+                                        options=opt)
             dest_path = path[0]
         else:
             dest_path = path if (os.path.splitext(path)[1] in VIDEO_FORMATS) else ""

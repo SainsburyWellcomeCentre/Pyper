@@ -39,10 +39,15 @@ class EditorIface(QObject):
     @pyqtSlot(result=str)
     def open_plugin_code(self):
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         path = diag.getOpenFileName(parent=diag,
                                     caption='Open file',
                                     directory=self.plugin_dir,
-                                    filter="*.py")
+                                    filter="*.py",
+                                    options=opt)
         src_path = path[0]
         if src_path:
             self.src_path = src_path
@@ -55,10 +60,15 @@ class EditorIface(QObject):
     @pyqtSlot(str)
     def save_plugin_code(self, src_code):
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         path = diag.getSaveFileName(parent=diag,
                                     caption='Save file',
                                     directory=self.plugin_dir,
-                                    filter="*.py")
+                                    filter="*.py",
+                                    options=opt)
         dest_path = path[0]
         if not dest_path.endswith('.py'):
             dest_path += '.py'
