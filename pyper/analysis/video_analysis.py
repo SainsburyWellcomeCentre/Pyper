@@ -14,6 +14,7 @@ from __future__ import division
 
 import math
 import os
+import sys
 
 import numpy as np
 import numpy.linalg as la
@@ -69,10 +70,15 @@ class VideoAnalyser(object):
         Save the graph as a png or jpeg image
         """
         diag = QFileDialog()
+        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
+            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
+        else:
+            opt = QFileDialog.Options()
         dest_path = diag.getSaveFileName(parent=diag,
                                          caption='Save file',
                                          directory=os.getenv('HOME'),
-                                         filter="Image (*.png *.jpg)")
+                                         filter="Image (*.png *.jpg)",
+                                         options=opt)
         dest_path = dest_path[0]
         if dest_path:
             imsave(dest_path, fig)
