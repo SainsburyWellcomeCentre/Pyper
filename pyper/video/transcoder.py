@@ -9,8 +9,8 @@ This may be required if your player doesn't support your format or to fix some v
 :author: crousse
 """
 
-import math
 import os
+import math
 
 import numpy as np
 from skimage.transform import resize

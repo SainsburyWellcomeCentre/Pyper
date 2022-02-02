@@ -35,7 +35,6 @@ if IS_PI:
 
 config = conf.config
 
-    
 DEFAULT_CAM = 0
 CODEC = 'mp4v'  # TODO: check which codecs are available
 DEFAULT_FPS = config['global']['default_fps']
@@ -48,6 +47,7 @@ class VideoStream(object):
     """
     A video stream which is supposed to be subclassed for use
     """
+
     def __init__(self, save_path, bg_start, n_background_frames):
         """
         :param str save_path: The path to save the video to (should end in container extension)
@@ -59,17 +59,17 @@ class VideoStream(object):
         self.stream, self.video_writer = self._start_video_capture_session(self.save_path)
         if not hasattr(self, 'size'):
             self.size = DEFAULT_FRAME_SIZE  # TODO: put as option
-        
+
         self.bg_start_frame = bg_start
         self.bg_end_frame = self.bg_start_frame + n_background_frames - 1
-        
+
         self.current_frame_idx = -1  # We start out since we increment upon frame loading
         self.seekable = False
 
     def save(self, frame):  # FIXME: fix video_writer calls (put most in VideoWriter)
         """
         Saves the frame supplied as argument to self.video_writer
-        
+
         :param frame: The frame to save
         :type frame: An image as an array with 1 or 3 color channels
         """
@@ -78,7 +78,7 @@ class VideoStream(object):
             if n_colors == 3:
                 tmp_color_frame = frame
             elif n_colors == 1:
-                tmp_color_frame = np.dstack([frame]*3)
+                tmp_color_frame = np.dstack([frame] * 3)
             else:
                 err_msg = 'Wrong number of color channels, expected 1 or 3, got {}'.format(n_colors)
                 raise VideoStreamTypeException(err_msg)
@@ -87,20 +87,20 @@ class VideoStream(object):
             self.video_writer.write(tmp_color_frame.copy())  # (copy because of dynamic arrays) # FIXME: slow
         else:
             print("skipping save because {} is None".format("frame" if frame is None else "save_path"))
-            
+
     def _init_cam(self):
         pass
-        
+
     def read(self):
         """ Should return the next frame .
-        This is one of the methods that are expected to change the most between 
+        This is one of the methods that are expected to change the most between
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
-    
+
     def _start_video_capture_session(self, src_path):
         """ Should return a stream of frames to be used by read()
         and a VideoWriter object to be used by save()
-        This is one of the methods that are expected to change the most between 
+        This is one of the methods that are expected to change the most between
         implementations. """
         raise NotImplementedError('This method should be defined by subclasses')
 
@@ -138,6 +138,7 @@ class RecordedVideoStream(VideoStream):
     A subclass of VideoStream that supplies the frames from a
     video file
     """
+
     def __init__(self, file_path, bg_start, n_background_frames):
         """
         :param str file_path: The source file path to read for the video
@@ -155,14 +156,14 @@ class RecordedVideoStream(VideoStream):
 
         VideoStream.__init__(self, file_path, bg_start, n_background_frames)
         self.seekable = self.stream.seekable
-        
+
     def _start_video_capture_session(self, file_path):  # TODO: refactor name
         """
         Initiates a VideoCapture object to supply the frames to read
         and a VideoWriter object to save a potential output
-        
+
         :param str file_path: the source file path
-        
+
         :return: capture and video_writer object
         :rtype: (VideoCapture, VideoWriter)
         """
@@ -172,18 +173,18 @@ class RecordedVideoStream(VideoStream):
         save_path = os.path.join(dirname, 'recording.avi')  # Fixme: should use argument
         video_writer = VideoWriter(save_path, 'mp4v', 15, self.size, True)
         return capture, video_writer
-        
+
     def _get_n_frames(self, stream):
         """
         Returns the number of frames in the stream
         Compensates for some bug in OpenCV in finding
         that info in the metadata
-        
+
         :param VideoCapture stream: The stream to use as source
-        
+
         :return: the number of frames in the stream
         :rtype: int
-        
+
         :raises: VideoStreamIOException if video cannot be read
         """
         n_frames = stream.n_frames
@@ -210,14 +211,14 @@ class RecordedVideoStream(VideoStream):
     def seek(self, frame_id):
         self.stream.seek(frame_id)  # FIXME: because of read
         self.current_frame_idx = frame_id
-    
+
     def read(self):  # OPTIMISE: (cast)
         """
         Returns the next frame after updating the count
-        
+
         :return: frame
         :rtype: video_frame.Frame
-        
+
         :raises: EOFError when end of stream is reached
         """
         self.current_frame_idx += 1
@@ -231,9 +232,9 @@ class RecordedVideoStream(VideoStream):
         """
         timeStr Time string in format mm:ss.
         Returns the frame number that corresponds to that time.
-        
+
         :param str time_str: A string of the form 'mm:ss'
-        
+
         :return Idx: The corresponding frame index
         :rtype: int
         """
@@ -244,17 +245,17 @@ class RecordedVideoStream(VideoStream):
         else:
             raise NotImplementedError
         return seconds * self.fps
-        
+
     def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
-        
+
         :param str msg: The message to print on closing.
         """
         VideoStream.stop_recording(self, msg)
         self.stream.reset()
         self.current_frame_idx = -1
-    
+
 
 class UsbVideoStream(VideoStream):
     """
@@ -320,17 +321,17 @@ class UsbVideoStream(VideoStream):
 
         actual_size = (actual_width, actual_height)  # All in openCV nomenclature
         self.size = actual_size
-        if capture.fps is None:
+        if capture.fps is None or capture.fps == 0:
             raise VideoStreamIOException("FPS was not set in videocapture")
         video_writer = VideoWriter(save_path, CODEC, capture.fps, actual_size, is_color=True)  # TEST: capture.fps
         return capture, video_writer
-        
+
     def read(self):
         """ Returns the next frame after updating the count
-        
+
         :return: frame
         :rtype: video_frame.Frame
-        
+
         :raises: VideoStreamFrameException when no frame can be read
         """
         try:
@@ -339,11 +340,11 @@ class UsbVideoStream(VideoStream):
             raise VideoStreamFrameException("UsbVideoStream frame not found")
         self.current_frame_idx += 1
         return Frame(frame.astype(np.float32))
-            
+
     def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
-        
+
         :param str msg: The message to print upon closing.
         """
         self.stream.release()
@@ -356,6 +357,7 @@ class PiVideoStream(VideoStream):
     A subclass of VideoStream for the raspberryPi camera
     which isn't supported by opencv
     """
+
     def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
@@ -378,26 +380,26 @@ class PiVideoStream(VideoStream):
             self._cam.led = False
         else:
             print("LED kept on. To turn off run as root")
-        
+
     def _start_video_capture_session(self, save_path):
         """
         Initiates a picamera.array.PiRGBArray object to store
-        the frames from the picamera when reading 
+        the frames from the picamera when reading
         and a VideoWriter object to save a potential output
-        
+
         :param str save_path: the destination file path
-        
+
         :return: array and video_writer object
         :type: (picamera.array.PiRGBArray, VideoWriter)
         """
         video_writer = VideoWriter(save_path, CODEC, self.fps, DEFAULT_FRAME_SIZE)
         stream = picamera.array.PiRGBArray(self._cam)
         return stream, video_writer
-        
+
     def read(self):
         """
         Returns the next frame after updating the count
-        
+
         :return: A video frame
         :rtype: video_frame.Frame
         """
@@ -408,11 +410,11 @@ class PiVideoStream(VideoStream):
         stream.truncate(0)
         self.current_frame_idx += 1
         return Frame(frame.astype(np.float32))
-        
+
     def restart_recording(self, reset):
         """
         Restarts the camera and potentially resets the output stream and frame index
-        
+
         :param bool reset: Whether to reset the output stream (overwrite previous) and frame index
         """
         if self._cam.closed:
@@ -420,23 +422,24 @@ class PiVideoStream(VideoStream):
         if reset:
             self.stream, self.video_writer = self._start_video_capture_session(self.save_path)
             self.current_frame_idx = -1
-    
+
     def stop_recording(self, msg):
         """
         Stops recording and performs cleanup actions
-        
+
         :param str msg: The message to print before closing.
         """
         VideoStream.stop_recording(self, msg)
         self._cam.close_encoder()
         self._cam.close()
 
-    
+
 class QuickRecordedVideoStream(RecordedVideoStream):
     """
     A subclass of RecordedVideoStream that supplies the frames from a
     video file but allows seeking (downscales the video (* 0.2) and loads everything in a numpy array.
     """
+
     def __init__(self, file_path, bg_start, n_background_frames):
         """
         :param str file_path: The source file path to read for the video
@@ -450,19 +453,19 @@ class QuickRecordedVideoStream(RecordedVideoStream):
         self.fourcc = self.stream.fourcc
         self.fps = self.stream.fps
         self.duration = self.n_frames / float(self.fps)
-        
+
     def _get_n_frames(self, stream):
         """
         Returns the number of frames in the stream
         Compensates for some bug in opencv in finding
         that info in the metadata
-        
+
         :param stream: The stream to use as source
         :type stream: stream that supports read()
-        
+
         :return: the number of frames in the stream
         :rtype: int
-        
+
         :raises: VideoStreamIOException if video cannot be read
         """
         n_frames = 0
@@ -479,14 +482,14 @@ class QuickRecordedVideoStream(RecordedVideoStream):
             raise VideoStreamIOException("Could not read video")
         else:
             return n_frames
-    
+
     def read(self, idx=None):
         """
         Returns the next frame after updating the count
-        
+
         :return: frame
         :rtype: video_frame.Frame
-        
+
         :raises: EOFError when end of stream is reached
         """
         if idx is None:
@@ -503,6 +506,7 @@ class ImageListVideoStream(object):
     """
     A minimalist VideoStream it just implements the read() method to return images from a list
     """
+
     def __init__(self, imgs_list):
         """
         :param list imgs_list: The list of images constituting the stream
@@ -517,10 +521,10 @@ class ImageListVideoStream(object):
     def read(self):
         """
         Returns the next frame after updating the count
-        
+
         :return: frame
         :rtype: video_frame.Frame
-        
+
         :raises: EOFError when end of stream is reached
         """
         if self.current_frame_idx > (len(self.imgs) - 1):
@@ -553,7 +557,9 @@ class KinectV2RgbVideoStream(VideoStream):
         try:
             frame = self.stream.read()
         except VideoCaptureGrabError:
-            raise VideoStreamFrameException("KinectV2RrbVideoStream frame not found")
+            # self.stream.close()
+            # self.stream.initialize_kinect()
+            raise VideoStreamFrameException("KinectV2RgbVideoStream frame not found")
         self.current_frame_idx += 1
         return Frame(frame.astype(np.float32))
 
@@ -571,7 +577,7 @@ class KinectV2RgbVideoStream(VideoStream):
         self.size = self.stream.get_shape()
         # if capture.fps is None:
         #     raise VideoStreamIOException("FPS was not set in videocapture")
-        video_writer = VideoWriter(save_path, CODEC, self.stream.max_fps, self.size, is_color=True)
+        video_writer = VideoWriter(save_path, CODEC, self.stream.max_fps, self.size, is_color=True)  # TEST: capture.fps
         return self.stream, video_writer
 
     def stop_recording(self, msg):
