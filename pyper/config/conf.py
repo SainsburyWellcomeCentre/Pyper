@@ -9,7 +9,7 @@ conf_file_name = 'pyper.conf'
 
 # The config will be read with this priority
 config_dirs = [
-    os.path.join(user_config_dir, conf_file_name),
+    user_config_dir,
     global_config_directory,
     'config',  # WARNING: relies on working directory
     '../config',  # For sphinx doc  # TODO: add check that run by sphinx
