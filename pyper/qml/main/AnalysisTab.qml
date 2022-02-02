@@ -81,7 +81,7 @@ Rectangle {
                 id: trackingControlsGrid
                 anchors.left: parent.left
 
-                columns: 2
+                columns: 3
                 rows: 2
                 spacing: 10
                 CustomLabeledButton{
@@ -131,6 +131,20 @@ Rectangle {
                         } else if (recordingLabel.checked){
                             py_recorder.analyse_distances();
                         }
+                        analysisImage2.reload();
+                    }
+                }
+                CustomLabeledButton{
+                    width: 80
+                    height: 30
+                    label: "Times"
+                    onClicked: {
+                        if (trackingLabel.checked){
+                            py_tracker.analyse_times();
+                        } else if (recordingLabel.checked){
+                            py_recorder.analyse_times();
+                        }
+                        analysisImage.reload();
                         analysisImage2.reload();
                     }
                 }

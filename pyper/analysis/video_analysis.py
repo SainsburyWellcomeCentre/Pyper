@@ -43,6 +43,18 @@ class VideoAnalyser(object):
             row.extend(struct.multi_results.get_row(idx))
         return row
 
+    def analyse_times(self):
+        fig1, ax = plt.subplots()
+        fig2, ax2 = plt.subplots()
+        for struct in self.tracker.structures:  # FIXME: add column names
+            for instance_times in struct.multi_results.get_times():
+                times_array = np.array(instance_times)
+                diff = np.diff(times_array)
+                ax.plot(diff)
+                histogram = np.histogram(diff, bins=25, range=(0.008, 0.066))
+                ax2.plot(histogram[1][:-1], histogram[0])
+        return fig1, fig2
+
     def analyse_angles(self):
         """
         Compute and plot the angles between the segment Pn -> Pn+1 and Pn+1 -> Pn+2

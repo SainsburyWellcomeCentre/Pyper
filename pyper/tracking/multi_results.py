@@ -112,6 +112,9 @@ class MultiResults(object):
     def get_positions(self):
         return np.stack([res.positions for res in self.results])
 
+    def get_times(self):
+        return np.stack([res.times for res in self.results])
+
     def plotting_positions(self):
         pos = self.get_positions()
         non_default_pos_idx = np.column_stack([res.non_default_pos_idx() for res in self.results])
