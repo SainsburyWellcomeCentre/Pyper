@@ -6,6 +6,8 @@ import pandas as pd
 
 class TrackingResults(object):
     def __init__(self):
+        self.start_time = None
+
         self.times = []
         self.xs = []
         self.ys = []
@@ -15,10 +17,9 @@ class TrackingResults(object):
         self.distances_from_arena_ys = []
         self.in_tracking_roi = []
 
-        self.start_time = None
+        self.only_defaults = True
 
         self.default_pos = -1
-        self.only_defaults = True
         self.default_measure = float('NaN')
         self.default_area = 0.
         self.default_distance_from_arena = float('NaN')
@@ -33,6 +34,8 @@ class TrackingResults(object):
         self.distances_from_arena_xs = []
         self.distances_from_arena_ys = []
         self.in_tracking_roi = []
+
+        self.only_defaults = True
 
     def reset(self):
         self._reset()
@@ -111,7 +114,7 @@ class TrackingResults(object):
     def overwrite_last_pos(self, position):
         self.xs[-1] = position[0]
         self.ys[-1] = position[1]
-        if (position != self.default_pos).all():
+        if self.only_defaults and (position != self.default_pos).all():
             self.only_defaults = False  # REFACTOR: replace by
 
     def overwrite_last_measure(self, measure):
@@ -213,11 +216,12 @@ class TrackingResults(object):
         self.in_tracking_roi.append(self.in_tracking_roi[-1])
 
     def update(self, position, area, measure, distances):  # TODO: see if add in_tracking_roi
-        self.overwrite_last_pos(position)
-        self.overwrite_last_measure(measure)
-        self.overwrite_last_area(area)
-        if distances[0] is not None:
-            self.overwrite_last_dist_from_arena(distances)
+        if self.xs:  # See if boolean instead
+            self.overwrite_last_pos(position)
+            self.overwrite_last_measure(measure)
+            self.overwrite_last_area(area)
+            if distances[0] is not None:
+                self.overwrite_last_dist_from_arena(distances)
 
     def has_non_default_position(self):
         return not self.only_defaults
