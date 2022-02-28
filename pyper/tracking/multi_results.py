@@ -111,6 +111,7 @@ class MultiResults(object):
             else:
                 arena_distances = (arena.dist_from_centre(pos), arena.dist_from_border(pos))
             self.results[src_idx].update(pos, areas[i], measures[i], arena_distances)
+            self.results[src_idx].last_contour = contours[i]  # FIXME: check match index
         # TODO: Check that sizes match with previous round
 
     def get_row(self, idx):
@@ -152,6 +153,8 @@ class MultiResults(object):
         teleporters = [False] * len(self.results)
         for i, res in enumerate(self.results):
             last_vector = res.get_last_movement_vector()
+            if last_vector is None:
+                return
             if (last_vector > self.params.max_movement).any():
                 print('structure {} teleported'.format(i))
                 teleporters[i] = True
