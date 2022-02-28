@@ -1,6 +1,7 @@
 import os
 import time
 import platform
+from bisect import bisect_left
 
 import cv2
 from PyQt5.QtCore import QTimer
@@ -150,6 +151,14 @@ def un_file(file_path):
             file_path = file_path[1:]
         file_path = os.path.normpath(file_path)
     return file_path
+
+
+def find_ge(a, x):  # From the STL
+    """Find leftmost item greater than or equal to x"""
+    i = bisect_left(a, x)
+    if i != len(a):
+        return a[i]
+    raise ValueError
 
 
 def increment_path(src_path):
