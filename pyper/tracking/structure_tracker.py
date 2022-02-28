@@ -3,9 +3,13 @@ This is module contains the StructureTracker class.
 A tracked structure is an object or group of objects with the same identity and tracking parameters.
 This can be the specimen or it can be a set elements in the field of view that share the same detection parameters.
 """
+import os
+from time import time
+
 import cv2
 import numpy as np
 
+from pyper.exceptions.exceptions import PyperValueError
 from pyper.utilities import utils
 from pyper.utilities.utils import increment_path, prompt_save
 
@@ -38,6 +42,10 @@ class StructureTracker(object):
         self.measure_roi = None
         self.bottom_square = None
 
+        self.params.callback_roi_check_method = 'border'    # FIXME: hard coded (subclass ?)
+
+        self.last_sent = time()
+
     def __del__(self):
         self.close_all()
 
@@ -55,10 +63,27 @@ class StructureTracker(object):
         if self.roi is not None:
             if self.multi_results.last_pos_is_default():
                 return
-            for i, pos in enumerate([res.get_last_position() for res in self.multi_results.results]):
-                if self.roi.contains_point(pos):
-                    self.handle_object_in_tracking_roi(i, sil)
-                    in_roi = True
+            if self.params.callback_roi_check_method == 'center':
+                for i, pos in enumerate([res.get_last_position() for res in self.multi_results.results]):
+                    if self.roi.contains_point(pos):
+                        self.handle_object_in_tracking_roi(i, sil)
+                        in_roi = True
+            elif self.params.callback_roi_check_method == 'border':
+                for i, cnt in enumerate([res.last_contour for res in self.multi_results.results]):
+                    rotated_rect = cv2.boxPoints(cv2.fitEllipse(cnt.contour))
+                    pts = np.int0(rotated_rect)
+                    roi_points = self.roi.points[::15]
+                    if (roi_points[-1] == roi_points[0]).all():
+                        roi_points = roi_points[:-1]
+                    roi_points = roi_points.astype(np.int32)
+                    intersect_area, _ = cv2.intersectConvexConvex(roi_points, pts, handleNested=True)
+                    cv2.drawContours(sil, [pts], 0, (0, 0, 255), 2)
+                    # cv2.drawContours(sil, [roi_points], 0, (0, 255, 0), 5)
+                    if intersect_area:
+                        self.handle_object_in_tracking_roi(i, sil)
+                        in_roi = True
+            else:
+                raise PyperValueError('Unsupported Roi check method {}'.format(self.params.callback_roi_check_method))
         return in_roi
 
     def handle_object_in_tracking_roi(self, struct_idx, frame):  # REFACTOR: part of roi add Callback class with call method
