@@ -11,7 +11,7 @@ from pyper.config.parameters import Parameters
 from pyper.config.conf import config
 from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.tabs_interfaces import STRUCTURE_TRACKER_CLASSES, VIDEO_FILTERS, VIDEO_FORMATS
-from pyper.utilities.utils import un_file
+from pyper.utilities.utils import un_file, display_warning
 from pyper.camera.kinect_cam import KINECT_AVAILABLE
 from pyper.camera.realsense_cam import REALSENSE_AVAILABLE
 
@@ -21,7 +21,7 @@ class AdvancedThresholdingParameters(object):
         self.is_enabled = False
         self.min_threshold = config['tracker']['advanced_thresholding']['min_threshold'].copy()
         self.max_threshold = config['tracker']['advanced_thresholding']['max_threshold'].copy()
-        self.min_area = config['tracker']['detection']['min_area']
+        self.min_area = config['tracker']['detection']['min_area']  # FIXME: re read
         self.max_area = config['tracker']['detection']['max_area']
         self.n_structures_max = config['tracker']['detection']['n_structures_max']  # Default number of structures  # FIXME: set graphically
         self.tracker_class = STRUCTURE_TRACKER_CLASSES['default']
@@ -59,6 +59,9 @@ class GuiParameters(QObject, Parameters):
 
         self.current_object = ''
         self.structures = {}
+
+        self.info_window = self.win.findChild(QObject, "infoScreen")
+        self.error_window = self.win.findChild(QObject, "errorScreen")
 
     def __del__(self):
         """
@@ -200,7 +203,12 @@ class GuiParameters(QObject, Parameters):
             for d in CONFIG_DIRS:
                 if os.path.exists(d):
                     ref_path = os.path.abspath(os.path.join(d, 'ref.png'))
-                    break
+                    if os.path.exists(ref_path):
+                        display_warning('', 'Ref loaded', modal=False)
+                        break
+                    else:
+                        display_warning('', "No default reference frame saved, aborting", modal=False)
+                        return
         ref_path = un_file(ref_path)
         if os.path.splitext(ref_path)[1]:
             self.ref = imread(ref_path)

@@ -27,22 +27,21 @@ from pyper.gui.gui_tracker import GuiTracker
 from pyper.gui.gui_live_cam import GuiPreviewer
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
-from matplotlib import pyplot as plt
 
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
-from pyper.utilities.utils import qurl_to_str, un_file
+from pyper.utilities.utils import qurl_to_str, un_file, display_warning
 from pyper.video.video_stream import RecordedVideoStream, QuickRecordedVideoStream, ImageListVideoStream
 from pyper.tracking.structure_tracker import ColorStructureTracker, StructureTrackerGui, HsvStructureTracker
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
 from pyper.camera.camera_calibration import CameraCalibration
 from pyper.gui.image_providers import CvImageProvider
 from pyper.video.cv_wrappers import helpers as cv_helpers
-from pyper.analysis import video_analysis
 
 from pyper.exceptions.exceptions import VideoStreamIOException, PyperError
 from pyper.config import conf
+
 config = conf.config
 
 VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg *.mp4)"
@@ -301,6 +300,8 @@ class BaseInterface(QObject):
             else:
                 ref_frame = self.stream.read()
             imsave(dest_path, ref_frame)
+            if not prompt:
+                display_warning('', 'Ref saved', modal=False)
         self.timer.start(self.timer_speed)
 
     def _prompt_ref_save(self):

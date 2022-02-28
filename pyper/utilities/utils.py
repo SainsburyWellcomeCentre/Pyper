@@ -3,6 +3,9 @@ import time
 import platform
 
 import cv2
+from PyQt5.QtCore import QTimer
+
+from PyQt5.QtWidgets import QMessageBox
 
 try:
     from HTMLParser import HTMLParser
@@ -21,6 +24,33 @@ colors = {'w': (255, 255, 255),
           'y': (0, 255, 255),
           'c': (255, 255, 0),
           'm': (255, 0, 255)}
+
+
+def prompt_save(msg, detailed_msg):
+    msg_box = QMessageBox()
+    # msg_box.setWindowTitle()
+    msg_box.setIcon(QMessageBox.Question)
+    msg_box.setText(msg)
+    msg_box.setDetailedText(detailed_msg)
+    msg_box.setStandardButtons(QMessageBox.Save | QMessageBox.Discard)
+    msg_box.setDefaultButton(QMessageBox.Save)
+    ret_val = msg_box.exec()
+    return ret_val == QMessageBox.Save
+
+
+def display_warning(err, message, modal=True):
+    msg_box = QMessageBox()
+    msg_box.setWindowTitle('WARNING')
+    msg_box.setIcon(QMessageBox.Warning)
+    msg_box.setText('{}: {}'.format(message, str(err)))
+    if modal:
+        msg_box.setStandardButtons(QMessageBox.Retry | QMessageBox.Cancel)
+        ret_val = msg_box.exec()
+        return ret_val
+    else:
+        msg_box.setStandardButtons(QMessageBox.NoButton)
+        QTimer.singleShot(1500, msg_box.accept)
+        msg_box.exec_()
 
 
 class HtmlStripper(HTMLParser):
