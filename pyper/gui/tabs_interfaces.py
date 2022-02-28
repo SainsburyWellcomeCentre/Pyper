@@ -44,8 +44,8 @@ from pyper.config import conf
 
 config = conf.config
 
-VIDEO_FILTERS = "Videos (*.avi *.h264 *.mpg *.mp4)"
-VIDEO_FORMATS = ('.avi', '.h264', '.mpg', '.mp4')
+VIDEO_FILTERS = "Videos (*.mp4 *.avi *.h264 *.mpg *.mkv)"
+VIDEO_FORMATS = ('.mp4', '.avi', '.h264', '.mpg', '.mkv')
 
 STRUCTURE_TRACKER_CLASSES = {
     'default': StructureTrackerGui,
