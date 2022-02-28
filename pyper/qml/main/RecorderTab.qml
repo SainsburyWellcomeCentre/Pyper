@@ -95,7 +95,9 @@ Rectangle {
                         enabled: false
                         onClicked:{
                             py_recorder.stop()
-                            recordBtn.enabled = true;
+                            if (pathTextField.text != "...") {
+                                recordBtn.enabled = true;
+                            }
                             liveBtn.enabled = true;
                             enabled = false;
                         }
@@ -220,6 +222,7 @@ Rectangle {
         }
         TextField{
             id: pathTextField
+            objectName: "pathTextField"
             width: 400
             anchors.verticalCenter: pathBtn.verticalCenter
             text: "..."
