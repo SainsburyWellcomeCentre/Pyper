@@ -28,7 +28,6 @@ from pyper.video.video_stream import RecordedVideoStream
 
 # TODO: see if can avoid to swap axis multiple times for Transcoder below
 
-
 class TranscoderIface(TrackerIface):
     CODECS_TO_EXTS = {".mp4": "MPG4",
                       ".mpg": "MPG4",

@@ -54,7 +54,7 @@ STRUCTURE_TRACKER_CLASSES = {
     'hsv': HsvStructureTracker,
     'rgb': ColorStructureTracker,  # OPTIMISE: split based on colour order
     'bgr': ColorStructureTracker
-        # FIXME: add pupil structuretracker PupilGuiTracker
+    # FIXME: add pupil structuretracker PupilGuiTracker
 }
 
 
@@ -66,6 +66,7 @@ class BaseInterface(QObject):
     It supplies the base methods and attributes to register an object with video in qml.
     It also possesses an instance of ParamsIface to 
     """
+
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         """
 
@@ -199,7 +200,6 @@ class BaseInterface(QObject):
             return False
         # FIXME: add resampling to fit video length
 
-
     @pyqtSlot(str, result=bool)
     def load_ethogram_data(self, ethograph_obj_name):
         diag = QFileDialog()
@@ -322,6 +322,7 @@ class PlayerInterface(BaseInterface):
     """
     This (abstract) class extends the BaseInterface to allow controllable videos (play, pause, forward...)
     """
+
     @pyqtSlot()
     def play(self):
         """
@@ -412,6 +413,7 @@ class CalibrationIface(PlayerInterface):
     It uses the CameraCalibration class to compute the camera matrix from a set of images containing a
     chessboard pattern.
     """
+
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
@@ -541,6 +543,7 @@ class TrackerIface(BaseInterface):
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker (or subclass thereof) object of the tracking module.
     """
+
     def __init__(self, app, context, parent, params, display_name, provider_name,
                  analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
@@ -718,6 +721,7 @@ class TrackerIface(BaseInterface):
         A method to be overwritten to allow execution of custom code before start in
         derived classes
         """
+        self.tracker.open_all()
         self.start_track_time = time()
         # self.timer_speed = int(1 / self.tracker._stream.stream.fps)
         self.tracker.set_start_time(self.start_track_time)
@@ -749,6 +753,7 @@ class TrackerIface(BaseInterface):
         """
         The qt slot to self._stop()
         """
+        self.tracker.close_all()
         self._stop('Recording stopped manually')
         
     def _stop(self, msg):
@@ -926,7 +931,6 @@ class TrackerIface(BaseInterface):
         dest_path = dest_path[0]
         if dest_path:
             self.tracker.multi_results.to_csv(dest_path)
-
 
     @pyqtSlot(QVariant)
     def set_frame_type(self, output_type):

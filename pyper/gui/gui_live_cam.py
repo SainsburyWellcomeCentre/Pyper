@@ -26,6 +26,7 @@ class GuiPreviewer(Tracker):
             dest_file_path = os.path.join(tempfile.gettempdir(), 'pyper_preview_video.mp4')
         Tracker.__init__(self, params, src_file_path=src_file_path, dest_file_path=dest_file_path,
                          camera_calibration=camera_calibration, requested_fps=requested_fps)
+        self.close_all()
         self.ui_iface = ui_iface
         self.record = dest_file_path is not None
         self.plt_curve = None

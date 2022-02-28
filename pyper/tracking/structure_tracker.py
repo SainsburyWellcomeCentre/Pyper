@@ -35,6 +35,10 @@ class StructureTracker(object):
         self.measure_roi = None
         self.bottom_square = None
 
+    def __del__(self):
+        self.close_all()
+
+
     def reset(self):
         self.multi_results.reset()
         # TODO: see if reset self.contour_handler ...

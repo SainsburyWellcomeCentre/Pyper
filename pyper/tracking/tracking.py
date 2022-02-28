@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from pyper.contours.contours_manager import ContoursManager
 from pyper.exceptions.exceptions import VideoStreamTypeException
-from pyper.tracking.structure_tracker import StructureTracker
+from pyper.tracking.structure_tracker import StructureTracker  # WARNING: Required for dynamic loading of classes
 from pyper.tracking.tracking_background import Background
 from pyper.video.video_frame import Frame, update_img
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException, \
@@ -100,6 +100,14 @@ class Tracker(object):
     def save_results(self):
         for struct in self.structures:
             struct.multi_results.save(struct_name=struct.name)
+
+    def close_all(self):
+        for struct in self.structures:
+            struct.close_all()
+
+    def open_all(self):
+        for struct in self.structures:
+            struct.open_all()
 
     def set_start_time(self, start_time):
         for struct in self.structures:
