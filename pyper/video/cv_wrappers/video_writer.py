@@ -42,6 +42,10 @@ class VideoWriter(object):
                                        .format(codec_name, self.codec, container))
         # TODO: use helpers to find alternative available codec/container pair
 
+    def reset(self):
+        self.release()
+        self.open()
+
     def open(self):
         self.writer.open(self.save_path, self.codec, self.fps, self.frame_shape, self.is_color)
         if not self.is_opened():
