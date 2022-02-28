@@ -1052,8 +1052,10 @@ class RecorderIface(TrackerIface):
 
         self._set_display()
         self._update_img_provider()
-        
-        self.tracker.set_roi(self.rois['tracking'], 0)  # FIXME:
+
+        if self.tracker is not None:
+            self.tracker.set_roi(self.rois['tracking'], 0)  # FIXME: should do for all indexes
+            self.tracker.set_tracking_region_roi(self.rois['restriction'], 0)
 
         self.pre_track()
         period = round((1 / self.tracker._stream.stream.fps) * 1000)
