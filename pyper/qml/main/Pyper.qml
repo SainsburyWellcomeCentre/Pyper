@@ -356,6 +356,7 @@ ApplicationWindow {
 
                 InfoScreen {
                     id: infoScreen
+                    objectName: "infoScreen"
                     width: 400
                     height: 200
                     text: "Video selected\n Please proceed to preview or tracking"
@@ -367,6 +368,7 @@ ApplicationWindow {
 
                 ErrorScreen {
                     id: errorScreen
+                    objectName: "errorScreen"
                     width: 400
                     height: 200
                     text: "No video selected"
