@@ -52,6 +52,7 @@ class StructureTracker(object):
 
     def reset(self):
         self.multi_results.reset()
+        self.multi_results.append_defaults()
         # TODO: see if reset self.contour_handler ...
 
     def check_specimen_in_roi(self, sil):
