@@ -25,6 +25,7 @@ from pyper.contours.contours_manager import ContoursManager
 from pyper.exceptions.exceptions import VideoStreamTypeException
 from pyper.tracking.structure_tracker import StructureTracker  # WARNING: Required for dynamic loading of classes
 from pyper.tracking.tracking_background import Background
+from pyper.utilities.utils import split_file_name_digits
 from pyper.video.video_frame import Frame, update_img
 from pyper.video.video_stream import PiVideoStream, UsbVideoStream, RecordedVideoStream, VideoStreamFrameException, \
     IS_PI, RealSenseRgbVideoStream, KinectV2RgbVideoStream
@@ -69,8 +70,13 @@ class Tracker(object):
                 else:
                     raise VideoStreamTypeException('"{}" is not a valid camera type. Supported types are {}'
                                                    .format(cam_name, ("usbX", "kinect", "realsense")))
-                base_path, ext = os.path.splitext(dest_file_path)
-                raw_out_path = "{}_raw{}".format(base_path, ext)
+                base_name, ext, idx, n_digits = split_file_name_digits(dest_file_path)
+                if idx is not None:
+                    raw_out_path = '{}raw_{}{}'.format(base_name, str(idx).zfill(n_digits), ext)
+                    raw_out_path = os.path.join(os.path.dirname(dest_file_path), raw_out_path)
+                else:
+                    base_path, ext = os.path.splitext(dest_file_path)
+                    raw_out_path = "{}_raw{}".format(base_path, ext)
                 self.raw_out_stream = VideoWriter(raw_out_path,
                                                   self._stream.video_writer.codec,
                                                   self._stream.video_writer.fps,
@@ -90,8 +96,9 @@ class Tracker(object):
         for struct_name, struct_params in self.params.structures.items():
             if struct_params.is_enabled:
                 struct_class = struct_params.tracker_class
-                self.structures.append(struct_class(struct_name, self.params, struct_params,
-                                                    arena=self.arena, stream=self._stream, background=self.bg))
+                self.structures.append(struct_class(struct_name, self.params, struct_params, arena=self.arena,
+                                                    stream=self._stream, raw_stream=self.raw_out_stream,
+                                                    background=self.bg))
 
     def reset_measures(self):
         for struct in self.structures:

@@ -150,3 +150,35 @@ def un_file(file_path):
             file_path = file_path[1:]
         file_path = os.path.normpath(file_path)
     return file_path
+
+
+def increment_path(src_path):
+    base_name, ext, idx, n_digits = split_file_name_digits(src_path)
+    if idx is None:
+        raise ValueError('Could not increment path "{}", no trailing number found'.format(src_path))
+    f_name = base_name + str(idx + 1).zfill(n_digits) + ext
+    incremented_path = os.path.join(os.path.dirname(src_path), f_name)
+    return incremented_path
+
+
+def extract_trailing_digits(in_str):
+    out = []
+    for c in in_str[::-1]:
+        if c.isdecimal():
+            out += c
+        else:
+            break
+    return ''.join(out[::-1])
+
+
+def split_file_name_digits(f_path):
+    src_f_name = os.path.splitext(os.path.basename(f_path))
+    base_name, ext = src_f_name
+    digits_as_str = extract_trailing_digits(base_name)
+    if digits_as_str:
+        idx = int(digits_as_str)
+        n_digits = len(digits_as_str)
+        base_name = base_name[:-n_digits]
+    else:
+        idx, n_digits = None, None
+    return base_name, ext, idx, n_digits

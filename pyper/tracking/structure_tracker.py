@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 
 from pyper.utilities import utils
+from pyper.utilities.utils import increment_path, prompt_save
+
 from pyper.video.video_frame import update_img, Frame
 from pyper.video.video_stream import IS_PI
 from pyper.tracking.multi_results import MultiResults
@@ -18,7 +20,7 @@ class StructureTracker(object):
     Corresponds to the tracker of 1 structure with potentially several parts (e.g. structure=red cubes, where there
     are 3 cubes)
     """
-    def __init__(self, name, main_params, thresholding_params, arena=None, stream=None, background=None):  # FIXME: plot color option to differentiate
+    def __init__(self, name, main_params, thresholding_params, arena=None, stream=None, raw_stream=None, background=None):  # FIXME: plot color option to differentiate
         self.name = name
         self.params = main_params
         self.thresholding_params = thresholding_params
@@ -27,6 +29,7 @@ class StructureTracker(object):
         self.mask = None  # np.emtpy(), but not necessary as will use first frame shape
 
         self._stream = stream
+        self._raw_stream = raw_stream
         self.bg = background
 
         self.arena = arena

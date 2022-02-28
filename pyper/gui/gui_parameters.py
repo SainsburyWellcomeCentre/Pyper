@@ -178,15 +178,14 @@ class GuiParameters(QObject, Parameters):
         default_dir = os.path.expanduser('~')  # os.getenv('HOME') is not always populated on Windows
         default_dir = default_dir if default_dir is not None else ''
         if not path:
+            opt = QFileDialog.Options(QFileDialog.DontConfirmOverwrite)
             if sys.platform == 'win32':  # avoids bug with windows COM object init failed
-                opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
-            else:
-                opt = QFileDialog.Options()
+                opt |= QFileDialog.DontUseNativeDialog
             path = diag.getSaveFileName(parent=diag,
                                         caption='Save file',
                                         directory=default_dir,
                                         filter=VIDEO_FILTERS,
-                                        initialFilter="Videos (*.avi)",
+                                        initialFilter="Videos (*.mp4)",
                                         options=opt)
             dest_path = path[0]
         else:

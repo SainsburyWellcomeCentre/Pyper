@@ -31,7 +31,7 @@ matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
-from pyper.utilities.utils import qurl_to_str, un_file, display_warning
+from pyper.utilities.utils import qurl_to_str, split_file_name_digits, display_warning, increment_path
 from pyper.video.video_stream import RecordedVideoStream, QuickRecordedVideoStream, ImageListVideoStream
 from pyper.tracking.structure_tracker import ColorStructureTracker, StructureTrackerGui, HsvStructureTracker
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
@@ -1005,10 +1005,22 @@ class RecorderIface(TrackerIface):
         """
         if not hasattr(self.params, 'dest_path'):
             return False
+        else:
+            self.params.dest_path = os.path.normpath(self.params.dest_path)
         vid_ext = os.path.splitext(self.params.dest_path)[1]
-        if vid_ext not in VIDEO_FORMATS:
-            print('Unknown format: {}'.format(vid_ext))
+        if not vid_ext:
+            print('No file format selected, defaulting to {}'.format(VIDEO_FORMATS[0]))
+            vid_ext = VIDEO_FORMATS[0]
+            self.params.dest_path += vid_ext
+            self.update_ui_dest_path()
+        elif vid_ext not in VIDEO_FORMATS:
+            display_warning('', 'Unknown format: {}'.format(vid_ext), modal=False)
             return False
+
+        if os.path.exists(self.params.dest_path):
+            self._handle_existing_dest_file_path()
+            if self.params.dest_path is None:
+                return
 
         self._reset_measures()
 
@@ -1105,3 +1117,33 @@ class RecorderIface(TrackerIface):
 
     def get_img(self):
         self.display.reload()
+
+    def _warn_existing_dest_file_path(self):
+        dlg = QMessageBox()
+        dlg.setIcon(QMessageBox.Warning)
+        dlg.setWindowTitle('Warning')
+        dlg.setText('<b>{}</b>'.format("File exists"))
+        dlg.setInformativeText("Destination file exists. <br>Do you want to increment or overwrite ?")
+
+        dlg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel | QMessageBox.Apply)
+        increment_btn = dlg.button(QMessageBox.Apply)
+        increment_btn.setText('Increment')
+        dlg.setDefaultButton(increment_btn)
+        return dlg.exec()
+
+    def _handle_existing_dest_file_path(self):
+        action = self._warn_existing_dest_file_path()
+        if action == QMessageBox.Apply:
+            try:
+                self.params.dest_path = increment_path(self.params.dest_path)
+                self.update_ui_dest_path()
+            except ValueError:
+                print('Could not increment file name')  # FIXME: handle better
+                self.params.dest_path = None
+        elif action == QMessageBox.Cancel:
+            self.params.dest_path = None  # FIXME: handle better
+
+    def update_ui_dest_path(self):
+        path_widget = self.win.findChild(QObject, 'pathTextField')
+        path_widget.setProperty('text', self.params.dest_path)
+
