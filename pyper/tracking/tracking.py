@@ -37,7 +37,6 @@ class Tracker(object):
     """
     A tracker object to track a specimen in a video stream
     """
-
     def __init__(self, params, src_file_path=None, dest_file_path=None,
                  camera_calibration=None, requested_fps=None):
         """
@@ -199,8 +198,7 @@ class Tracker(object):
             except EOFError:
                 return [struct.multi_results.positions for struct in self.structures]
 
-    def track_frame(self, pbar=None, record=False,
-                    requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
+    def track_frame(self, pbar=None, record=False, requested_output='raw'):  # TODO: improve calls to "if record: self._stream.save(frame)"
         fid = None  # if undefined before exception
         try:
             frame = self._stream.read()

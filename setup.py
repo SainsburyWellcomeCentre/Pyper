@@ -188,7 +188,7 @@ setup(
     url='https://github.com/SainsburyWellcomeCentre/Pyper',
     license='GPLv2',
     author='Charly Rousseau and Pyper contributors',
-    author_email='Charly Rousseau <c.rousseau@ucl.ac.uk>',
+    author_email='Charly Rousseau <charly.rousseau@icm-institute.org>',
     description='Motion tracking with closed loop abilities',
     classifiers=['Development Status :: 4 - Beta',  # TODO: change for release
                  'Programming Language :: Python',

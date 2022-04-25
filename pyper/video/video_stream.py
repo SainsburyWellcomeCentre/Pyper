@@ -49,7 +49,6 @@ class VideoStream(object):
     """
     A video stream which is supposed to be subclassed for use
     """
-
     def __init__(self, save_path, bg_start, n_background_frames):
         """
         :param str save_path: The path to save the video to (should end in container extension)
@@ -140,7 +139,6 @@ class RecordedVideoStream(VideoStream):
     A subclass of VideoStream that supplies the frames from a
     video file
     """
-
     def __init__(self, file_path, bg_start, n_background_frames):
         """
         :param str file_path: The source file path to read for the video
@@ -359,7 +357,6 @@ class PiVideoStream(VideoStream):
     A subclass of VideoStream for the raspberryPi camera
     which isn't supported by opencv
     """
-
     def __init__(self, save_path, bg_start, n_background_frames, requested_fps=None):
         """
         :param str save_path: The destination file path to save the video to
@@ -441,7 +438,6 @@ class QuickRecordedVideoStream(RecordedVideoStream):
     A subclass of RecordedVideoStream that supplies the frames from a
     video file but allows seeking (downscales the video (* 0.2) and loads everything in a numpy array.
     """
-
     def __init__(self, file_path, bg_start, n_background_frames):
         """
         :param str file_path: The source file path to read for the video
@@ -508,7 +504,6 @@ class ImageListVideoStream(object):
     """
     A minimalist VideoStream it just implements the read() method to return images from a list
     """
-
     def __init__(self, imgs_list):
         """
         :param list imgs_list: The list of images constituting the stream

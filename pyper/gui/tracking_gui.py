@@ -58,7 +58,7 @@ class Logger(QObject):
         if text:
             previous_text = self.log.property('text')
             output_text = '{}\n>>>{}'.format(previous_text, text)
-            self.log.setProperty('text', output_text)
+            self.log.setProperty('text', output_text)  # FIXME: append
 
 
 def main():

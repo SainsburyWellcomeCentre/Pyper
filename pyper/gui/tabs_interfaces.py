@@ -27,6 +27,7 @@ from pyper.gui.gui_tracker import GuiTracker
 from pyper.gui.gui_live_cam import GuiPreviewer
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
+from matplotlib import pyplot as plt
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
@@ -65,7 +66,6 @@ class BaseInterface(QObject):
     It supplies the base methods and attributes to register an object with video in qml.
     It also possesses an instance of ParamsIface to 
     """
-
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         """
 
@@ -323,7 +323,6 @@ class PlayerInterface(BaseInterface):
     """
     This (abstract) class extends the BaseInterface to allow controllable videos (play, pause, forward...)
     """
-
     @pyqtSlot()
     def play(self):
         """
@@ -414,7 +413,6 @@ class CalibrationIface(PlayerInterface):
     It uses the CameraCalibration class to compute the camera matrix from a set of images containing a
     chessboard pattern.
     """
-
     def __init__(self, app, context, parent, params, display_name, provider_name, timer_speed=20):
         PlayerInterface.__init__(self, app, context, parent, params, display_name, provider_name, timer_speed)
         
@@ -544,7 +542,6 @@ class TrackerIface(BaseInterface):
     This class implements the BaseInterface to provide a qml interface
     to the GuiTracker (or subclass thereof) object of the tracking module.
     """
-
     def __init__(self, app, context, parent, params, display_name, provider_name,
                  analysis_provider_1, analysis_provider_2):
         BaseInterface.__init__(self, app, context, parent, params, display_name, provider_name)
@@ -612,7 +609,7 @@ class TrackerIface(BaseInterface):
             error_screen.setProperty('doFlash', True)
             return
         self.stream = self.tracker  # To comply with BaseInterface
-        self.tracker.roi = self.rois['tracking']
+        self.tracker.roi = self.rois['tracking']  # FIXME: check why not tracker.set_roi
 
         self.n_frames = self.tracker._stream.n_frames - 1
         self.current_frame_idx = self.tracker._stream.current_frame_idx
@@ -1028,7 +1025,7 @@ class RecorderIface(TrackerIface):
         self.params.fast = True
         self.params.plot = True
 
-        requested_fps = round(1/(self.params.timer_period / 1000))  # convert period to seconds
+        requested_fps = round(1 / (self.params.timer_period / 1000))  # convert period to seconds
         if __debug__:
             print("Timer period: '{}'ms, requested FPS: '{}'Hz".format(self.params.timer_period, requested_fps))
 
