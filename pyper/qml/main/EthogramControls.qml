@@ -29,7 +29,7 @@ Frame {
         sequence: root.key
         context: Qt.ApplicationShortcut
         onActivated: {
-            py_viewer.switch_ethogram_state("viewerEthogram", idx + 1);    // FIXME: hard coded // TODO: use numericalId + check if can parametrise object
+            py_viewer.switch_ethogram_state("viewerEthogram", numericalId);  // FIXME:: name hard coded
         }
     }
 

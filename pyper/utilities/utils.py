@@ -3,6 +3,8 @@ import time
 import platform
 from bisect import bisect_left
 
+import numpy as np
+
 import cv2
 from PyQt5.QtCore import QTimer
 
@@ -191,3 +193,27 @@ def split_file_name_digits(f_path):
     else:
         idx, n_digits = None, None
     return base_name, ext, idx, n_digits
+
+
+def find_range_starts(src_mask):
+    """
+    For a binary mask of the form:
+    (0,0,0,1,0,1,1,1,0,0,0,1,1,0,0,1)
+    returns:
+    (0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,1)
+    """
+    tmp_mask = np.logical_and(src_mask[1:], np.diff(src_mask))
+    output_mask = np.hstack(([src_mask[0]], tmp_mask))  # reintroduce first element
+    return output_mask
+
+
+def find_range_ends(src_mask):
+    """
+    For a binary mask of the form:
+    (0,0,0,1,0,1,1,1,0,0,0,1,1,0,0,1)
+    returns:
+    (0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1)
+    """
+    tmp_mask = np.logical_and(src_mask[:-1], np.diff(src_mask))
+    output_mask = np.hstack((tmp_mask, src_mask[-1]))  # reintroduce first element
+    return output_mask

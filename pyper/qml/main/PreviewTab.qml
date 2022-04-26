@@ -300,7 +300,7 @@ Rectangle {
         }
         EthogramControlsManager {
             id: ethogramManager
-            pythonObject: py_iface
+            pythonObject: py_viewer
             visible: false
         }
     }

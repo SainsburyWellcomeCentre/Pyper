@@ -18,6 +18,7 @@ from time import time
 
 import matplotlib
 import numpy as np
+import pandas as pd
 from scipy.io import loadmat
 from skimage.io import imsave
 
@@ -32,7 +33,8 @@ from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QObject, pyqtSlot, QVariant, QTimer
 
-from pyper.utilities.utils import qurl_to_str, split_file_name_digits, display_warning, increment_path
+from pyper.utilities.utils import qurl_to_str, split_file_name_digits, display_warning, increment_path, \
+    find_range_starts, find_range_ends
 from pyper.video.video_stream import RecordedVideoStream, QuickRecordedVideoStream, ImageListVideoStream
 from pyper.tracking.structure_tracker import ColorStructureTracker, StructureTrackerGui, HsvStructureTracker
 from pyper.contours.roi import Rectangle, Ellipse, FreehandRoi, Roi, RoiCollection
@@ -221,7 +223,7 @@ class BaseInterface(QObject):
             elif extension == '.mat':
                 self.ethogram_data = loadmat(src_path)  # TEST:
             elif extension == '.csv':
-                self.ethogram_data = np.genfromtext(src_path, delimiter=',')  # TEST:
+                self.ethogram_data = np.genfromtext(src_path, delimiter=',')  # FIXME: pandas
             else:
                 raise PyperError("Unknown extension: {}".format(extension))
             self.__send_ethogram(ethograph_obj_name)
@@ -229,6 +231,15 @@ class BaseInterface(QObject):
             return True
         else:
             return False
+
+    @pyqtSlot(str, int)
+    def remove_behaviour(self, bhv_name, bhv_id):
+        self.behaviours.pop(bhv_name, None)
+        self.ethogram_data[self.ethogram_data == bhv_id] = 0
+
+    @pyqtSlot(str, int)
+    def add_behaviour(self, bhv_name, bhv_id):
+        self.behaviours[bhv_name] = bhv_id
 
     def __get_ethograph_obj(self, ethograph_obj_name):
         return self.win.findChild(QObject, ethograph_obj_name)
@@ -243,6 +254,13 @@ class BaseInterface(QObject):
         self.ethogram_data = np.zeros(round(self.n_frames))
         self.current_behaviour = 0
         self.__send_ethogram(ethograph_obj_name)
+        # FIXME: do from qml and update when name updated
+        self.behaviours = {
+            'none': 0,
+            'idle': 1,
+            'nesting': 2,
+            'grooming': 4
+        }
 
     @pyqtSlot(str, int)
     def switch_ethogram_state(self, ethograph_obj_name, behaviour_id):  # REFACTOR: use ethogram object
@@ -278,6 +296,17 @@ class BaseInterface(QObject):
             extension = os.path.splitext(dest_path)[-1]
             if extension == '.npy':
                 np.save(dest_path, data)
+            elif extension == '.csv':
+                data = []
+                for k, v in self.behaviours.keys():
+                    bhv_mask = self.ethogram_data == v
+                    bhv_starts = np.where(find_range_starts(bhv_mask))[0]
+                    bhv_ends = np.where(find_range_ends(bhv_mask))[0]
+                    for start, end in zip(bhv_starts, bhv_ends):
+                        data.append([k, v, start, end])
+                df = pd.DataFrame(data,
+                                  columns=['behaviour_name', 'behaviour_id', 'start_frame', 'end_frame'])
+                df.to_csv(dest_path)
             else:
                 raise NotImplementedError("Please implement methods for other extensions")
 

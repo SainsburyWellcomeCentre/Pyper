@@ -91,7 +91,7 @@ Window {
                     key: model.key
 
                     onDeleteTriggered: {
-                        pythonObject.remove_behaviour(name);
+                        pythonObject.remove_behaviour(name, behaviourListRepeater.model.get(idx).numericalId);
                         behaviourListRepeater.model.remove(idx);
                     }
                 }
@@ -99,14 +99,15 @@ Window {
             CustomLabeledButton {
                 label: "+"
                 onClicked: {
-                    var component = Qt.createComponent("../basic_types/ThresholdingControlsModel.qml");
+                    var component = Qt.createComponent("../basic_types/EthogramControlsModel.qml");
                     if (component.status == Component.Ready) {
                         var newBehaviour = component.createObject(root);
                         newBehaviour.name = "Behaviour"+behaviourListRepeater.count;  // FIXME : may colide
                         newBehaviour.numericalId = Math.pow(2, behaviourListRepeater.count);
                         newBehaviour.colour = Theme.ethogramColours[behaviourListRepeater.count];
-                        newBehaviour.key = toString(behaviourListRepeater.count + 1)
+                        newBehaviour.key = toString(behaviourListRepeater.count + 1);
                         behaviourListRepeater.model.append(newBehaviour);
+                        pythonObject.add_behaviour(newBehaviour.name, newBehaviour.numericalId);
                     }
                 }
             }
