@@ -45,15 +45,17 @@ Rectangle {
         redBar.x = Math.round(x - redBar.width/2.0);
     }
     
-    function setPath(points) {
+    function setPath(pointsString) {
         graphCanvas.resetPath();
-        var pointsString = points.split(";");
-        var ptString
-        var value;
+        var pts = pointsString.split(";");
+        var tmp;
         var behaviour;
-        for (var i=0; i < pointsString.length; i++) {
-            ptString = pointsString[i];
-            behaviour = parseInt(ptString);
+        for (var i=0; i < pts.length; i++) {
+            tmp = pts[i];
+            behaviour = parseInt(tmp);
+//            if (behaviour !== 0) {
+//                console.log(behaviour);
+//            }
             graphCanvas.path.push(behaviour);
         }
         graphCanvas.drawPath();
@@ -88,15 +90,16 @@ Rectangle {
 
                 var ctx = getContext('2d');
                 ctx.lineWidth = width / path.length;
-                var previousColor = "#000000"
+                var defaultColor = "#000000";
+                var currentColor;
 
                 for (var i=1; i < path.length; i++) {
                     x = i / path.length * width;
 
                     currentPoint = path[i];
-                    ctx.strokeStyle = Theme.ethogramColours[currentPoint];
-
-                    if (ctx.strokeStyle != previousColor) {
+                    currentColor = Theme.ethogramColours[currentPoint];
+                    ctx.strokeStyle = currentColor;
+                    if (currentColor != defaultColor) {
                         ctx.stroke();
                         ctx.beginPath();
                     }

@@ -38,5 +38,15 @@ QtObject {
 
     readonly property string defaultFont: "Verdana"
 
-    property var ethogramColours: [background, "orange", "pink", "green", "purple", "red", "white", "blue", "yellow"]
+    property var ethogramColours: ({
+        0: background,
+        1: "orange",
+        2: "pink",
+        4: "green",
+        8: "purple",
+        16: "red",
+        32: "white",
+        64: "blue",
+        128: "yellow",
+    })
 }

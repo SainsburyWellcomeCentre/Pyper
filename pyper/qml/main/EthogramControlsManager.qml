@@ -11,6 +11,7 @@ import "../style"
 
 Window {
     id: root
+    objectName: "ethogramControlManager"
     width: 430  // FIXME: put in config
     height: 700
     title: "Ethogram"
@@ -18,6 +19,7 @@ Window {
     signal selected
 
     property variant pythonObject
+    property variant pythonParams
 
     property bool drawingMode: false
 
@@ -32,6 +34,26 @@ Window {
                 return i;
             }
         }
+    }
+    function addBehaviour(behaviourVars) {  // creates and appends
+        var component = Qt.createComponent("../basic_types/EthogramControlsModel.qml");
+        if (component.status === Component.Ready) {
+            if (behaviourVars === undefined) {  // FIXME: check
+                behaviourVars = pythonObject.add_behaviour();
+            }
+            behaviourVars = behaviourVars.split(";");
+            var newBehaviour = component.createObject(root);
+            newBehaviour.name = behaviourVars[0];
+            newBehaviour.numericalId = parseInt(behaviourVars[1]);
+            var col = behaviourVars[2];
+            var qColor = Qt.rgba(col[0], col[1], col[2], col[3]);
+            newBehaviour.colour = 'grey';  // FIXME:
+            newBehaviour.key = behaviourVars[3];
+            behaviourListRepeater.model.append(newBehaviour);
+        }
+    }
+    function appendBehaviour(behaviourVars) {  // appends from existing python
+        addBehaviour(behaviourVars);
     }
 
     Rectangle {
@@ -74,16 +96,16 @@ Window {
             Repeater {
                 id: behaviourListRepeater
                 model: ListModel {
-                    ListElement { name: "idle"; numericalId: 1; colour: 'orange'; key: "Ctrl+r"}
-                    ListElement { name: "nesting"; numericalId: 2; colour: 'green'; key: "Ctrl+t"}
-                    ListElement { name: "grooming"; numericalId: 4; colour: 'purple'; key: "Ctrl+g"}
+                    //ListElement { name: "idle"; numericalId: 1; colour: 'orange'; key: "Ctrl+r"}
+                    //ListElement { name: "nesting"; numericalId: 2; colour: 'green'; key: "Ctrl+t"}
+                    //ListElement { name: "grooming"; numericalId: 4; colour: 'purple'; key: "Ctrl+g"}
                 }
 
                 delegate: EthogramControls {
                     name: model.name
                     idx: index
                     parentWindow: root
-                    pythonObject: root.pythonObject
+                    pythonObject: root.pythonParams
 
                     // exclusiveGroup: currentBehaviourExclusiveGroup
                     numericalId: model.numericalId
@@ -99,16 +121,7 @@ Window {
             CustomLabeledButton {
                 label: "+"
                 onClicked: {
-                    var component = Qt.createComponent("../basic_types/EthogramControlsModel.qml");
-                    if (component.status == Component.Ready) {
-                        var newBehaviour = component.createObject(root);
-                        newBehaviour.name = "Behaviour"+behaviourListRepeater.count;  // FIXME : may colide
-                        newBehaviour.numericalId = Math.pow(2, behaviourListRepeater.count);
-                        newBehaviour.colour = Theme.ethogramColours[behaviourListRepeater.count];
-                        newBehaviour.key = toString(behaviourListRepeater.count + 1);
-                        behaviourListRepeater.model.append(newBehaviour);
-                        pythonObject.add_behaviour(newBehaviour.name, newBehaviour.numericalId);
-                    }
+                    root.addBehaviour();
                 }
             }
         }

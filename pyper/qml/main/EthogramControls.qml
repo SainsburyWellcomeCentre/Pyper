@@ -24,20 +24,6 @@ Frame {
 
     property int idx
 
-    Shortcut {
-        id: shortcut
-        sequence: root.key
-        context: Qt.ApplicationShortcut
-        onActivated: {
-            py_viewer.switch_ethogram_state("viewerEthogram", numericalId);  // FIXME:: name hard coded
-        }
-    }
-
-    onNameChanged: {
-        pythonObject.rename_structure(oldName, name);
-        oldName = name;
-        oldName = oldName;  // bind to itself to break the binding
-    }
 
     property bool finished: false  // completed
 
@@ -49,6 +35,22 @@ Frame {
     property bool checked: false
 
     property ExclusiveGroup exclusiveGroup: null
+
+    Shortcut {
+        id: shortcut
+        sequence: root.key
+        context: Qt.ApplicationShortcut
+        onActivated: {
+//            console.log('Shortcut "', key, '" activated for "', name, '" colour: "', colour, '"');
+            py_viewer.switch_ethogram_state("viewerEthogram", numericalId);  // FIXME:: name hard coded, extract graph name to parent
+        }
+    }
+
+    onNameChanged: {
+        pythonObject.rename_structure(oldName, name);
+        oldName = name;
+        oldName = oldName;  // bind to itself to break the binding
+    }
 
     function finalise() {
         root.finished = true;
@@ -114,6 +116,7 @@ Frame {
                 height: 15
                 color: Theme.text
                 font.bold: true
+                horizontalAlignment: TextInput.AlignHCenter
             }
 
             Rectangle {
@@ -127,8 +130,22 @@ Frame {
                     }
                 }
                 onColorChanged: {
-                    Theme.ethogramColours[root.idx + 1] = color
+                    Theme.ethogramColours[root.numericalId] = color
                 }
+            }
+            Text {
+                text: "Id: "
+                width: contentWidth
+                height: itemName.height
+                color: Theme.text
+            }
+            TextInput {
+                id: numericalIdTxt
+                width: 20
+                height: itemName.height
+                color: Theme.text
+                font.bold: true
+                text: root.numericalId
             }
             Text {
                 text: "Shortcut: '"
@@ -156,7 +173,7 @@ Frame {
 
             Item {  // spacer
                 height:itemName.height
-                width: 60
+                width: 10
             }
             CustomLabeledButton {
                 width: height

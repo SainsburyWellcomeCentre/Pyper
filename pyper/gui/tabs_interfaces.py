@@ -23,6 +23,7 @@ from scipy.io import loadmat
 from skimage.io import imsave
 
 from pyper.analysis.video_analysis import VideoAnalyser
+from pyper.behaviour.ethogram import Ethogram
 from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.gui.gui_live_cam import GuiPreviewer
@@ -89,6 +90,8 @@ class BaseInterface(QObject):
 
         self.stream = None
         self.n_frames = 0
+
+        self.ethogram = Ethogram()
         
         self.timer = QTimer(self)
         self.timer_speed = params.timer_period
@@ -203,112 +206,46 @@ class BaseInterface(QObject):
 
     @pyqtSlot(str, result=bool)
     def load_ethogram_data(self, ethograph_obj_name):
-        diag = QFileDialog()
-        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
-            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
-        else:
-            opt = QFileDialog.Options()
-        src_path = diag.getOpenFileName(parent=diag,
-                                        caption='Choose data file',
-                                        directory=os.path.expanduser('~'),
-                                        filter="Data (*.mat *.npy *.csv)",
-                                        initialFilter="Data (*.npy)",
-                                        options=opt)
-
-        src_path = src_path[0]
-        if src_path:
-            extension = os.path.splitext(src_path)[-1]
-            if extension == '.npy':
-                self.ethogram_data = np.load(src_path)
-            elif extension == '.mat':
-                self.ethogram_data = loadmat(src_path)  # TEST:
-            elif extension == '.csv':
-                self.ethogram_data = np.genfromtext(src_path, delimiter=',')  # FIXME: pandas
-            else:
-                raise PyperError("Unknown extension: {}".format(extension))
+        success = self.ethogram.load_data()
+        if success:
             self.__send_ethogram(ethograph_obj_name)
-            self.current_behaviour = 0
-            return True
-        else:
-            return False
+        return success
 
-    @pyqtSlot(str, int)
-    def remove_behaviour(self, bhv_name, bhv_id):
-        self.behaviours.pop(bhv_name, None)
-        self.ethogram_data[self.ethogram_data == bhv_id] = 0
+    @pyqtSlot(str)
+    def remove_behaviour(self, bhv_name):
+        self.ethogram.remove_behaviour(bhv_name)
 
-    @pyqtSlot(str, int)
-    def add_behaviour(self, bhv_name, bhv_id):
-        self.behaviours[bhv_name] = bhv_id
+    @pyqtSlot(result=QVariant)
+    def add_behaviour(self):
+        return self.ethogram.add_behaviour()
 
-    def __get_ethograph_obj(self, ethograph_obj_name):
+    def __get_qml_obj(self, ethograph_obj_name):
         return self.win.findChild(QObject, ethograph_obj_name)
 
     def __send_ethogram(self, ethograph_obj_name):
-        data_str = ";".join([str(d) for d in self.ethogram_data])
-        graph_object = self.__get_ethograph_obj(ethograph_obj_name)
-        graph_object.setProperty("points", data_str)
+        graph_object = self.__get_qml_obj(ethograph_obj_name)
+        pts = self.ethogram.data_str()
+        graph_object.setProperty("points", pts)
 
     @pyqtSlot(str)
     def create_empty_ethogram(self, ethograph_obj_name):
-        self.ethogram_data = np.zeros(round(self.n_frames))
-        self.current_behaviour = 0
+        ethogram_manager = self.__get_qml_obj("ethogramControlManager")
+        behaviour_strings = self.ethogram.create_empty(self.n_frames)
+        for bhv_str in behaviour_strings:
+            ethogram_manager.appendBehaviour(bhv_str)
         self.__send_ethogram(ethograph_obj_name)
-        # FIXME: do from qml and update when name updated
-        self.behaviours = {
-            'none': 0,
-            'idle': 1,
-            'nesting': 2,
-            'grooming': 4
-        }
 
     @pyqtSlot(str, int)
-    def switch_ethogram_state(self, ethograph_obj_name, behaviour_id):  # REFACTOR: use ethogram object
-        if behaviour_id == self.current_behaviour:  # closing
-            # print("Closing behaviour {} from {} to {}"
-            #       .format(behaviour_id, self.first_behaviour_frame, self.stream.current_frame_idx))
-            self.ethogram_data[self.first_behaviour_frame:self.stream.current_frame_idx] = behaviour_id
-            self.current_behaviour = 0
+    def switch_ethogram_state(self, ethograph_obj_name, behaviour_id):
+        updated = self.ethogram.switch_state(behaviour_id, self.stream.current_frame_idx)
+        if updated:
             self.__send_ethogram(ethograph_obj_name)
-        else:
-            self.first_behaviour_frame = self.stream.current_frame_idx
-            self.current_behaviour = behaviour_id
 
     @pyqtSlot(str)
-    def save_ethogram(self, ethograph_obj_name):
-        ethograph_obj = self.__get_ethograph_obj(ethograph_obj_name)
-        data_str = ethograph_obj.property("points")
-        data = np.array(data_str.split(";"), dtype=np.float64)
-        diag = QFileDialog()
-        if sys.platform == 'win32':  # avoids bug with windows COM object init failed
-            opt = QFileDialog.Options(QFileDialog.DontUseNativeDialog)
-        else:
-            opt = QFileDialog.Options()
-        dest_path = diag.getSaveFileName(parent=diag,
-                                         caption='Choose data file',
-                                         directory=os.path.expanduser('~'),
-                                         filter="Data (*.mat *.npy *.csv)",
-                                         initialFilter="Data (*.npy)",
-                                         options=opt)
-
-        dest_path = dest_path[0]
-        if dest_path:
-            extension = os.path.splitext(dest_path)[-1]
-            if extension == '.npy':
-                np.save(dest_path, data)
-            elif extension == '.csv':
-                data = []
-                for k, v in self.behaviours.keys():
-                    bhv_mask = self.ethogram_data == v
-                    bhv_starts = np.where(find_range_starts(bhv_mask))[0]
-                    bhv_ends = np.where(find_range_ends(bhv_mask))[0]
-                    for start, end in zip(bhv_starts, bhv_ends):
-                        data.append([k, v, start, end])
-                df = pd.DataFrame(data,
-                                  columns=['behaviour_name', 'behaviour_id', 'start_frame', 'end_frame'])
-                df.to_csv(dest_path)
-            else:
-                raise NotImplementedError("Please implement methods for other extensions")
+    def save_ethogram(self, ethograph_obj_name):  # WARNING: ethograph_obj_name to support viewer, tracker qml...
+        # ethograph_obj = self.__get_ethograph_obj(ethograph_obj_name)
+        # data_str = ethograph_obj.property("points")
+        self.ethogram.save()
 
     @pyqtSlot(bool)
     def save_ref_source(self, prompt=True):
