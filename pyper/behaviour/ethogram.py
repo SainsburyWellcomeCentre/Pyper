@@ -43,13 +43,18 @@ class Ethogram:
         return "{name};{num_id};{colour};{shortcut}".format(name=bhv.name, num_id=bhv.num_id,
                                                             colour=rgb_color, shortcut=bhv.shortcut)
 
+    def _get_max_numerical_shortcut(self):
+        shortcuts = self.behaviours['shortcut']
+        max_number = shortcuts[~shortcuts.str.contains('Ctrl')].max()  # TODO: should check for other modifiers
+        if np.isnan(max_number):
+            max_number = 0
+        return int(max_number)
+
     def add_behaviour(self):
-        _name = 'Undefined behaviour'
+        _name = 'Undefined'
         _id = 2 * self.behaviours['num_id'].max()
         _colour = 'red'
-        shortcuts = self.behaviours['shortcut']
-        _shortcut = int(shortcuts[~shortcuts.str.contains('Ctrl')].max()) + 1  # the max number (TODO: should check for other modifiers)
-        _shortcut = str(_shortcut)
+        _shortcut = str(self._get_max_numerical_shortcut() + 1)
         bhv = {'name': [_name],
                'num_id': [_id],
                'colour': [_colour],
@@ -81,6 +86,9 @@ class Ethogram:
             self.current_behaviour = bhv_id
             self.first_behaviour_frame = current_frame_idx
         return update
+
+    def close_behaviour(self, frame_id):
+        self.switch_state(self.current_behaviour, frame_id)
 
     def data_str(self):
         return ";".join([str(d) for d in self.data])

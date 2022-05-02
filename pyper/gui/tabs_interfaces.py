@@ -104,6 +104,8 @@ class BaseInterface(QObject):
                 self.display.reload()
                 self._update_display_idx()
             except EOFError:
+                if len(self.ethogram.behaviours):
+                    self.ethogram.close_behaviour(self.stream.current_frame_idx)
                 self.timer.stop()
         else:
             self.timer.stop()

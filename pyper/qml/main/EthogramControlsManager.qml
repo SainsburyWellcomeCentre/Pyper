@@ -36,18 +36,18 @@ Window {
         }
     }
     function addBehaviour(behaviourVars) {  // creates and appends
+        if (behaviourVars === undefined) {  // FIXME: check
+            behaviourVars = pythonObject.add_behaviour();
+        }
+        behaviourVars = behaviourVars.split(";");
+
         var component = Qt.createComponent("../basic_types/EthogramControlsModel.qml");
         if (component.status === Component.Ready) {
-            if (behaviourVars === undefined) {  // FIXME: check
-                behaviourVars = pythonObject.add_behaviour();
-            }
-            behaviourVars = behaviourVars.split(";");
             var newBehaviour = component.createObject(root);
             newBehaviour.name = behaviourVars[0];
             newBehaviour.numericalId = parseInt(behaviourVars[1]);
             var col = behaviourVars[2];
             var qColor = Qt.rgba(col[0], col[1], col[2], col[3]);
-            newBehaviour.colour = 'grey';  // FIXME:
             newBehaviour.key = behaviourVars[3];
             behaviourListRepeater.model.append(newBehaviour);
         }
@@ -109,7 +109,7 @@ Window {
 
                     // exclusiveGroup: currentBehaviourExclusiveGroup
                     numericalId: model.numericalId
-                    colour: model.colour
+                    colour: Theme.ethogramColours[model.numericalId]
                     key: model.key
 
                     onDeleteTriggered: {
