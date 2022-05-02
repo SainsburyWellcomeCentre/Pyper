@@ -49,13 +49,14 @@ class Ethogram:
         _colour = 'red'
         shortcuts = self.behaviours['shortcut']
         _shortcut = int(shortcuts[~shortcuts.str.contains('Ctrl')].max()) + 1  # the max number (TODO: should check for other modifiers)
+        _shortcut = str(_shortcut)
         bhv = {'name': [_name],
                'num_id': [_id],
                'colour': [_colour],
                'shortcut': [_shortcut]
                }
         row = pd.DataFrame.from_records(bhv)
-        self.behaviours = pd.concat((self.behaviours, row))
+        self.behaviours = pd.concat((self.behaviours, row), ignore_index=True)
         for _row in row.itertuples(index=False):  # FIXME: dirty conversion
             tpl = _row
         return self.bhv_to_str(tpl)
