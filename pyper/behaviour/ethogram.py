@@ -74,6 +74,9 @@ class Ethogram:
         # reset that bhv to default in vector
         self.data[self.data == bhv.numerical_id] = self.behaviours['num_id'][self.behaviours['name'] == 'None']
 
+    def rename_behaviour(self, old_name, new_name):
+        self.behaviours.loc[self.behaviours['name'] == old_name, ['name']] = new_name
+
     def switch_state(self, bhv_id, current_frame_idx):  # FIXME: when stops without close
         update = False
         if bhv_id == self.current_behaviour:  # ending behaviour

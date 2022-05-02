@@ -105,7 +105,8 @@ Window {
                     name: model.name
                     idx: index
                     parentWindow: root
-                    pythonObject: root.pythonParams
+                    pythonObject: root.pythonObject
+                    pythonParams: root.pythonParams
 
                     // exclusiveGroup: currentBehaviourExclusiveGroup
                     numericalId: model.numericalId

@@ -28,6 +28,7 @@ Frame {
     property bool finished: false  // completed
 
     property variant pythonObject
+    property variant pythonParams
 
     property variant parentWindow
 
@@ -47,7 +48,7 @@ Frame {
     }
 
     onNameChanged: {
-        pythonObject.rename_structure(oldName, name);
+        pythonObject.rename_behaviour(oldName, name);
         oldName = name;
         oldName = oldName;  // bind to itself to break the binding
     }

@@ -237,6 +237,10 @@ class BaseInterface(QObject):
             ethogram_manager.appendBehaviour(bhv_str)
         self.__send_ethogram(ethograph_obj_name)
 
+    @pyqtSlot(str, str)
+    def rename_behaviour(self, old_name, new_name):
+        self.ethogram.rename_behaviour(old_name, new_name)
+
     @pyqtSlot(str, int)
     def switch_ethogram_state(self, ethograph_obj_name, behaviour_id):
         updated = self.ethogram.switch_state(behaviour_id, self.stream.current_frame_idx)
