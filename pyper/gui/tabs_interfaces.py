@@ -104,11 +104,15 @@ class BaseInterface(QObject):
                 self.display.reload()
                 self._update_display_idx()
             except EOFError:
+                self.timer.stop()
                 if len(self.ethogram.behaviours):
                     self.ethogram.close_behaviour(self.stream.current_frame_idx)
-                self.timer.stop()
+                    self.__send_ethogram('viewerEthogram')
         else:
             self.timer.stop()
+            if len(self.ethogram.behaviours):
+                self.ethogram.close_behaviour(self.stream.current_frame_idx)
+                self.__send_ethogram('viewerEthogram')
 
     def _set_display(self):
         """
