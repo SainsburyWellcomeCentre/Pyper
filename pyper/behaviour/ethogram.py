@@ -37,16 +37,17 @@ class Ethogram:
 
     @staticmethod
     def bhv_to_str(bhv):
-        colour = bhv.colour
-        q_col = QColor(colour)
-        rgb_color = [c / 255 for c in q_col.getRgb()]
+        # colour = bhv.colour
+        # q_col = QColor(colour)
+        # rgb_color = [c / 255 for c in q_col.getRgb()]
+        rgb_color = bhv.colour
         return "{name};{num_id};{colour};{shortcut}".format(name=bhv.name, num_id=bhv.num_id,
                                                             colour=rgb_color, shortcut=bhv.shortcut)
 
     def _get_max_numerical_shortcut(self):
         shortcuts = self.behaviours['shortcut']
         max_number = shortcuts[~shortcuts.str.contains('Ctrl')].max()  # TODO: should check for other modifiers
-        if np.isnan(max_number):
+        if pd.isnull(max_number):
             max_number = 0
         return int(max_number)
 
