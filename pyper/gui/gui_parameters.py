@@ -60,6 +60,8 @@ class GuiParameters(QObject, Parameters):
         self.current_object = ''
         self.structures = {}
 
+        self.roi_methods = {'Action ROI': 'center'}
+
         self.info_window = self.win.findChild(QObject, "infoScreen")
         self.error_window = self.win.findChild(QObject, "errorScreen")
 
@@ -346,3 +348,7 @@ class GuiParameters(QObject, Parameters):
         version = version.split(' ')[-1]
         version = float('.'.join(version.split('.')[:2]))
         return version
+
+    @pyqtSlot(str, str)
+    def set_roi_point_check_method(self, method, roi_type):
+        self.roi_methods[roi_type] = method

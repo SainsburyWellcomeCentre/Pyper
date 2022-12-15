@@ -90,6 +90,32 @@ Frame {
                     roiLayout.sourceRoi.roiActive = checked;
                 }
             }
+            Item {  // spacer item
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+            ComboBox {
+                model: ListModel {
+                    id: roi_point_check_method_list
+                    ListElement {text: 'center'}
+                    ListElement {text: 'border'}
+                }
+                width: 100
+                height: 25
+                style: ComboBoxStyle {
+                    background: Frame {
+                        width: parent.width
+                        height: parent.height
+                    }
+                    textColor: Theme.text
+                }
+                onCurrentIndexChanged: {
+                    var currentItem = roi_point_check_method_list.get(currentIndex);
+                    if (currentItem != undefined) {
+                        pythonObject.set_roi_point_check_method(currentItem.text, roiLayout.name);
+                    }
+                }
+            }
         }
 
         Row {

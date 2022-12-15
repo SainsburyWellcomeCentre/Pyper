@@ -92,6 +92,7 @@ class Roi(object):
         self.width = None
         self.height = None
         self.contour = None
+        self.convex_contour = None
     
     def contains_point(self, point):
         """
@@ -195,7 +196,15 @@ class Circle(Roi):
         self.radius = radius
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
+        self.convex_contour = self.convexify()
         self.contour = ObjectContour(self.points, contour_type='circle')
+
+    def convexify(self):
+        convex_contour = self.points[::15]
+        if (convex_contour[-1] == convex_contour[0]).all():
+            convex_contour = convex_contour[:-1]
+        convex_contour = convex_contour.astype(np.int32)
+        return convex_contour
         
     def circle_point(self, angle):
         """
@@ -232,6 +241,7 @@ class Rectangle(Roi):
         self.centre = (int(top_left_x + (width / 2)), int(top_left_y + (height / 2)))
         points = self.get_points().astype(np.int32)
         self.points = np.expand_dims(points, axis=1)
+        self.convex_contour = self.points.astype(np.int32)
         self.contour = ObjectContour(self.points, contour_type='rectangle')
 
     def get_points(self):
