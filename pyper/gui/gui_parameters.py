@@ -281,16 +281,18 @@ class GuiParameters(QObject, Parameters):
 
     @pyqtSlot(str, int)
     def set_min_area(self, struct_name, area):
-        self.structures[struct_name].min_area = area
+        struct_name = struct_name if struct_name else self.current_object
+        self.structures[struct_name].min_area = area  #  FIXME: hacky, rewrite parameters and gui_parameters to unify
 
     @pyqtSlot(str, result=int)
-    def get_max_area(self, struct_name=''):  # WARNING: resembles property of simple version
+    def get_max_area(self, struct_name=''):  # WARNING: resembles property of simple version  # FIXME: for advanced thresholding
         struct_name = struct_name if struct_name else self.current_object
         return self.structures[struct_name].max_area
 
     @pyqtSlot(str, int)
     def set_max_area(self, struct_name, area):
-        self.structures[struct_name].max_area = area
+        struct_name = struct_name if struct_name else self.current_object
+        self.structures[struct_name].max_area = area  #  FIXME: hacky, rewrite parameters and gui_parameters to unify
 
     @pyqtSlot(str, result=int)
     def get_n_structures_max(self, struct_name):

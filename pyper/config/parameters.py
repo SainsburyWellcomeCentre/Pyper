@@ -163,6 +163,7 @@ class Parameters(object):
     def min_area(self, area):
         self._objects_min_area = area
         self.config['tracker']['detection']['min_area'] = area
+        self.set_min_area('', area)  # FIXME: Hack
 
     max_area_signal = pyqtSignal()
     @pyqtProperty(int, notify=max_area_signal)
@@ -173,6 +174,7 @@ class Parameters(object):
     def max_area(self, area):
         self._objects_max_area = area
         self.config['tracker']['detection']['max_area'] = area
+        self.set_max_area('', area)  # FIXME: Hack
 
     max_mvmt_signal = pyqtSignal()
     @pyqtProperty(int, notify=max_mvmt_signal)
