@@ -23,8 +23,9 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QIcon
 
+from pyper.video.cv_wrappers.video_capture import VideoCaptureGrabError
 from pyper.video.transcoder import TranscoderIface
-from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface
+from pyper.gui.tabs_interfaces import ViewerIface, TrackerIface, RecorderIface, CalibrationIface, BaseInterface
 from pyper.gui.code_editor import EditorIface
 from pyper.gui.gui_parameters import GuiParameters
 from pyper.gui.image_providers import CvImageProvider, PyplotImageProvider

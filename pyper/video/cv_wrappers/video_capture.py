@@ -50,7 +50,7 @@ class VideoCapture(object):
             try:
                 open(filename_or_cam_idx, 'r')
             except IOError as err:
-                raise VideoCaptureOpenError("Could not open file {} for reading; {}".format(filename_or_cam_idx, err))
+                raise VideoCaptureOpenError(f'Could not open file {filename_or_cam_idx} for reading; {err}')
             self.filename = filename_or_cam_idx
             self.capture = cv2.VideoCapture(self.filename)
 
@@ -62,12 +62,11 @@ class VideoCapture(object):
         if self.filename is not None:
             self.capture.open(self.filename)
             if not self.is_opened():
-                raise VideoCaptureOpenError("Could not open file {} for reading, CODEC may not be supported"
-                                            .format(self.filename))
+                raise VideoCaptureOpenError(f'Could not open file {self.filename} for reading, CODEC may not be supported')
         else:
             self.capture.open(self.cam_idx)
             if not self.is_opened():
-                raise VideoCaptureOpenError("Could not open camera number {} for reading".format(self.cam_idx))
+                raise VideoCaptureOpenError(f'Could not open camera number {self.cam_idx} for reading')
 
     def is_opened(self):
         return self.capture.isOpened()
@@ -78,19 +77,19 @@ class VideoCapture(object):
     def grab(self):
         has_grabed = self.capture.grab()
         if not has_grabed:
-            raise VideoCaptureGrabError("Could not get frame at index {}".format(self.current_frame_idx))
+            raise VideoCaptureGrabError(f'Could not get frame at index {self.current_frame_idx}')
 
     def retrieve(self):
         has_grabed, img = self.capture.retrieve()
         if not has_grabed:
-            raise VideoCaptureGrabError("Could not get frame at index {}".format(self.current_frame_idx))
+            raise VideoCaptureGrabError(f'Could not get frame at index {self.current_frame_idx}')
         self.current_frame_idx += 1
         return img
 
     def read(self):
         has_grabed, img = self.capture.read()
         if not has_grabed:
-            raise VideoCaptureGrabError("Could not get frame at index {}".format(self.current_frame_idx))
+            raise VideoCaptureGrabError(f'Could not get frame at index {self.current_frame_idx}')
         self.current_frame_idx += 1
         return img
 
@@ -134,12 +133,13 @@ class VideoCapture(object):
     def seek(self, frame_id):
         if self.seekable and 0 <= frame_id < self.n_frames:
             self.set('pos_frames', frame_id)
+            self.current_frame_idx = frame_id
 
     def get_prop_id(self, propid):  # TODO: add exception handling for non existing properties (bad spelling)
         if try_int(propid) is not False:
             return try_int(propid)
         else:
-            prop_name = "CV_CAP_PROP_{}".format(propid.upper())
+            prop_name = f'CV_CAP_PROP_{propid.upper()}'
             if IS_CV_3:
                 propid = CV_PROP_IDS[prop_name]
             else:
@@ -162,8 +162,8 @@ class VideoCapture(object):
         propid = self.get_prop_id(propid)
         has_set = self.capture.set(propid, value)
         if not has_set:
-            raise VideoCapturePropertySetError("Could not set property {} to {}"
-                                               .format(VideoCapture.get_cv_attribute_name(propid), value))
+            raise VideoCapturePropertySetError(
+                f'Could not set property {VideoCapture.get_cv_attribute_name(propid)} to {value}')
 
     @staticmethod
     def get_cv_attributes():

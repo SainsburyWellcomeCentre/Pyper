@@ -41,7 +41,7 @@ Rectangle {
     function highlightPoint(idx) {
         var currentPoint = graphCanvas.path[idx];
         if (currentPoint !== undefined) {
-            console.log(currentPoint);
+            // console.log(currentPoint);
             redDot.x = Math.round(currentPoint.x - redDot.width/2.0);
             redDot.y = Math.round(currentPoint.y - redDot.height/2.0);
         }

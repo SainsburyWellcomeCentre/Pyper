@@ -1,5 +1,3 @@
-
-
 import cv2
 import numpy as np  # WARNING: required for dynamic subclassing
 
@@ -24,8 +22,17 @@ class GuiTracker(Tracker):
         Tracker.__init__(self, params, src_file_path=src_file_path, dest_file_path=dest_file_path,
                          camera_calibration=camera_calibration, requested_fps=requested_fps)
         self.ui_iface = ui_iface
+        for struct in self.structures:
+            struct.ui_iface = self.ui_iface
         self.record = dest_file_path is not None
         self.plt_curve = None
+
+    @property
+    def seekable(self):
+        return self._stream.seekable
+
+    def seek(self, frame_idx):
+        self._stream.seek(frame_idx)
 
     def read(self):
         """
