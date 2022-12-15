@@ -19,6 +19,7 @@ from time import time
 import matplotlib
 import numpy as np
 import pandas as pd
+from PyQt5 import QtCore
 from scipy.io import loadmat
 from skimage.io import imsave
 
@@ -27,6 +28,7 @@ from pyper.behaviour.ethogram import Ethogram
 from pyper.config.conf import config_dirs as CONFIG_DIRS
 from pyper.gui.gui_tracker import GuiTracker
 from pyper.gui.gui_live_cam import GuiPreviewer
+from pyper.video.cv_wrappers.video_capture import VideoCaptureGrabError
 
 matplotlib.use('qt5agg')  # For OSX otherwise, the default backend doesn't allow to draw to buffer
 from matplotlib import pyplot as plt
@@ -109,10 +111,13 @@ class BaseInterface(QObject):
                     self.ethogram.close_behaviour(self.stream.current_frame_idx)
                     self.__send_ethogram('viewerEthogram')
         else:
-            self.timer.stop()
-            if len(self.ethogram.behaviours):
-                self.ethogram.close_behaviour(self.stream.current_frame_idx)
-                self.__send_ethogram('viewerEthogram')
+            self.__handle_stream_end()
+
+    def __handle_stream_end(self):
+        self.timer.stop()
+        if len(self.ethogram.data.shape):
+            self.ethogram.close_behaviour(self.stream.current_frame_idx)
+            self.__send_ethogram('viewerEthogram')
 
     def _set_display(self):
         """
@@ -326,7 +331,7 @@ class PlayerInterface(BaseInterface):
         target_frame += int(step_size)
         self.seek_to(target_frame)
 
-    @pyqtSlot(QVariant)
+    @pyqtSlot(int)
     def seek_to(self, frame_idx):
         """
         Seeks directly to frameIdx in the video
@@ -1067,6 +1072,7 @@ class RecorderIface(TrackerIface):
 
         # period = round((1 / self.tracker._stream.stream.fps) * 1000)
         # self.timer_speed = period  # convert to ms
+        self.pre_track()
         self.timer_speed = self.params.timer_period  # FIXME:
         self.timer.start(self.timer_speed)
         return True

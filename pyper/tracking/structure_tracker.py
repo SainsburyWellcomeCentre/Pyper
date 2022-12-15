@@ -47,6 +47,11 @@ class StructureTracker(object):
     def __del__(self):
         self.close_all()
 
+    def close_all(self):
+        pass
+
+    def open_all(self):
+        pass
 
     def reset(self):
         self.multi_results.reset()
@@ -140,6 +145,8 @@ class StructureTracker(object):
         :returns: mask
         :rtype: binary mask or None
         """
+        self.pre_track()
+
         processed_frame = self._pre_process_frame(frame)  # FIXME: check why frame is float32
         mask, diff = self.get_mask(processed_frame)
         update_img(self.mask, mask)
@@ -175,6 +182,12 @@ class StructureTracker(object):
                 self._handle_bad_size_contour(plot_silhouette)
             self._fast_print('Frame {}, no contour found'.format(self._stream.current_frame_idx))
         return contour_found, plot_silhouette
+
+    def pre_track(self):  # REFACTOR: move to subclass specific of photron cam tracking
+        pass
+
+    def terminate_parent(self):
+        pass
 
     def _pre_process_frame(self, frame):
         treated_frame = frame.gray(self.params.fast)   # TODO: check if we should separate setting
@@ -267,6 +280,9 @@ class StructureTrackerGui(StructureTracker):
         self.paint_rois(frame, roi_color='c')
         if should_update_vid:  # do only every x pnts in fast mode
             frame.paint(curve=(self.multi_results.plotting_positions()))
+
+    def terminate_parent(self):
+        self.ui_iface.stop()
 
 
 class ColorStructureTracker(StructureTrackerGui):
