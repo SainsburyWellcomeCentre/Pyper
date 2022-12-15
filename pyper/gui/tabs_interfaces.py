@@ -96,6 +96,7 @@ class BaseInterface(QObject):
         self.ethogram = Ethogram()
         
         self.timer = QTimer(self)
+        self.timer.setTimerType(QtCore.Qt.PreciseTimer)
         self.timer_speed = params.timer_period
         self.timer.timeout.connect(self.get_img)
 
