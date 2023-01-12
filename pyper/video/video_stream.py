@@ -30,7 +30,7 @@ from pyper.video.video_frame import Frame
 from pyper.camera.kinect_cam import KinectCam
 from pyper.config import conf
 
-IS_PI = (platform.machine()).startswith('arm')
+IS_PI = (platform.machine()).startswith('arm') and platform.system().lower() == 'linux'
 if IS_PI:
     import picamera.array
     from pyper.camera.camera import CvPiCamera

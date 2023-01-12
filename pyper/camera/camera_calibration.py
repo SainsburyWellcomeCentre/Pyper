@@ -8,7 +8,7 @@ import cv2
 
 from pyper.exceptions.exceptions import CameraCalibrationException
 
-is_pi = (platform.machine()).startswith('arm')
+is_pi = (platform.machine()).startswith('arm') and platform.system().lower() == 'linux'
 """
 Inspired by:
 http://opencv-python-tutroals.readthedocs.org/en/latest/py_tutorials/py_calib3d/py_calibration/py_calibration.html
